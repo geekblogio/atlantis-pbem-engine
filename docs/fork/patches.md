@@ -205,7 +205,7 @@ own.
 
 ### Developer documentation
 
-`1aeef70`, `68a9559`, `a9ba283` — `docs/architecture.md`, `docs/rulesets.md`,
+`1aeef70`, `68a9559`, `a9ba283`, `69eeff6` — `docs/architecture.md`, `docs/rulesets.md`,
 `docs/build-and-test.md`, `docs/snapshot-tests.md` and `docs/interface/**`, plus the three
 fork-local documents and the decision records.
 
@@ -213,6 +213,25 @@ Upstream ships no developer documentation by choice; the README says so. The eng
 and the interface specification are **upstream-friendly in content** — each carries a
 `Provenance:` header saying so — but offering documentation upstream is a conversation about
 their project's shape, not a bug fix, and is not proposed here.
+
+### `bea2a21` — vendored nlohmann/json 3.11.3 → 3.12.0
+
+Produced by the `Vendored Deps` workflow, which runs `make check-libraries` monthly and opens a
+pull request when a header moved. `external/boost/ut.hpp` was already current at 2.3.1.
+
+**Mechanical, and temporary.** It is a divergence only until upstream refreshes their own copy;
+there is nothing here to offer them that their own `make check-libraries` would not produce.
+
+Worth knowing about the workflow that creates these: the pull request is opened with
+`GITHUB_TOKEN`, and GitHub does not trigger workflow runs from that token. **The pull request
+therefore arrives with no `CI` status check and branch protection holds it pending.** Close and
+reopen it as a user to start the pipeline — the pull request body says so, and it is not
+optional. Re-running the workflow does not help; it reproduces the same condition.
+
+The verification that matters is that the bump builds warning-clean: the header is included
+under `-Werror` by every translation unit, so the change invalidates ccache completely and both
+CI builds run cold. On this bump both passed, along with 19 unit test suites and 35 snapshot
+checks.
 
 ---
 
