@@ -1,0 +1,1508 @@
+{
+  "administrative": {
+    "email": "NoAddress",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "September",
+    "year": 1
+  },
+  "engine": {
+    "json_report_version": "1.0.1 (beta)",
+    "ruleset": "Wyreth",
+    "ruleset_version": "2.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "take",
+      "message": "Takes 2730 silver [SILV] from King's Guards (167).",
+      "unit": {
+        "name": "Reinforcement",
+        "number": 178
+      }
+    },
+    {
+      "category": "tax",
+      "message": "Collects $1250 in taxes in plain (29,11) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 29,
+          "y": 11,
+          "z": 1
+        },
+        "province": "Koheda",
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "King's Guards",
+        "number": 167
+      }
+    },
+    {
+      "category": "sell",
+      "message": "Sells 10 livestock [LIVE] at $23 each.",
+      "unit": {
+        "name": "Ranchers",
+        "number": 155
+      }
+    },
+    {
+      "category": "buy",
+      "message": "Buys 22 high elves [HELF] at $58 each.",
+      "unit": {
+        "name": "Reinforcement",
+        "number": 178
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 162 silver working in plain (28,10) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 28,
+          "y": 10,
+          "z": 1
+        },
+        "province": "Koheda",
+        "settlement": {
+          "name": "Thandianost",
+          "size": "city"
+        },
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "Workers",
+        "number": 152
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies combat at a cost of 220 silver [SILV].",
+      "unit": {
+        "name": "Reinforcement",
+        "number": 178
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 14 silver working in plain (29,11) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 29,
+          "y": 11,
+          "z": 1
+        },
+        "province": "Koheda",
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "Scout",
+        "number": 164
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 365 silver working in plain (29,11) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 29,
+          "y": 11,
+          "z": 1
+        },
+        "province": "Koheda",
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "King's Guards",
+        "number": 167
+      }
+    },
+    {
+      "category": "share",
+      "message": "Ranchers (155) shares 100 silver [SILV] with King (140).",
+      "unit": {
+        "name": "Ranchers",
+        "number": 155
+      }
+    },
+    {
+      "category": "study",
+      "message": "Studies fire at a cost of 100 silver [SILV].",
+      "unit": {
+        "name": "King",
+        "number": 140
+      }
+    },
+    {
+      "category": "produce",
+      "message": "Produces 10 livestock [LIVE] in plain (28,12) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 28,
+          "y": 12,
+          "z": 1
+        },
+        "province": "Koheda",
+        "settlement": {
+          "name": "Hynodale",
+          "size": "town"
+        },
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "Ranchers",
+        "number": 155
+      }
+    },
+    {
+      "category": "work",
+      "message": "Earns 149 silver working in plain (28,12) in Koheda.",
+      "region": {
+        "coordinates": {
+          "label": "surface",
+          "x": 28,
+          "y": 12,
+          "z": 1
+        },
+        "province": "Koheda",
+        "settlement": {
+          "name": "Hynodale",
+          "size": "town"
+        },
+        "terrain": "plain"
+      },
+      "unit": {
+        "name": "Workers",
+        "number": 156
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 100 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Workers",
+        "number": 152
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 10 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Scout",
+        "number": 164
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 250 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "King's Guards",
+        "number": 167
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 220 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Reinforcement",
+        "number": 178
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 100 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Ranchers",
+        "number": 155
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Consumes 100 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Workers",
+        "number": 156
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Borrows 20 silver [SILV] from Ranchers (155) for maintenance.",
+      "unit": {
+        "name": "King",
+        "number": 140
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "King (140) borrows 20 silver [SILV] for maintenance.",
+      "unit": {
+        "name": "Ranchers",
+        "number": 155
+      }
+    }
+  ],
+  "item_reports": [],
+  "name": "Test",
+  "number": 3,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 28,
+        "y": 10,
+        "z": 1
+      },
+      "entertainment": 1997,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 8,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 11,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 12,
+              "z": 1
+            },
+            "province": "Koheda",
+            "settlement": {
+              "name": "Hynodale",
+              "size": "town"
+            },
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 27,
+              "y": 11,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 27,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "name": "iron",
+            "plural": "iron",
+            "price": 75,
+            "tag": "IRON",
+            "unlimited": true
+          },
+          {
+            "name": "wood",
+            "plural": "wood",
+            "price": 75,
+            "tag": "WOOD",
+            "unlimited": true
+          },
+          {
+            "name": "stone",
+            "plural": "stone",
+            "price": 75,
+            "tag": "STON",
+            "unlimited": true
+          },
+          {
+            "name": "fur",
+            "plural": "furs",
+            "price": 75,
+            "tag": "FUR",
+            "unlimited": true
+          },
+          {
+            "name": "herb",
+            "plural": "herbs",
+            "price": 75,
+            "tag": "HERB",
+            "unlimited": true
+          },
+          {
+            "name": "horse",
+            "plural": "horses",
+            "price": 75,
+            "tag": "HORS",
+            "unlimited": true
+          },
+          {
+            "name": "sword",
+            "plural": "swords",
+            "price": 150,
+            "tag": "SWOR",
+            "unlimited": true
+          },
+          {
+            "name": "crossbow",
+            "plural": "crossbows",
+            "price": 150,
+            "tag": "XBOW",
+            "unlimited": true
+          },
+          {
+            "name": "longbow",
+            "plural": "longbows",
+            "price": 150,
+            "tag": "LBOW",
+            "unlimited": true
+          },
+          {
+            "name": "chain armor",
+            "plural": "chain armor",
+            "price": 150,
+            "tag": "CARM",
+            "unlimited": true
+          },
+          {
+            "name": "plate armor",
+            "plural": "plate armor",
+            "price": 625,
+            "tag": "PARM",
+            "unlimited": true
+          },
+          {
+            "name": "wagon",
+            "plural": "wagons",
+            "price": 250,
+            "tag": "WAGO",
+            "unlimited": true
+          },
+          {
+            "name": "pick",
+            "plural": "picks",
+            "price": 150,
+            "tag": "PICK",
+            "unlimited": true
+          },
+          {
+            "name": "spear",
+            "plural": "spears",
+            "price": 150,
+            "tag": "SPEA",
+            "unlimited": true
+          },
+          {
+            "name": "axe",
+            "plural": "axes",
+            "price": 150,
+            "tag": "AXE",
+            "unlimited": true
+          },
+          {
+            "name": "hammer",
+            "plural": "hammers",
+            "price": 150,
+            "tag": "HAMM",
+            "unlimited": true
+          },
+          {
+            "name": "net",
+            "plural": "nets",
+            "price": 200,
+            "tag": "NET",
+            "unlimited": true
+          },
+          {
+            "name": "lasso",
+            "plural": "lassoes",
+            "price": 150,
+            "tag": "LASS",
+            "unlimited": true
+          },
+          {
+            "name": "bag",
+            "plural": "bags",
+            "price": 150,
+            "tag": "BAG",
+            "unlimited": true
+          },
+          {
+            "name": "spinning wheel",
+            "plural": "spinning wheels",
+            "price": 150,
+            "tag": "SPIN",
+            "unlimited": true
+          },
+          {
+            "name": "leather armor",
+            "plural": "leather armor",
+            "price": 112,
+            "tag": "LARM",
+            "unlimited": true
+          },
+          {
+            "name": "cloth armor",
+            "plural": "cloth armor",
+            "price": 100,
+            "tag": "CLAR",
+            "unlimited": true
+          },
+          {
+            "name": "lance",
+            "plural": "lances",
+            "price": 250,
+            "tag": "LANC",
+            "unlimited": true
+          },
+          {
+            "name": "battle axe",
+            "plural": "battle axes",
+            "price": 225,
+            "tag": "BAXE",
+            "unlimited": true
+          },
+          {
+            "name": "javelin",
+            "plural": "javelins",
+            "price": 150,
+            "tag": "JAVE",
+            "unlimited": true
+          },
+          {
+            "name": "pike",
+            "plural": "pikes",
+            "price": 250,
+            "tag": "PIKE",
+            "unlimited": true
+          },
+          {
+            "name": "nomad",
+            "plural": "nomads",
+            "price": 64,
+            "tag": "NOMA",
+            "unlimited": true
+          },
+          {
+            "name": "leader",
+            "plural": "leaders",
+            "price": 129,
+            "tag": "LEAD",
+            "unlimited": true
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 27745,
+        "race": "nomads"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 56,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 21,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Koheda",
+      "settlement": {
+        "name": "Thandianost",
+        "size": "city"
+      },
+      "tax": 34403,
+      "terrain": "plain",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 500,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 500,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            },
+            {
+              "amount": 500,
+              "name": "plate armor",
+              "plural": "plate armor",
+              "tag": "PARM"
+            }
+          ],
+          "name": "City Guard",
+          "number": 18
+        },
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "City Mage",
+          "number": 19
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "nomad",
+              "plural": "nomads",
+              "tag": "NOMA"
+            },
+            {
+              "amount": 434,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Workers",
+          "number": 152,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 100
+        }
+      ],
+      "wages": {
+        "amount": 16.2,
+        "max": 11467
+      },
+      "weather": {
+        "current": "clear",
+        "next": "clear"
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 29,
+        "y": 11,
+        "z": 1
+      },
+      "entertainment": 126,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 9,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 30,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "lake"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 30,
+              "y": 12,
+              "z": 1
+            },
+            "province": "Lotholuen",
+            "settlement": {
+              "name": "Eindorf",
+              "size": "town"
+            },
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 13,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 12,
+              "z": 1
+            },
+            "province": "Koheda",
+            "settlement": {
+              "name": "Hynodale",
+              "size": "town"
+            },
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Koheda",
+            "settlement": {
+              "name": "Thandianost",
+              "size": "city"
+            },
+            "terrain": "plain"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 99,
+            "name": "high elf",
+            "plural": "high elves",
+            "price": 58,
+            "tag": "HELF"
+          },
+          {
+            "amount": 19,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 116,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 2484,
+        "race": "high elves"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 67,
+          "name": "grain",
+          "plural": "grain",
+          "tag": "GRAI"
+        },
+        {
+          "amount": 39,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Koheda",
+      "tax": 2285,
+      "terrain": "plain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "plainsman",
+              "plural": "plainsmen",
+              "tag": "PLAI"
+            },
+            {
+              "amount": 16,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Scout",
+          "number": 164,
+          "orders": [
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 10
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 375
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 25,
+              "name": "high elf",
+              "plural": "high elves",
+              "tag": "HELF"
+            },
+            {
+              "amount": 1365,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "King's Guards",
+          "number": 167,
+          "orders": [
+            {
+              "order": "@guard 1"
+            },
+            {
+              "order": "@tax"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "combat",
+                "skill_days": 30,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "weight": 250
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 330
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 22,
+              "name": "high elf",
+              "plural": "high elves",
+              "tag": "HELF"
+            },
+            {
+              "amount": 1014,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Reinforcement",
+          "number": 178,
+          "orders": [
+            {
+              "order": "give 167 22 HELF"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "combat",
+                "skill_days": 30,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "weight": 220
+        }
+      ],
+      "wages": {
+        "amount": 14.6,
+        "max": 1537
+      },
+      "weather": {
+        "current": "clear",
+        "next": "clear"
+      }
+    },
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 28,
+        "y": 12,
+        "z": 1
+      },
+      "entertainment": 569,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 10,
+              "z": 1
+            },
+            "province": "Koheda",
+            "settlement": {
+              "name": "Thandianost",
+              "size": "city"
+            },
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 11,
+              "z": 1
+            },
+            "province": "Koheda",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 29,
+              "y": 13,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 28,
+              "y": 14,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 27,
+              "y": 13,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 27,
+              "y": 11,
+              "z": 1
+            },
+            "province": "Wyreth Ocean",
+            "terrain": "ocean"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 1,
+            "name": "horse",
+            "plural": "horses",
+            "price": 51,
+            "tag": "HORS"
+          },
+          {
+            "amount": 385,
+            "name": "plainsman",
+            "plural": "plainsmen",
+            "price": 59,
+            "tag": "PLAI"
+          },
+          {
+            "amount": 77,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 119,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": [
+          {
+            "amount": 105,
+            "name": "grain",
+            "plural": "grain",
+            "price": 21,
+            "tag": "GRAI"
+          },
+          {
+            "amount": 110,
+            "name": "livestock",
+            "plural": "livestock",
+            "price": 23,
+            "tag": "LIVE"
+          },
+          {
+            "amount": 150,
+            "name": "fish",
+            "plural": "fish",
+            "price": 51,
+            "tag": "FISH"
+          },
+          {
+            "amount": 3,
+            "name": "lance",
+            "plural": "lances",
+            "price": 170,
+            "tag": "LANC"
+          }
+        ]
+      },
+      "population": {
+        "amount": 9648,
+        "race": "plainsmen"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 71,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 31,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Koheda",
+      "settlement": {
+        "name": "Hynodale",
+        "size": "town"
+      },
+      "tax": 9455,
+      "terrain": "plain",
+      "units": [
+        {
+          "attitude": "neutral",
+          "faction": {
+            "name": "The Guardsmen",
+            "number": 1
+          },
+          "flags": {
+            "avoid": false,
+            "guard": true
+          },
+          "items": [
+            {
+              "amount": 80,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            },
+            {
+              "amount": 80,
+              "name": "sword",
+              "plural": "swords",
+              "tag": "SWOR"
+            }
+          ],
+          "name": "City Guard",
+          "number": 25
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "King",
+          "number": 140,
+          "orders": [
+            {
+              "order": "study forc 2"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "pattern",
+                "skill_days": 30,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 30,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "force",
+                "skill_days": 30,
+                "tag": "FORC"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              }
+            ]
+          },
+          "weight": 10
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 650
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "plainsman",
+              "plural": "plainsmen",
+              "tag": "PLAI"
+            },
+            {
+              "amount": 10,
+              "name": "livestock",
+              "plural": "livestock",
+              "tag": "LIVE"
+            },
+            {
+              "amount": 88,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Ranchers",
+          "number": 155,
+          "orders": [
+            {
+              "order": "@share 1"
+            },
+            {
+              "order": "@sell all LIVE"
+            },
+            {
+              "order": "@produce LIVE"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": [
+              {
+                "level": 1,
+                "name": "farming",
+                "skill_days": 30,
+                "tag": "FARM"
+              }
+            ]
+          },
+          "weight": 600
+        },
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 150
+          },
+          "faction": {
+            "name": "Test",
+            "number": 3
+          },
+          "flags": {
+            "avoid": false,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": true,
+            "reveal": "faction",
+            "sharing": true,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 10,
+              "name": "plainsman",
+              "plural": "plainsmen",
+              "tag": "PLAI"
+            },
+            {
+              "amount": 98,
+              "name": "silver",
+              "plural": "silver",
+              "tag": "SILV"
+            }
+          ],
+          "name": "Workers",
+          "number": 156,
+          "orders": [
+            {
+              "order": "@share 1"
+            },
+            {
+              "order": "@work"
+            }
+          ],
+          "own_unit": true,
+          "skills": {
+            "known": []
+          },
+          "weight": 100
+        }
+      ],
+      "wages": {
+        "amount": 14.9,
+        "max": 3151
+      },
+      "weather": {
+        "current": "clear",
+        "next": "clear"
+      }
+    }
+  ],
+  "skill_reports": [
+    {
+      "description": " A mage with this skill can cast a fireball in battle. This ability does between 2 and 10 times the skill level of the mage energy attacks and each attack deals 1 damage. In order to use this spell in combat, the mage should use the COMBAT order to set it as his combat spell. This skill requires force [FORC] 1 to begin to study. This skill costs 100 silver per month of study.",
+      "level": 1,
+      "name": "fire",
+      "tag": "FIRE"
+    }
+  ],
+  "status": {
+    "mages": {
+      "allowed": 1,
+      "current": 1
+    },
+    "tax_regions": {
+      "allowed": 10,
+      "current": 1
+    },
+    "trade_regions": {
+      "allowed": 10,
+      "current": 1
+    }
+  },
+  "type": {
+    "magic": 1,
+    "trade": 1,
+    "war": 1
+  },
+  "unclaimed_silver": 643
+}

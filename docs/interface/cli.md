@@ -110,7 +110,7 @@ logs nothing about them.
 | Variable | Effect | Provenance |
 | --- | --- | --- |
 | `ATLANTIS_SEED=<integer>` | fixes the world-generation seed used by `new`, making a world reproducible. No effect on `run`, which restores the seed from `game.in`. A non-integer value is rejected with a message and the run continues. | upstream candidate |
-| `ATLANTIS_SIM_MODE` | narrows `REPORT_FORMAT` to JSON: no text report, no order template. **Ignored, with a message, on a ruleset that does not enable the JSON report** — of the seven, only `neworigins`, `neworigins8` and `havilah` do. | fork-local |
+| `ATLANTIS_SIM_MODE` | narrows `REPORT_FORMAT` to JSON: no text report, no order template. **Ignored, with a message, on a ruleset that does not enable the JSON report** — all seven do today, so the guard is a safety net for a future one that does not. | fork-local |
 | `ATLANTIS_NO_GM_REPORT` | clears `GM_REPORT`, so the world-wide report for the NPC faction is not built. Worth roughly 70% of a turn's wall time; the share grows with the map. | fork-local |
 
 `ATLANTIS_SIM_MODE` and `ATLANTIS_NO_GM_REPORT` are deliberately independent: a recorded
