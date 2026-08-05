@@ -1,0 +1,36 @@
+# Line endings
+#
+# Everything text is stored AND checked out as LF. This repository is built and
+# tested through bash (GitHub Actions, Docker, WSL), and its snapshot fixtures are
+# compared byte for byte, so a CRLF working tree breaks both: `#!/bin/bash^M` is not
+# a valid interpreter, and a fixture recorded on a CRLF checkout differs from the
+# Linux engine output it is meant to match.
+#
+# This overrides a local core.autocrlf setting, and matches .editorconfig
+# (end_of_line = lf).
+* text=auto eol=lf
+
+# Scripts and build files, stated explicitly so the intent survives any future
+# relaxation of the blanket rule above.
+*.sh         text eol=lf
+s/*          text eol=lf
+Makefile     text eol=lf
+*.cmake      text eol=lf
+
+# Snapshot fixtures.
+#
+# These are recorded from a Linux binary and diffed byte for byte by
+# snapshot-tests/run-game-snapshots.sh, so they must stay LF on every host.
+#
+# linguist-generated collapses them by default in pull request diffs — a re-record
+# touches tens of megabytes and would otherwise make the PR unreviewable. It does
+# NOT affect `git diff` locally, which the failure-triage procedure depends on.
+snapshot-tests/turns/**             text eol=lf linguist-generated=true
+snapshot-tests/neworigins_turns/**  text eol=lf linguist-generated=true
+snapshot-tests/rules/*.html         text eol=lf linguist-generated=true
+
+# Vendored single-file header libraries, refreshed wholesale by `make check-libraries`.
+external/**  linguist-vendored=true
+
+# Binary assets, marked explicitly rather than relying on content detection.
+*.jpg  binary
