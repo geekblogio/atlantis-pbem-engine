@@ -2418,8 +2418,10 @@ void ARegionList::RandomTerrain(ARegionArray *pArr)
                 for (int d = 0; d < NDIRS; d++) {
                     ARegion *newregion = reg->neighbors[d];
                     if (!newregion) continue;
-                    if ((TerrainDefs[newregion->type].similar_type !=
-                                R_OCEAN) && (newregion->type != R_NUM) &&
+                    // R_NUM is the terrain count, and doubles as the "unassigned" sentinel
+                    // during generation, so it has to be excluded before indexing TerrainDefs.
+                    if ((newregion->type != R_NUM) &&
+                            (TerrainDefs[newregion->type].similar_type != R_OCEAN) &&
                             (newregion->wages > 0)) {
                         adjtype = newregion->type;
                         adjname = newregion->wages;
