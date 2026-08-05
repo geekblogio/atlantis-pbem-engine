@@ -11,7 +11,7 @@ change belongs.
 The engine library is every `*.cpp` in the repository root. It is game-agnostic: it declares
 functions it never defines, and each **ruleset** directory supplies them. A ruleset compiles
 together with the engine into its own standalone executable — `standard`, `basic`, `fracas`,
-`havilah`, `kingdoms`, `neworigins`.
+`havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8`.
 
 Five files per ruleset, all mandatory:
 
@@ -95,7 +95,8 @@ the JSON cannot appear in the text report.
 
 Which formats are written is controlled by the ruleset's `REPORT_FORMAT` flags:
 `REPORT_FORMAT_TEXT` produces `report.<n>` plus `template.<n>`, `REPORT_FORMAT_JSON` produces
-`report.<n>.json`.
+`report.<n>.json`. The report is a **published interface** — see
+[interface/json-report.md](interface/json-report.md) before changing a field.
 
 `genrules` renders the complete HTML rulebook from the live data tables (`genrules.cpp`,
 `skillshows.cpp`). This is why changing a data table also moves the rules snapshots.

@@ -1,0 +1,213 @@
+# Divergence register
+
+> **Audience:** anyone asking "how does this fork differ from upstream, and why?"
+> **Provenance:** FORK-LOCAL.
+
+**Read this when** you want to know how this fork diverges — or you are adding divergence and
+need to record it.
+
+**Append-only.** Entries are never deleted. When something is accepted upstream and arrives
+back through a sync, mark the entry *Landed upstream* and leave it in place; the history of why
+we carried it is the point.
+
+## How to use this file
+
+Every commit on `master` that is not on `upstream/master` must correspond to exactly one entry
+here. The final acceptance check is:
+
+```bash
+git log --oneline upstream/master..master
+```
+
+Each line must be findable below. If it is not, either the entry is missing or the commit
+should not have landed.
+
+## Status vocabulary
+
+| Status | Meaning |
+| --- | --- |
+| **Prepared** | on an `upstream/*` branch, self-contained, ready to offer. Not submitted. |
+| **Offered** | a pull request exists at `Atlantis-PBEM/Atlantis` |
+| **Landed upstream** | accepted; the divergence disappears at the next sync |
+| **Fork-local** | deliberately never offered |
+| **Declined** | offered and rejected; we keep it |
+
+**Nothing has been offered.** Per the standing rule in `CLAUDE.md`, upstream candidates are
+prepared and registered, not submitted; submitting is a separate, explicit decision. See
+[upstream-sync.md](upstream-sync.md) for the mechanics when that decision is made.
+
+---
+
+## Bug fixes — prepared for upstream
+
+Each of these landed here on an `upstream/*` branch, rebase-merged so the individual commits
+stay cherry-pickable, and touches nothing fork-local.
+
+### `ee97aa4` — dangling pointers in the data tables
+
+`modify.cpp`. The `modify_*` helpers assign `arg.c_str()` of a `const std::string&` parameter to
+raw `char const*` table fields (`MonType::special`, `WeaponType::baseSkill`, `MountType::skill`,
+…). The parameter is a temporary at the call site, so the table keeps a pointer into freed
+memory and combat crashes later. Fixed with a `static std::list<std::string>` intern pool, seven
+call sites converted. Also removes a `delete` on a pointer never allocated with `new`.
+
+**Upstream value: high.** A memory-safety bug with a crash behind it.
+
+### `535a0a0` — unguarded `find_special()` optional
+
+`items.cpp`, `specials.cpp`, `army.cpp`, `battle.cpp` — six sites. `find_special()` returns
+`nullopt` for an empty or unknown special string, and some ruleset data carries `""` rather than
+`NULL`. Calling `.value()` throws `bad_optional_access`. Each site got the behaviour that fits
+it: an empty description, `return 1`, `continue`, `return`, no shield, no mount special.
+
+**Upstream value: high.** A crash, fixed minimally.
+
+### `f6111d2` — use-after-free reading an anomaly's region
+
+`neworigins/extra.cpp`. `far_anomaly` is deleted and then read three times through `->region`.
+GCC's `-Wuse-after-free` reports all three. The region pointer is now taken before the delete.
+
+**Upstream value: high.** Unambiguous, one-line shape.
+
+### `e5b090b` — nexus gateways named "Dummy"
+
+`basic/map.cpp`, `standard/map.cpp`, `havilah/map.cpp`, `neworigins/map.cpp`. `set_name()`
+refuses to rename an `O_DUMMY` object, which is the constructor default, so every nexus gateway
+in a freshly generated world was called *Dummy*. `o->type = O_GATEWAY` now comes first.
+
+A **regression**, introduced by upstream's `89f4d40` *"Update parser to no longer use AString"*.
+That is why the committed fixtures carry correct gateway names while fresh worlds do not.
+
+**Upstream value: high.** Player-visible, in four rulesets.
+
+### `a388a00` — `TerrainDefs` indexed past the end
+
+All six rulesets' `map.cpp`. In `ARegionList::RandomTerrain` the `!= R_NUM` guard sat *behind*
+the `TerrainDefs[...]` access it was meant to protect. `R_NUM` is 63 and `TerrainDefs` holds 63
+entries. Reached on every world generation with an underworld level. The check was moved in
+front; nothing was added.
+
+**Upstream value: high.** The original port fixed only `havilah`; the code is byte-identical in
+all six.
+
+### `3d888cc` — unescaped angle brackets in the rulebook
+
+`genrules.cpp`. The `ANNIHILATE` example header contains `<5, 5>`, written verbatim into the
+HTML rulebook, so a browser swallows it as an unknown tag and the published rules read *"at
+coordinates on the surface"*. Escaped. Moves the `neworigins` rules baseline.
+
+**Upstream value: high.** Small, visible, obviously right.
+
+### `85d016c` — `inline` on an out-of-line definition
+
+`faction.cpp`. `Faction::gets_gm_report` is defined out of line and called from `game.cpp`;
+`inline` makes that ill-formed. It links only because `-O0` still emits an out-of-line copy —
+`nm` shows a weak symbol at `-O0`, no symbol at all at `-O2`.
+
+**Upstream value: high.** A latent link failure that appears the moment anyone optimises.
+
+### `3cc4269` — variables gcc only warns about at `-O2`
+
+`aregion.cpp`, `game.cpp`, `monthorders.cpp`, `spells.cpp`, `unit.cpp`, `neworigins/map.cpp`,
+`unittest/market_order_test.cpp`. Fifteen `-Wmaybe-uninitialized` warnings, invisible in an
+unoptimised build. Three are real: `mantype` indexing `ItemDefs` when a unit has no man item,
+`Province::GetLocation` building its return value from three uninitialised ints, and
+`CanUseWeapon` passing an unwritten skill index to `Practice()`.
+
+**Upstream value: medium.** Upstream does not build with `-O2` and so never sees these. The
+three real ones justify it; the rest are defensive.
+
+### `d58ff37` — CMake numeric operators on strings
+
+`CompilerSupport.cmake`, plus cleanup on two early exits in `run-game-snapshots.sh`.
+`CMAKE_CXX_COMPILER_ID EQUALS "GNU"` uses the *numeric* comparison, so the branch that disables
+the ranges probe for GCC below 12 never fires. `STREQUAL` and `VERSION_LESS`.
+
+**Upstream value: high.** Trivial and unambiguous. No effect on any supported toolchain today.
+
+### `c82aaed` — line endings and swallowed snapshot fixtures
+
+`.gitattributes` (new) and `.gitignore`. The bare `game.*` / `report.*` / `players.*` patterns
+match the fixtures of a **newly created** turn directory, so `new-turn.sh` silently produces an
+incomplete commit and the replay then fails with *"turn N missing"*. `.gitattributes` pins
+`eol=lf` on the byte-compared trees, without which a re-record on Windows destroys all of them.
+
+**Upstream value: high.** The same bug exists upstream. Verified content-neutral: the index
+holds zero CR bytes across all 325 snapshot files.
+
+---
+
+## Fork-local
+
+### `5b44837` — build at `-O2`, `genrules.cpp` exempt
+
+`Makefile`, `CMakeLists.txt`, `s/configure`, `.github/workflows/ci.yml`. Measured 0.217 s →
+0.041 s per turn (5.3×) on gcc 13.3.0. `genrules.cpp` stays at `-O0`: 6.6 s / 0.76 GB against
+119.9 s / 1.81 GB, with gcc reporting *variable tracking size limit exceeded*.
+
+Also switched the cmake CI job from `Debug` to `RelWithDebInfo` so the binary the snapshot suite
+tests is built the way the shipped one is. That surfaced one `-DNDEBUG` casualty, fixed in the
+same pull request.
+
+**Upstream value: borderline.** Upstream ships debug builds deliberately. The `genrules`
+pathology is worth reporting to them regardless of which default anyone prefers.
+
+### `6f033dd` — `ATLANTIS_SEED`
+
+`game.h`, `game.cpp`, `main.cpp`. A public `Game::set_deterministic_seed(int)` assigning the
+existing private `init_random_seed` hook — the same extension point the unit tests use — driven
+by an environment variable. Affects `new` only; `run` restores the seed from `game.in`.
+
+**Upstream value: worth offering.** Reproducible world generation helps anyone debugging map
+generation. Opt-in and inert when unset. The debatable part is the delivery mechanism; see
+[ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md).
+
+### `2b1d369` — `ATLANTIS_SIM_MODE`, `ATLANTIS_NO_GM_REPORT`
+
+`main.cpp`. `SIM_MODE` narrows `REPORT_FORMAT` to JSON; `NO_GM_REPORT` clears `GM_REPORT`, worth
+roughly 70% of a turn on a snapshot-sized world. Two switches, not one, because a *recorded*
+simulation still wants the GM report as ground truth.
+
+**Fork-local.** An environment variable overriding a ruleset global is a policy decision
+upstream would reasonably reject. The right upstream shape is a `--no-gm-report` flag.
+
+### `e89a198` — JSON report for `havilah`
+
+`havilah/rules.cpp`, one flag. `neworigins` already carries `REPORT_FORMAT_JSON` upstream.
+Purely additive: the text report and template are unchanged.
+
+**Upstream value: borderline, low risk.** Consistency with what upstream already does elsewhere.
+
+### `neworigins8` — the fork's own ruleset
+
+Added in a pull request of its own. `rules.cpp` is a copy of `neworigins/rules.cpp` with
+`UPKEEP_FOOD_VALUE` 30 → 50; the other four files are `#include` shims. `RULESET_NAME` and
+`RULESET_VERSION` stay identical to `neworigins` because `Game::OpenGame` refuses a `game.in`
+whose name differs. See [ADR 0006](../decisions/0006-neworigins8-as-its-own-ruleset.md).
+
+**Fork-local by definition.**
+
+### Infrastructure
+
+`.github/**`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/fork/`, `docs/decisions/` —
+the CI pipeline, branch protection, Dependabot, the pull request template, and this
+documentation. **Fork-local, permanently.** The `Upstream Hygiene` CI job fails any `upstream/*`
+branch that touches these paths, so they cannot leak into a contribution by accident.
+
+`c1656a7` (map viewer type check, Dependabot) is infrastructure but does add
+`map_viewer/tsconfig.json` and two `package.json` scripts, which are upstream-friendly on their
+own.
+
+---
+
+## Considered and not taken
+
+- **Division by zero in `TownStatistics`** and the **null guard in `skillshows.cpp`** were in the
+  original port but upstream has since fixed both independently. Only an explanatory comment
+  differed. Not worth a pull request.
+- **Turn fixtures for `neworigins8`.** It shares all engine and world-generation code with
+  `neworigins`; recording 14 more turns duplicates coverage rather than adding it.
+- **A full audit of the other 186 `TerrainDefs[x->type]` accesses.** Its own undertaking;
+  `a388a00` fixes the one pattern where the guard is demonstrably misplaced.
+- **A null check on `GetUnitId()`'s result in `monthorders.cpp`**, noticed while fixing the
+  uninitialised `t` next to it. Pre-existing and separate.

@@ -1,6 +1,12 @@
 # Atlantis PBEM Source Code
-[![Build Status](https://github.com/Atlantis-PBEM/Atlantis/actions/workflows/build.yml/badge.svg)](https://github.com/Atlantis-PBEM/Atlantis)
+[![CI](https://github.com/geekblogio/atlantis-pbem-engine/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/geekblogio/atlantis-pbem-engine/actions/workflows/ci.yml)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+
+This is a fork of [Atlantis-PBEM/Atlantis](https://github.com/Atlantis-PBEM/Atlantis), maintained
+as an **engine supplier** for two separate projects that build the binary and drive it as a
+subprocess. Start at [CLAUDE.md](CLAUDE.md) for the documentation index,
+[docs/interface/](docs/interface/README.md) if you are integrating the engine, and
+[docs/fork/patches.md](docs/fork/patches.md) for how this fork diverges from upstream.
 
 Copyright 1998-2023 orginally by Geoff Dunbar & Russell Wallace
 Additional copyright to various changes by Larry Stanberry, JT Traub, Stephen Baillie, Artem Trytiak, and many,
@@ -9,9 +15,10 @@ many others throughout the history of the project.
 Please see [the Credits file](https://github.com/Atlantis-PBEM/Atlantis/blob/master/CREDITS) for a more
 complete, but still inadequate, list of additional contributors.
 
-This distribution of the Atlantis source code purposefully comes with only this file as documentation. Please
-visit the [Atlantis Project Gamemaster Guide](https://github.com/Atlantis-PBEM/Atlantis/blob/master/GAMEMASTER.md)
-for more documentation.
+Upstream deliberately ships only this file as documentation, and points at the
+[Atlantis Project Gamemaster Guide](https://github.com/Atlantis-PBEM/Atlantis/blob/master/GAMEMASTER.md)
+for the rest. This fork keeps [GAMEMASTER.md](GAMEMASTER.md) for game-master knowledge and adds
+developer and integrator documentation under [docs/](docs/).
 
 Additional support can be found via the [Atlantis New Origins Discord](https://discord.gg/HusGETf) which exists
 primarily to support [Atlantis New Origins](https://atlantis-pbem.com) games, but also serves as a development
