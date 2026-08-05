@@ -82,8 +82,10 @@ Then, in order:
 git log --oneline upstream/master..master
 ```
 
-Every line must correspond to an entry in [patches.md](patches.md). That is the acceptance
-check for a sync, and for the fork as a whole.
+Every line must correspond to an entry in [patches.md](patches.md), named either by its pull
+request number or by its short SHA. That is the acceptance check for a sync, and for the fork as
+a whole; run the loop under
+[*How to use this file*](patches.md#how-to-use-this-file) rather than reading the list.
 
 ## What upstream must never receive by accident
 

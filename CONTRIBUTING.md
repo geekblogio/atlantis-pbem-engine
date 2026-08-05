@@ -78,7 +78,9 @@ A pull request is ready when all of these are true:
 - [ ] Every document the change invalidated is updated in the same pull request.
 - [ ] A change visible outside the binary is reflected in `docs/interface/`, and the version
       constants in `game.h` were considered.
-- [ ] A divergence from upstream is registered in `docs/fork/patches.md`.
+- [ ] The change is registered in `docs/fork/patches.md`, in an entry naming `#<this pull
+      request>`. Open the pull request first, then write the entry and push it onto the same
+      branch — the `Divergence Register` job fails until you do.
 - [ ] A new source file is registered in **both** `Makefile` and `CMakeLists.txt`.
 
 ## What CI covers
@@ -91,6 +93,7 @@ depends on either succeeded or was skipped.
 | `Build & Test (cmake)` | the CMake build, unit tests, and the full snapshot suite |
 | `Build (make)` | the Makefile build of `havilah` plus unit tests — the path the downstream Docker image uses |
 | `Upstream Hygiene` | fork-local paths on an `upstream/*` branch |
+| `Divergence Register` | that `docs/fork/patches.md` names this pull request's number |
 
 **Windows and macOS are not on the pull request path.** They run in `Platforms` after a merge
 and weekly. A portability regression is found within a day, which is cheaper than seven minutes
