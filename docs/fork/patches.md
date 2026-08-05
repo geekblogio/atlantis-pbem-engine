@@ -13,20 +13,42 @@ we carried it is the point.
 ## How to use this file
 
 Every commit on `master` that is not on `upstream/master` must correspond to exactly one entry
-here, **and the entry must name its short SHA** so the check can be run rather than eyeballed:
+here, **and the entry must name a key** so the check can be run rather than eyeballed. Two keys
+are accepted:
+
+| Key | For | Available |
+| --- | --- | --- |
+| `#<pull request>` | anything squash-merged — GitHub puts `(#N)` in the subject | **before** the merge |
+| short SHA | the `upstream/*` branches, rebase-merged and therefore carrying no number | only after it |
+
+**Prefer the pull request number.** It exists before the merge, so the entry ships with the change
+it describes: open the pull request, then write the entry naming `#N` and push it onto the same
+branch. A SHA can only be added once the squash-merge has invented it, which costs a second pull
+request every single time.
 
 ```bash
 git log --format='%h %s' upstream/master..master |
   while read -r sha rest; do
-    # A commit that only edits this file cannot name its own SHA -- doing so would need a
-    # further commit, and so on. Skipping them is what keeps the rule from chasing its tail.
-    [ "$(git show --pretty= --name-only "$sha")" = "docs/fork/patches.md" ] && continue
-    grep -q "$sha" docs/fork/patches.md || echo "UNREGISTERED $sha $rest"
+    pr=$(printf '%s' "$rest" | grep -oE '\(#[0-9]+\)$' | tr -d '()')
+    grep -q "$sha" docs/fork/patches.md && continue
+    [ -n "$pr" ] && grep -qE "${pr}([^0-9]|$)" docs/fork/patches.md && continue
+    echo "UNREGISTERED $sha $rest"
   done
 ```
 
 Silence means the register is complete. Any output means either the entry is missing or the
 commit should not have landed. Run it after every sync.
+
+This rule used to skip commits that touched nothing but this file, because such a commit cannot
+name its own SHA — write it in, and you need a further commit to record *that*, and so on. A
+pull request number has no such problem: it is known while the file is being edited, so a
+register-only pull request registers itself and the exemption is gone.
+
+The **`Divergence Register`** job in [`ci.yml`](../../.github/workflows/ci.yml) enforces the same
+rule from the other end, failing a pull request whose number this file does not name — so the gap
+surfaces during review instead of after the merge. It exempts `upstream/*` branches and
+bot-authored pull requests: the first have no number to register, the second no way to write one.
+Both are added by SHA afterwards.
 
 ## Status vocabulary
 
@@ -184,6 +206,21 @@ Purely additive: the text report and template are unchanged.
 
 **Upstream value: borderline, low risk.** Consistency with what upstream already does elsewhere.
 
+### `#30` — JSON report from every ruleset
+
+`standard/rules.cpp`, `basic/rules.cpp`, `fracas/rules.cpp`, `kingdoms/rules.cpp`: the same flag
+`e89a198` set for `havilah`, so `report.<n>.json` exists whichever ruleset a consumer builds.
+Includes the 28 re-recorded `standard` turn fixtures — the re-record produced 28 new files and
+**zero modified** ones, which is the evidence that building the JSON document draws no random
+numbers and moves nothing downstream of it.
+
+Two unrelated repairs ride along: the explicit `obj/genrules.o` recipe from `5b44837` became a
+target-specific `CFLAGS += -O0`, because an explicit recipe overrode the static pattern rule and
+make said so twice per sub-make; and `.idea/` joined the ignored IDE directories.
+
+**Fork-local, low upstream value.** The same reasoning as the `havilah` flag, four rulesets
+wider. Upstream has no consumer that reads the JSON report.
+
 ### `0cf80ff` — `neworigins8`, the fork's own ruleset
 
 `rules.cpp` is a copy of `neworigins/rules.cpp` with
@@ -217,10 +254,22 @@ and the interface specification are **upstream-friendly in content** — each ca
 `Provenance:` header saying so — but offering documentation upstream is a conversation about
 their project's shape, not a bug fix, and is not proposed here.
 
+### Maintenance of this register
+
+`#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
+covered but no key named; `#29` stopped the acceptance check chasing its own tail, by skipping
+commits that touched nothing else. That exemption is gone again: with the pull request number as
+the key, a register-only pull request can name itself.
+
+**Fork-local, permanently**, like everything under `docs/fork/`.
+
 ### `bea2a21` — vendored nlohmann/json 3.11.3 → 3.12.0
 
 Produced by the `Vendored Deps` workflow, which runs `make check-libraries` monthly and opens a
 pull request when a header moved. `external/boost/ut.hpp` was already current at 2.3.1.
+
+Registered by SHA after the fact, not by number: the workflow opens its pull requests with
+`GITHUB_TOKEN`, so the `Divergence Register` job exempts them.
 
 **Mechanical, and temporary.** It is a divergence only until upstream refreshes their own copy;
 there is nothing here to offer them that their own `make check-libraries` would not produce.

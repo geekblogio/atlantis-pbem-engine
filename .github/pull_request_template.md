@@ -17,7 +17,8 @@ what was wrong, why this is the right fix, what you measured or ruled out.
 - [ ] Breaks a downstream consumer? → `docs/fork/downstream-consumers.md` updated and an issue
       opened in the consumer repository
 - [ ] New source file? → registered in **both** `Makefile` and `CMakeLists.txt`
-- [ ] Diverges from upstream? → registered in `docs/fork/patches.md`
+- [ ] Registered in `docs/fork/patches.md`, in an entry naming this pull request's `#number` —
+      the `Divergence Register` job fails until it is
 - [ ] On an `upstream/*` branch? → branched from `upstream/master`, no fork-local paths touched,
       commit written in upstream's voice
 

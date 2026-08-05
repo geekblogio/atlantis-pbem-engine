@@ -178,6 +178,39 @@ jobs:
           fi
           echo "No fork-local paths touched."
 
+  register:
+    name: Divergence Register
+    # Only a pull request has a number to register with, and only master accumulates
+    # divergence. Two exemptions, both structural rather than convenience:
+    #
+    #   * upstream/* branches are rebase-merged, so their commits keep no (#N) marker
+    #     and are registered by short SHA afterwards. The Upstream Hygiene job would
+    #     reject the docs/fork/ edit anyway.
+    #   * Bot-authored pull requests (Dependabot, the vendored-header refresh) cannot
+    #     write a register entry. They are registered by SHA afterwards too.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.base_ref == 'master' &&
+      !startsWith(github.head_ref, 'upstream/') &&
+      github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The other half of the rule in docs/fork/patches.md. That check runs over merged
+      # history and can only report a gap once it exists; this one refuses to let the gap
+      # be created, which is the point at which fixing it is still free.
+      - name: Require an entry naming this pull request
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if grep -qE "#${PR}([^0-9]|$)" docs/fork/patches.md; then
+            echo "Pull request #${PR} is registered."
+            exit 0
+          fi
+          echo "::error file=docs/fork/patches.md::No entry names #${PR}. Every commit that lands on master is a divergence from upstream and must be registered -- add the entry to docs/fork/patches.md on this branch."
+          exit 1
+
   # The single required status check.
   #
   # `if: always()` so it reports even when a job it needs was skipped. `skipped` is
@@ -187,7 +220,7 @@ jobs:
   gate:
     name: CI
     if: always()
-    needs: [changes, cmake, make, viewer, hygiene]
+    needs: [changes, cmake, make, viewer, hygiene, register]
     runs-on: ubuntu-24.04
     steps:
       - name: Aggregate job results
