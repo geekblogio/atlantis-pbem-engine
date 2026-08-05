@@ -137,19 +137,26 @@ Record fixtures on Linux. They are byte-compared against the output of a Linux b
 Nothing is sent upstream without an explicit decision. The steps below prepare a fix so that
 decision stays cheap later.
 
-1. Branch from `upstream/master`, not from our `master`:
+1. Branch from **our `master`**, named `upstream/<topic>`:
    ```bash
-   git fetch upstream
-   git switch -c upstream/<topic> upstream/master
+   git switch -c upstream/<topic> master
    ```
-   Branching from our `master` drags fork-local commits into the patch's ancestry.
-2. Touch only upstream-friendly paths. `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`,
+   The branch's ancestry does not matter, because step 6 cherry-picks the commit rather than
+   pushing the branch — and a cherry-pick carries the diff, not the history. Branching from
+   `upstream/master` instead only guarantees that the branch is behind `master`, and
+   `required_status_checks.strict` then blocks the merge until it is rebased anyway.
+2. Keep the change **self-contained**: one logical fix, no dependency on anything this fork
+   added. That, not the branch point, is what makes the cherry-pick apply to upstream.
+3. Touch only upstream-friendly paths. `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`,
    `docs/fork/`, `docs/decisions/` and `.github/` are fork-local; the `Upstream Hygiene` job
-   fails the build if they appear.
-3. Write the commit in upstream's voice: no reference to this fork, its consumers or its CI.
-   Strip the `Co-Authored-By` trailer from the commit that is actually submitted.
-4. Merge into our `master` with **rebase**, so the commit survives unchanged.
-5. Register it in `docs/fork/patches.md` as an upstream candidate.
-6. When it is time to submit: branch from `upstream/master` in a personal fork of
-   Atlantis-PBEM/Atlantis, cherry-pick, push there, and open the pull request from that fork.
-   Never open it from a branch of this repository — that history contains fork-local commits.
+   fails the build if they appear. This is why a change to *this* file cannot ride along on an
+   `upstream/*` branch.
+4. Write the commit in upstream's voice: no reference to this fork, its consumers or its CI,
+   and no `Co-Authored-By` trailer.
+5. Merge into our `master` with **rebase**, so the commit survives unchanged and stays
+   cherry-pickable.
+6. Register it in `docs/fork/patches.md` as an upstream candidate.
+7. When it is time to submit: branch from `upstream/master` in a personal fork of
+   Atlantis-PBEM/Atlantis, `git cherry-pick` the commit, push there, and open the pull request
+   from that fork. Never open it from a branch of this repository — that history contains
+   fork-local commits. A conflict at this point means step 2 was not honoured.
