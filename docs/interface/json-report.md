@@ -18,9 +18,9 @@ Two consequences:
 
 ## When it is written
 
-Only when the ruleset's `REPORT_FORMAT` includes `REPORT_FORMAT_JSON`. Today: `neworigins`,
-`neworigins8` and `havilah`. The others write text only, and no amount of environment variable
-changes that — see [cli.md](cli.md).
+Only when the ruleset's `REPORT_FORMAT` includes `REPORT_FORMAT_JSON` — which **every ruleset
+shipped here now does**, alongside `REPORT_FORMAT_TEXT`. A ruleset that turned the flag off would
+write text only, and no environment variable would change that — see [cli.md](cli.md).
 
 The file is `report.<faction-number>.json`, one per faction that gets a report.
 

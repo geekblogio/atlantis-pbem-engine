@@ -137,8 +137,11 @@ $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 # -O0 is appended rather than -O2 removed, so this stays unoptimised even when
 # CFLAGS is overridden from the command line. The rules generator runs once per
 # ruleset release, so its own speed does not matter.
-obj/genrules.o: genrules.cpp
-	$(CPLUS) $(CFLAGS) -O0 -c -o $@ $<
+#
+# This is a target-specific variable rather than a second recipe: an explicit
+# recipe here would override the static pattern rule above, and make says so
+# twice per sub-make.
+obj/genrules.o: CFLAGS += -O0
 
 # If the boost.hpp file is updated, we need to rebuild the unit test files that include it.
 $(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp external/boost/ut.hpp
