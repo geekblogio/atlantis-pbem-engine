@@ -5,6 +5,10 @@
 #include "gamedata.h"
 #include "strings_util.hpp"
 
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
+
 void usage()
 {
     logger::write("atlantis new");
@@ -16,6 +20,9 @@ void usage()
     logger::write("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
     logger::write("");
     logger::write("atlantis check <orderfile> <checkfile>");
+    logger::write("");
+    logger::write("Environment:");
+    logger::write("  ATLANTIS_SEED=<integer>   fix the world generation seed used by `new`");
 }
 
 int main(int argc, char *argv[])
@@ -39,6 +46,19 @@ int main(int argc, char *argv[])
     std::vector<std::string> args;
     for (int i = 0; i < argc; i++) {
         args.push_back(argv[i]);
+    }
+
+    // ATLANTIS_SEED makes world generation reproducible, which is what you want when
+    // bisecting a map-generation crash or replaying a simulation. Unset -- the normal case
+    // -- nothing changes: the seed still comes from std::random_device.
+    if (const char *seed_env = std::getenv("ATLANTIS_SEED")) {
+        try {
+            int seed = std::stoi(seed_env);
+            game.set_deterministic_seed(seed);
+            logger::write("Using deterministic world seed " + std::to_string(seed) + " (ATLANTIS_SEED).");
+        } catch (const std::exception&) {
+            logger::write("Ignoring ATLANTIS_SEED: '" + std::string(seed_env) + "' is not an integer.");
+        }
     }
 
     game.ModifyTablesPerRuleset();

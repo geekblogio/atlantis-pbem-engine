@@ -314,6 +314,12 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
     return(1);
 }
 
+void Game::set_deterministic_seed(int seed)
+{
+    // Same extension point the unit tests use; see init_random_seed in game.h.
+    init_random_seed = [seed]() { rng::seed_random(seed); };
+}
+
 int Game::NewGame()
 {
     factionseq = 1;
