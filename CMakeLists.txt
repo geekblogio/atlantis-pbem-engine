@@ -113,6 +113,7 @@ fracas
 havilah
 kingdoms
 neworigins
+neworigins8
 standard
 )
 
