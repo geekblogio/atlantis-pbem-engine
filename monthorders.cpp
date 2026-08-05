@@ -1086,7 +1086,7 @@ void Game::RunProduceOrders(ARegion *r)
                     } else if (u->build < 0 || o->target) {
                         std::string order = "BUILD ";
                         BuildOrder *border = nullptr;
-                        Unit *t;
+                        Unit *t = nullptr;
                         if (o->target) {
                             t = r->GetUnitId(o->target, u->faction->num);
                             if (t->monthorders && (t->monthorders->type == O_BUILD)) {

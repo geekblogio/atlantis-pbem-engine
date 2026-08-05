@@ -29,7 +29,7 @@ ut::suite<"Market Orders"> market_order_suite = []
     unit2->items.SetNum(I_LEADERS, 1);
     unit2->items.SetNum(I_SILVER, 8000);
 
-    int item_id;
+    int item_id = -1;
     int max_amount = 0;
     int price = 0;
     for(const auto market : region->markets) {
@@ -101,7 +101,7 @@ ut::suite<"Market Orders"> market_order_suite = []
     Unit *unit2 = helper.create_unit(faction, region);
     unit2->items.SetNum(I_LEADERS, 1);
 
-    int item_id;
+    int item_id = -1;
     int max_amount = 0;
     int price = 0;
     for(const auto market : region->markets) {
@@ -119,11 +119,11 @@ ut::suite<"Market Orders"> market_order_suite = []
       break;
     }
 
+    expect(max_amount > 0); // silly, just make sure we have a market item that we found.
+
     // Make sure they have enough to sell the items.
     unit->items.SetNum(item_id, max_amount * 4);
     unit2->items.SetNum(item_id, max_amount * 4);
-
-    expect(max_amount > 0); // silly, just make sure we have a market item that we found.
 
     std::stringstream ss;
     ss << "#atlantis 3\n";

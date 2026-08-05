@@ -2673,7 +2673,9 @@ int Unit::CanUseWeapon(const WeaponType& weapon, int riding)
     int baseSkillLevel = 0;
     int tempSkillLevel = 0;
 
-    int bsk, orsk;
+    // -1 is lookup_skill()'s "no such skill" answer, and both variables stay
+    // unwritten when the weapon has no skill of that kind at all.
+    int bsk = -1, orsk = -1;
     if (weapon.baseSkill != NULL) {
         bsk = lookup_skill(weapon.baseSkill);
         if (bsk != -1) baseSkillLevel = GetSkill(bsk);
@@ -2684,10 +2686,12 @@ int Unit::CanUseWeapon(const WeaponType& weapon, int riding)
         if (orsk != -1) tempSkillLevel = GetSkill(orsk);
     }
 
+    // Practice() reaches SkillDefs[sk] through GetAvailSkill(), so -1 must not
+    // get through -- PracticeAttribute() guards the same way.
     if (tempSkillLevel > baseSkillLevel) {
         baseSkillLevel = tempSkillLevel;
-        Practice(orsk);
-    } else
+        if (orsk != -1) Practice(orsk);
+    } else if (bsk != -1)
         Practice(bsk);
 
     if (weapon.flags & WeaponType::NEEDSKILL && !baseSkillLevel) return -1;
