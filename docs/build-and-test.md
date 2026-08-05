@@ -81,6 +81,11 @@ the exemption survives a `CFLAGS=` override on the command line. CMake does the 
 GCC and Clang build with `-Wextra -Wall -Werror -pedantic`. Any new diagnostic is a hard
 failure.
 
+**The two build systems do not warn identically.** CMake's `RelWithDebInfo` adds `-DNDEBUG`,
+which the Makefile does not, so `assert()` disappears and anything that existed only to feed one
+becomes an unused variable. A clean `make all` is therefore not proof that the cmake job will
+pass. The cmake CI job is the authority.
+
 **MSVC is materially laxer**: `/WX` is disabled and `4244`, `4267` and `4700` are suppressed.
 Code that is clean under MSVC can still fail CI. If you develop on Windows, build once under
 GCC before opening a pull request.
@@ -127,5 +132,6 @@ that target monthly and opens a pull request when something moved.
 | `Compiler lacks full support for C++20 ranges` | toolchain too old; `CompilerSupport.cmake` refused |
 | undefined reference to a member defined in a `.cpp` | an `inline` on an out-of-line definition — legal only while nothing optimises it away |
 | link succeeds locally, fails in CI | a source file registered in only one of the two build files |
+| `unused variable` under CMake but not under `make` | `RelWithDebInfo` adds `-DNDEBUG`, which compiles `assert()` away; a variable that exists only for an assertion needs `[[maybe_unused]]` |
 | a warning you did not introduce | a newer compiler; check whether `Platforms` is already red |
 | stale or half-linked objects after an interrupted `make` | `make all-clean`; and check you did not use `-j` |
