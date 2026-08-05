@@ -3721,7 +3721,7 @@ int Game::generate_rules(const std::string& rules, const std::string& css, const
           << "This skill cannot target or affect regions which are already barren, nor can it target the Nexus.\n";
         f << enclose("p", false);
         f << enclose("p", true) << "Example:\n" << enclose("p", false);
-        f << example_start("Annihilate the region located at coordinates <5, 5> on the surface.")
+        f << example_start("Annihilate the region located at coordinates &lt;5, 5&gt; on the surface.")
           << "ANNIHILATE REGION 5 5 1\n";
         if (rt.flags & RangeType::RNG_SURFACE_ONLY) {
           f << " or\n"
