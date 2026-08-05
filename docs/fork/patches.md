@@ -18,6 +18,9 @@ here, **and the entry must name its short SHA** so the check can be run rather t
 ```bash
 git log --format='%h %s' upstream/master..master |
   while read -r sha rest; do
+    # A commit that only edits this file cannot name its own SHA -- doing so would need a
+    # further commit, and so on. Skipping them is what keeps the rule from chasing its tail.
+    [ "$(git show --pretty= --name-only "$sha")" = "docs/fork/patches.md" ] && continue
     grep -q "$sha" docs/fork/patches.md || echo "UNREGISTERED $sha $rest"
   done
 ```
