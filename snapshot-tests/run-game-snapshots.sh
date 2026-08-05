@@ -22,6 +22,7 @@ chmod +x "./$game"
 
 if [[ ! -f "$turndir/turn" ]]; then
   echo "No turns defined for $game.  Test failed."
+  rm -f "./$game"
   exit 1
 fi
 
@@ -33,6 +34,8 @@ do
 
   if [[ ! -d "$turndir/turn_$turn" ]]; then
     echo "turn $turn missing. -- Test failed."
+    rm -rf ./output
+    rm -f "./$game"
     exit 1
   fi
 
