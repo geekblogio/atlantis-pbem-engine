@@ -213,10 +213,13 @@ std::unordered_set<int> Province::GetNeighborBiomes() {
 }
 
 Coords Province::GetLocation() {
+    // xMin doubles as the "first region seen" sentinel. The other three are only
+    // written on that first iteration, so a province with no regions at all would
+    // otherwise build its return value out of four uninitialised ints.
     int xMin = -1;
-    int yMin;
-    int xMax;
-    int yMax;
+    int yMin = -1;
+    int xMax = -1;
+    int yMax = -1;
 
     for (auto &kv : regions) {
         auto reg = kv.second;

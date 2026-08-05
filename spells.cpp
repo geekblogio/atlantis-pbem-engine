@@ -1778,7 +1778,7 @@ int Game::RunPortalLore(ARegion *r, Unit *u)
 int Game::RunTransmutation(ARegion *, Unit *u)
 {
     CastTransmuteOrder *order;
-    int level, num, source;
+    int level, num, source = -1;
 
     order = dynamic_cast<CastTransmuteOrder *>(u->castorders);
     level = u->GetSkill(S_TRANSMUTATION);
@@ -1826,7 +1826,7 @@ int Game::RunTransmutation(ARegion *, Unit *u)
 
 int Game::RunBlasphemousRitual(ARegion *r, Unit *mage)
 {
-    int level, num, sactype, sacrifices, i, sac, relics;
+    int level, num, sactype, sacrifices, i, sac = -1, relics;
     Object *tower;
     Unit *victim;
     std::string message;

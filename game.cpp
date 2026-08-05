@@ -1723,7 +1723,7 @@ void Game::CreateCityMon(ARegion *region, int percent, int needmage)
     num = num * percent / 100;
     Faction *fac = GetFaction(factions, guardfaction);
     Unit *u = GetNewUnit(fac);
-    Unit *u2;
+    Unit *u2 = nullptr;
 
     if ((Globals->LEADERS_EXIST) || (region->type == R_NEXUS)) {
         /* standard Leader-type guards */
@@ -1820,8 +1820,10 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
     int AC = 0;
     int men;
     int IV = 0;
-    int mantype;
-    int maxmen;
+    int mantype = -1;
+    // Not 0: the only read of maxmen is a division by it, and every path reaching
+    // that read assigns it first.
+    int maxmen = 1;
     int weapon = -1;
     int maxweapon = 0;
     int armor = -1;
@@ -1876,7 +1878,9 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
             men = maxmen;
     }
 
-    u->SetMen(mantype,men);
+    // A unit with no man item at all leaves mantype at -1; SetMen() would index
+    // ItemDefs out of bounds with it.
+    if (mantype != -1) u->SetMen(mantype,men);
     if (IV) u->items.SetNum(I_AMULETOFI,men);
 
     if (u->type == U_GUARDMAGE) {

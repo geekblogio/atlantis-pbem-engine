@@ -1843,7 +1843,7 @@ void ARegionList::SetupIcosahedralNeighbors(ARegionArray *pRegs)
 
 void ARegionList::IcosahedralNeighSetup(ARegion *r, ARegionArray *ar)
 {
-    int scale, x, y, x2, y2, x3, neighX, neighY;
+    int scale, x, y, x2, y2, x3, neighX = 0, neighY = 0;
 
     scale = ar->x / 10;
 
