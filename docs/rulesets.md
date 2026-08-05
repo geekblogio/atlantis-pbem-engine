@@ -4,7 +4,7 @@
 > **Provenance:** upstream-friendly.
 
 **Read this when** you are adding or modifying a ruleset, or you need a change not to leak into
-the other five.
+the others.
 
 ## The contract
 

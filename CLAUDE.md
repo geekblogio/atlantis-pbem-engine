@@ -72,11 +72,12 @@ ctest --test-dir build --output-on-failure
 | [docs/rulesets.md](docs/rulesets.md) | you are adding or changing a ruleset, or a change must not leak across them |
 | [docs/build-and-test.md](docs/build-and-test.md) | first build on a machine, you added or removed a source file, or CI failed at compile |
 | [docs/snapshot-tests.md](docs/snapshot-tests.md) | a snapshot test failed, or your change intentionally alters engine output |
+| [docs/fork/upstream-sync.md](docs/fork/upstream-sync.md) | you are pulling upstream into this fork |
+| [docs/fork/patches.md](docs/fork/patches.md) | you want to know how this fork diverges — or you are adding divergence |
+| [docs/fork/downstream-consumers.md](docs/fork/downstream-consumers.md) | before any change that could break the two Python projects |
+| [docs/decisions/](docs/decisions/README.md) | you want to reopen a decision that has already been made |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | branching, commit style, pull request flow, Definition of Done, contributing upstream |
 | [GAMEMASTER.md](GAMEMASTER.md) | *game-master* knowledge: running a game, world design, order semantics. Not a developer document. |
-
-Still to be written: `docs/fork/` (how this fork diverges, upstream sync, downstream consumers)
-and `docs/decisions/` (the ADRs). Do not reference them until they exist.
 
 ## Conventions
 
