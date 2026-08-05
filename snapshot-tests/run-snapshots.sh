@@ -39,5 +39,9 @@ fi
 if [[ $? != 0 ]]; then
   failure=1
 fi
+./run-rules-snapshot.sh neworigins8
+if [[ $? != 0 ]]; then
+  failure=1
+fi
 
 exit $failure

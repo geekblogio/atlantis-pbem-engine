@@ -13,8 +13,8 @@ byte of every output file** against what was recorded.
 | Suite | Covers |
 | --- | --- |
 | `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard` and `neworigins` only, 14 turns each |
-| `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for all six rulesets |
-| `run-snapshots.sh` | both, for everything — 34 individual checks |
+| `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for every ruleset |
+| `run-snapshots.sh` | both, for everything — 35 individual checks |
 
 The comparison covers `game.*`, `players.*`, `orders.*`, `template.*`, `report.*`, `times.*`
 and the engine's own stdout. The rules comparison strips the `Last Change:` timestamp line
@@ -27,7 +27,7 @@ cd snapshot-tests && ./run-snapshots.sh
 ```
 
 The runners look for `../<game>/<game>` and fall back to `../build/<game>`, so either build
-system works. Build all six rulesets first — the four without turn data are still needed for
+system works. Build every ruleset first — the ones without turn data are still needed for
 the rulebook comparison, and a missing binary is reported as a **failure**, not a skip.
 
 `run-snapshots.sh` returns a non-zero exit code when anything failed. Do not pipe it straight
