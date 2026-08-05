@@ -7,5 +7,6 @@ echo "Updating all rules snapshots"
 ./update-rules-snapshot.sh havilah
 ./update-rules-snapshot.sh kingdoms
 ./update-rules-snapshot.sh neworigins
+./update-rules-snapshot.sh neworigins8
 
 exit 0

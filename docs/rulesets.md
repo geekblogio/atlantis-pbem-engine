@@ -72,12 +72,31 @@ enable the skill that produces it, or the object that houses it — each is a se
 4. Add `<game>/obj`, `<game>/<game>` and `<game>/html/<game>.html` to `.gitignore`, and
    `/snapshot-tests/<game>` for the binary the snapshot runner copies in.
 5. Record the rules baseline: build it, then `./update-rules-snapshot.sh <game>`, and add the
-   game to `run-snapshots.sh`.
+   game to **both** `run-snapshots.sh` and `update-all-rule-snapshots.sh`. Missing the second
+   one means the next re-record silently skips your ruleset.
 
 A ruleset that is a small variation of an existing one does not need a full copy. Only the file
 that actually differs has to be duplicated; the rest can be one-line `#include "../<base>/<file>"`
 shims, which then track the base ruleset automatically. Quoted includes resolve relative to the
 file containing the directive, so a shim behaves exactly like the original.
+
+## `neworigins8`, and why it shares a name
+
+`neworigins8/` is the shim pattern in practice, and the only fork-local ruleset here. It exists
+because the live game runs NewOrigins 8, whose sole published rule change against 7 is that
+**meals cost 50 silver instead of 30**. `rules.cpp` is a copy of `neworigins/rules.cpp` with
+that one value changed; the other four files are shims.
+
+**`RULESET_NAME` and `RULESET_VERSION` are deliberately identical to `neworigins`.**
+`Game::OpenGame` refuses a `game.in` whose stored name does not match `Globals->RULESET_NAME`,
+and a *higher* version triggers the `upgrade_*_version` path. Renaming or bumping either would
+mean the binary could not open the very game files it exists to process. The two executables
+are therefore interchangeable on the same game — verified by replaying a recorded `neworigins`
+turn under both.
+
+The consequence to keep in mind: nothing in a report or a game file distinguishes the two. The
+rulebook is the only visible difference, and the generated `neworigins8` baseline differs from
+the `neworigins` one in exactly four lines — the stylesheet reference and the meal price.
 
 ## The unit test ruleset
 

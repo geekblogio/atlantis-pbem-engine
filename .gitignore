@@ -17,6 +17,9 @@ havilah/html/havilah.html
 neworigins/obj
 neworigins/neworigins
 neworigins/html/neworigins.html
+neworigins8/obj
+neworigins8/neworigins8
+neworigins8/html/neworigins8.html
 snapshot-tests/output
 unittest/obj
 unittest/unittest
@@ -55,6 +58,7 @@ map_viewer/dist
 /snapshot-tests/havilah
 /snapshot-tests/kingdoms
 /snapshot-tests/neworigins
+/snapshot-tests/neworigins8
 /snapshot-tests/standard
 /snapshot-tests/*.html
 /snapshot-tests/*.html.strip

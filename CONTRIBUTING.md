@@ -102,12 +102,12 @@ without a job producing it, every pull request stays pending forever.
 ## Running everything locally
 
 ```bash
-make all                      # six rulesets plus the unit test binary — do NOT use -j
+make all                      # every ruleset plus the unit test binary — do NOT use -j
 ./unittest/unittest
 cd snapshot-tests && ./run-snapshots.sh
 ```
 
-`make` shares one `obj/` directory across all six rulesets and races on `mkdir obj`, so `-j` is
+`make` shares one `obj/` directory across all rulesets and races on `mkdir obj`, so `-j` is
 unsafe. The CMake path is parallel-safe:
 
 ```bash

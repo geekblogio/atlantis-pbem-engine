@@ -23,13 +23,13 @@ which matters because the snapshot runners look in both.
 ### Makefile — output `<game>/<game>`
 
 ```bash
-make all             # all six rulesets plus the unit test binary
+make all             # every ruleset plus the unit test binary
 make GAME=standard   # one ruleset
 make unittest        # the unit test binary only
 make all-clean
 ```
 
-**Never pass `-j`.** All six sub-makes write the same `obj/*.o`, and the `objdir` target races
+**Never pass `-j`.** All the sub-makes write the same `obj/*.o`, and the `objdir` target races
 the compiles. The build will fail or, worse, link stale objects. Parallelism belongs to the
 CMake path.
 

@@ -26,7 +26,7 @@ belongs in `docs/`; add it there and reference it from the index below, not here
 
 The Atlantis play-by-email engine (C++20). One shared engine library plus several **rulesets**
 (game variants); each compiles into its own standalone executable — `standard`, `basic`,
-`fracas`, `havilah`, `kingdoms`, `neworigins`.
+`fracas`, `havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8`.
 
 It is a batch turn processor, not a server: it reads `game.in`, `players.in` and
 `orders.<faction#>` from the working directory, runs one turn, and writes `game.out`,
@@ -54,7 +54,7 @@ interface, not an implementation detail.
 ## Commands
 
 ```bash
-make all                                    # six rulesets + unit tests — never with -j
+make all                                    # all rulesets + unit tests — never with -j
 ./unittest/unittest
 cd snapshot-tests && ./run-snapshots.sh
 
