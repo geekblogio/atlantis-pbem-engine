@@ -13,6 +13,14 @@ declare global {
 }
 window.Alpine = Alpine
 
+// Alpine.store() is typed as returning `unknown`, so describe the shape we register
+// below once and assert against it where the store is read.
+type GlobalStore = {
+    resource: string
+    resources: { title: string, value: string }[]
+    features: { title: string, checked: boolean }[]
+}
+
 // registering a global store
 Alpine.store('global', {
     'resource': '',
@@ -45,7 +53,9 @@ const jungle = Color('#177832');
 const grassland = Color('#91e069');
 const desert = Color('#f0d735');
 
-const TERRAIN = {
+// Keyed by the terrain name the engine writes, so the index type has to be `string`
+// rather than the union of the keys listed here — an unknown terrain falls back to red.
+const TERRAIN: Record<string, string> = {
   'ocean': '#00008b',
   'plain': '#bfb370',
   'forest': '#228B22',
@@ -73,7 +83,7 @@ function drawHexMap(col: number, row: number, level: string) {
     const offsetY = row * (MAP_H * CELL_SZ + MAP_GAP) + 50;
 
     const layout = new Layout(Layout.flat, new Point(CELL_SZ * 2, CELL_SZ * 2.25), new Point(offsetX, offsetY));
-    const globals = Alpine.store('global');
+    const globals = Alpine.store('global') as GlobalStore;
 
     for (const item of hexdata[level]) {
         const p = new DoubledCoord(item.x, item.y).qdoubledToCube();
@@ -93,20 +103,20 @@ function drawHexMap(col: number, row: number, level: string) {
         // Draw small circles for gate & starting area.
         const point = layout.hexToPixel(p);
         // Draw a circle for the gate (in white)
-        if (item.gate && globals.features.find(f => f.title === 'Gate').checked) {
+        if (item.gate && globals.features.find(f => f.title === 'Gate')?.checked) {
             ctx.beginPath();
             ctx.fillStyle = 'yellow';
             ctx.arc(point.x - 3, point.y - 3, 2, 0, Math.PI*2);
             ctx.fill();
         }
-        if (item.starting && globals.features.find(f => f.title === 'Starting Area').checked) {
+        if (item.starting && globals.features.find(f => f.title === 'Starting Area')?.checked) {
             // Draw a circle for starting area (in yellow)
             ctx.beginPath();
             ctx.fillStyle = 'red';
             ctx.arc(point.x + 3, point.y + 3, 2, 0, Math.PI*2);
             ctx.fill();
         }
-        if (item.shaft && globals.features.find(f => f.title === 'Shaft').checked) {
+        if (item.shaft && globals.features.find(f => f.title === 'Shaft')?.checked) {
             // Draw a circle for shaft (in yellow)
             ctx.beginPath();
             ctx.fillStyle = 'black';
