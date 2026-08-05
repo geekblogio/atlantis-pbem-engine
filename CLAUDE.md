@@ -67,6 +67,7 @@ ctest --test-dir build --output-on-failure
 
 | Document | Read when |
 | --- | --- |
+| [docs/interface/](docs/interface/README.md) | you are changing anything visible from outside the binary — the CLI, a file name or format, the JSON report, a version constant |
 | [docs/architecture.md](docs/architecture.md) | you are about to modify engine C++ and do not know where the change belongs |
 | [docs/rulesets.md](docs/rulesets.md) | you are adding or changing a ruleset, or a change must not leak across them |
 | [docs/build-and-test.md](docs/build-and-test.md) | first build on a machine, you added or removed a source file, or CI failed at compile |
@@ -74,9 +75,8 @@ ctest --test-dir build --output-on-failure
 | [CONTRIBUTING.md](CONTRIBUTING.md) | branching, commit style, pull request flow, Definition of Done, contributing upstream |
 | [GAMEMASTER.md](GAMEMASTER.md) | *game-master* knowledge: running a game, world design, order semantics. Not a developer document. |
 
-Still to be written: `docs/interface/` (the CLI, file formats, JSON report schema and version
-policy the two consumers depend on) and `docs/fork/` (how this fork diverges, upstream sync,
-downstream consumers). Do not reference them until they exist.
+Still to be written: `docs/fork/` (how this fork diverges, upstream sync, downstream consumers)
+and `docs/decisions/` (the ADRs). Do not reference them until they exist.
 
 ## Conventions
 
