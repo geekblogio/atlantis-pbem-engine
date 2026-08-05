@@ -17,11 +17,10 @@ valuable feedback.
 1.      Obtaining a copy of Atlantis
 
 2.      Compiling Atlantis
-2.1     Unix
-2.1.1   A sample compile under UNIX
-2.2     Windows (copied directly from the old guide)
-2.2.1   Compiling Atlantis with Dev-C++ on Windows
-2.3     The gory details (for advanced users, or the terminally curious)
+2.1     With CMake
+2.2     With the makefile
+2.3     Warnings are errors
+2.4     Keeping both build files in step
 
 3.      Running a game
 3.1     Running a game of Atlantis by hand (the hard way)
@@ -54,207 +53,69 @@ git clone https://github.com/Atlantis-PBEM/Atlantis.git
 
 ## 2. Compiling Atlantis
 
-### 2.1 Unix
+Atlantis is a standard C++20 program with no user interface and no platform-specific
+features. It does not handle email, scheduling turns or adding players; that is all
+left to the GM.
 
-A makefile is included for compilation on Unix, using the GNU gcc
-compiler. You can get more information about the GNU compiler at
-http://www.gnu.org. This has been tested on Linux and FreeBSD, and
-should work on any Unix system. Just type 'make <gamedirname>' at the
-top level, where <gamedirname> is one of the various subdirectories,
-such as havilah or standard.
+Each rule set compiles together with the shared engine into its own standalone
+executable. The engine sources are the `.cpp` files in the top-level directory; the
+rule set specific ones live in a subdirectory named after the game.
 
-You may run into trouble if your system uses a non-gnu make (such as
-FreeBSD). In that case, you need to type gmake <gamedirname> instead of
-make. The specific error is something like: gcc: No input files
-specified, followed by *** Error code 1, and make quitting.
+You need a C++20 compiler with complete ranges support. GCC 12 or later and recent
+Clang are known to work; older compilers are rejected at configure time with
+"Compiler lacks full support for C++20 ranges." No other dependencies are required:
+the two third-party libraries are vendored as single headers under `external/`.
 
-Once the compile has completed, you should find the game specific files
-within the game's subdirectory. The main one is the game binary, which
-should be named after the game. There will also be a html directory with
-the rules in it, if you've also done a 'make <gamedirname>-rules'.
+### 2.1 With CMake
 
-If for some reason you want to clean up the sources afterwards (ie.
-remove object files, for reasons of disk space, perhaps) you can use
-'make <gamedir>-clean' or 'make GAME=gamedir clean'
+```
+cmake -B build -S .
+cmake --build build -j
+```
 
+The binaries land in `build/`, one per rule set, plus `build/unittest`. This path
+generates correct dependency information, so parallel builds are safe.
 
-### 2.1.1 A sample compile under UNIX
+Run the unit tests with:
 
-[steve@kudzu atlantis]$ make havilah
-make GAME=havilah
-make[1]: Entering directory `/home/steve/atlantis'
-if [ ! -d obj ]; then mkdir obj; fi
-if [ ! -d havilah/obj ]; then mkdir havilah/obj; fi
-g++ -g -I. -I.. -Wall -c -o havilah/obj/extra.o havilah/extra.cpp
-g++ -g -I. -I.. -Wall -c -o havilah/obj/map.o havilah/map.cpp
-g++ -g -I. -I.. -Wall -c -o havilah/obj/monsters.o havilah/monsters.cpp
-g++ -g -I. -I.. -Wall -c -o havilah/obj/rules.o havilah/rules.cpp
-g++ -g -I. -I.. -Wall -c -o havilah/obj/world.o havilah/world.cpp
-g++ -g -I. -I.. -Wall -c -o obj/aregion.o aregion.cpp
-.
-.
-.
-g++ -g -I. -I.. -Wall -c -o obj/template.o template.cpp
-g++ -g -I. -I.. -Wall -c -o obj/unit.o unit.cpp
-g++ -g -I. -I.. -Wall -o havilah/havilah havilah/obj/extra.o havilah/obj/map.o
-havilah/obj/monsters.o havilah/obj/rules.o havilah/obj/world.o
-obj/aregion.o obj/army.o obj/astring.o obj/battle.o obj/economy.o obj/edit.o
-obj/faction.o obj/fileio.o obj/game.o obj/gamedata.o obj/gamedefs.o
-obj/genrules.o obj/items.o obj/main.o obj/market.o
-obj/modify.o obj/monthorders.o obj/npc.o obj/object.o obj/orders.o
-obj/parseorders.o obj/production.o obj/quests.o obj/runorders.o obj/shields.o
-obj/skills.o obj/skillshows.o obj/specials.o obj/spells.o obj/template.o
-obj/unit.o
-make[1]: Leaving directory `/home/steve/atlantis'
+```
+ctest --test-dir build --output-on-failure
+```
 
+### 2.2 With the makefile
 
-### 2.2 Windows (copied directly from the old guide)
+```
+make <gamedirname>          # one rule set, e.g. `make havilah`
+make all                    # every rule set plus the unit test binary
+make <gamedirname>-rules    # regenerate that rule set's HTML rulebook
+make <gamedirname>-clean    # remove its object files and binary
+make all-clean
+```
 
-I am now using the GNU gcc compiler on Windows as well. This has the
-advantage that I can use it on both Unix and Windows, and as an added
-bonus the compiler is freely available. As above, just switch into the
-rule-set subdirectory and type 'make'. The Win32 port of gcc can be
-found at <http://www.cygwin.com/>.
+The binary is written into the rule set's own directory — `havilah/havilah` — and
+the generated rulebook into `havilah/html/`.
 
-I'm no longer using Visual C++, so I don't include a Visual C++
-makefile. If someone wants to create a makefile for others to use, I'll
-be happy to put it on the download page.
+**Do not pass `-j` to the makefile.** Every rule set writes into the same top-level
+`obj/` directory and the directory-creation step races the compiles, so a parallel
+run either fails or links stale objects. Use the CMake path when you want
+parallelism.
 
-However, it is very easy to make a VC project to compile Atlantis:
-1. Choose a rule-set that you want to compile. For instance, the
-   Atlantis Conquest rule-set is in the subdirectory conquest.
-2. Create a 'Console Application' Workspace in the rule-set
-   directory.
-3. Add all of the Atlantis engine source files to the project. These
-   are all of the .cpp files located in the main directory.
-4. Add all of the rule-set specific source files; these are all of
-   the .cpp files in the rule-set directory.
-5. Update the include path to include both the main directory and the
-   rule-set directory.
-6. That's it; you should be able to compile Atlantis at this point.
-   You'll probably want to compile the 'Checked' version in case you
-   want to debug.
+On a system whose `make` is not GNU make, use `gmake` instead. The symptom otherwise
+is `gcc: No input files specified` followed by `*** Error code 1`.
 
-2.2.1 Compiling Atlantis with Dev-C++ on Windows
-      (Submitted by malakh@subdimension.com)
-      (Added to by gmfangs@asmrb.org)
+### 2.3 Warnings are errors
 
-First, you need to have the open source compiler Dev-C++ version 5
-installed (homepage: <http://www.bloodshed.net/dev/devcpp.html>, this
-howto tested with the version "Dev-C++ 5.0 beta 9 (4.9.9.1) (7.6 MB)
-with Mingw/GCC 3.3.1").
+GCC and Clang builds use `-Wextra -Wall -Werror -pedantic`, so any new diagnostic
+stops the build. MSVC is configured more leniently — `/WX` is off and warnings 4244,
+4267 and 4700 are suppressed — which means code that compiles cleanly under MSVC can
+still fail elsewhere. If you develop on Windows, build once with GCC before
+publishing a change.
 
-I recommend installing it to "C:\Dev-Cpp\" if you are using anything
-prior to Windows XP -- this will help from running into a limitation on
-the length of commands in DOS that may prevent the linker from working.
-Otherwise it may be installed anywhere.
+### 2.4 Keeping both build files in step
 
-Next, you'll need to download the Atlantis source code. One of the best
-ways to do this is to use open source Tortoise CVS (homepage:
-<http://www.tortoisecvs.org/>, current version:
-<http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.8.11.exe>).
-
-Once Tortoise CVS is installed, select the "C:\Dev-Cpp\" folder, right-
-click and select the "CVS Checkout..." menu item. In the checkout
-dialog, select for the Protocol: "Password server (:pserver)", for the
-Server: enter "cvs.dragoncat.net", for the Repository folder: enter
-"/data/cvs", for the User name: enter "guest", for the Module: enter
-"atlantis", and leave the port blank. If you want the Atlantis 4 stable
-branch, click on the Revision tab, select "Choose branch or tag", and
-enter "RELEASE_410" for the Branch. Then click "Ok" and the current
-version of Atlantis 5, (or Atlantis 4.10 if you selected that branch)
-will be downloaded into the folder "C:\Dev-Cpp\atlantis\".
-
-If you don't want to use Tortoise CVS, you can downloaded the Atlantis
-source code, decompressed it (remembering to preserve the files as unix
-files), and then copy the atlantis folder inside "C:\Dev-Cpp\".
-
-To compile Atlantis, you must first change some compiler options. Open
-Dev-C++, and select the menu Tools -> Compiler Options, and then click
-on the "Directories" tab. Make sure that there is a path to your
-binaries at "C:\Dev-Cpp\bin" (they should be set there by default, but
-I've run into cases where the Dev-C++ beta installer leaves this empty).
-
-Next click on the "C++ Includes" tab, and add the path to the
-"C:\Dev-Cpp\include\c++\3.3.1\mingw32\bits" folder. Now you can close
-the compiler options.
-
-If you are compiling Atlantis 5.0 project, start a new C++ console
-project. Save the *.dev in the same folder as the *.cpp source files for
-Atlantis if you are using anything prior to Windows XP (again this keeps
-the paths short.) Otherwise, you can create a folder anywhere, for
-example "C:\Dev-Cpp\standard"
-
-When you first create a project, it starts with a pre-generated main.cpp
-file. Close it without saving it. You should now have an empty project.
-
-Next go to Project -> Add to Project, and click on the popup "Files of
-Type" so that you see only C++ sources. Then click to select the first
-c++ source file in the "C:\Dev-Cpp\atlantis" folder (normally
-aregion.cpp), and then shift-click on the last file (normally unit.h).
-Then click "Open" to add all of these files to your project.
-
-Next go to Project -> Add to Project, and now select all the .cpp files
-that are in the sub-folder for the rules variant you plan to use, for
-"C:\Dev-Cpp\atlantis\standard", and click on "Open" to add all of these
-files to the project.
-
-Now go to Project -> Project Options menu, and click on "Directories"
-tab then click on the "Include Directories" sub-tab and add in the
-paths for your atlantis sources (i.e. "C:\Dev-Cpp\atlantis") and also a
-path to your rules set sub-folder (i.e. "C:\Dev-Cpp\atlantis\standard").
-Then click OK.
-
-Finally go to Execute -> Compile. Be patient, this will take some time to
-complete. You will know it is done compiling when the Compile Log
-minimizes.
-
-You should now have an .exe of your project inside "C:\Dev-Cpp\standard".
-
-You can quickly test your .exe build by creating a shortcut to the .exe
-file, then right-click to select file properties, and append to the
-"Target:" field the text " new", i.e. "C:\Dev-Cpp\test-build\atlantis-
-standard.exe new". Then rename this shortcut "new". When you double-
-click on the shortcut, you should be asked how wide the map should be,
-and how tall the map should be. If there are no errors, there should be
-a game.out and a players.out file in your test folder.
-
-If you want to test further, you can now copy this shortcut and change
-the appended Target parameter from " new" to " edit" and you can now
-edit your generated world (if you make changes a new game.out file will
-be created with the changes.)
-
-I like to use Atlantis Advisor (home page
-<http://gnawer.byte-force.yar.ru/advisor/>, announcements at
-<http://games.groups.yahoo.com/group/atlantis_advisor_en>, and current
-version at <http://atlantis.chol.ru/advisor_3.24.00.exe>) to test new
-builds.
-
-Atlantis Advisor allows you to run a local copy of the Atlantis
-completely inside Windows. Run Atlantis Advisor, and select "Options"
-and add the path to your .exe file, and then select "New Game" and click
-on the "Local game" box. Atlantis Advisor will create a new world, allow
-you to enter orders for a single faction, then you can select "Run next
-local turn" from the file menu to run your commands. It only runs turns
-for single user, but it is an excellent way to test out any changes that
-you may have made to your rules files.
-
-
-### 2.3 The gory details (for advanced users, or the terminally curious)
-
-Atlantis is a standard C++ program, and is deliberately written with no
-UI or other platform specific features. It does not handle email,
-running turns, or adding players, which is all left up to the GM.
-
-If you are building from your own project or makefile, you will need to
-include both sets of source files in the makefile.  As such, simply
-putting all of the source files into a project or makefile and compiling
-it as a command-line application is about all there is to it.
-
-Atlantis has a number of variant games, with different races, monsters
-and features. For each of these games there is a subdirectory for all of
-the rule set specific files; the common Atlantis engine files live in
-the main directory.
+Adding or removing a source file means editing **both** `CMakeLists.txt` and
+`Makefile`. Nothing detects a mismatch: the build that was not updated simply fails
+to link, and possibly only on someone else's machine.
 
 
 ## 3. Running a Game of Atlantis
