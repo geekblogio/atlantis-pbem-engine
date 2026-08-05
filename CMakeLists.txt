@@ -6,6 +6,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Without a build type CMake passes no optimisation flag at all. The Makefile
+# builds at -O2 -g; RelWithDebInfo is the configuration that matches it. An
+# explicit -DCMAKE_BUILD_TYPE=... still wins, and multi-config generators
+# ignore this.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Build type" FORCE)
+endif()
+
 include(${CMAKE_SOURCE_DIR}/CompilerSupport.cmake)
 if (NOT COMPILER_HAS_RANGES)
     message(FATAL_ERROR "Compiler lacks full support for C++20 ranges.")
@@ -61,6 +69,15 @@ add_library(engine
     indenter.cpp
     text_report_generator.cpp
 )
+
+# genrules.cpp is one enormous function that gcc's optimiser scales badly on;
+# see the Makefile rule for obj/genrules.o. The option is appended, so it wins
+# over whatever the build type put in front of it.
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    set_source_files_properties(genrules.cpp PROPERTIES COMPILE_OPTIONS "-O0")
+elseif(MSVC)
+    set_source_files_properties(genrules.cpp PROPERTIES COMPILE_OPTIONS "/Od")
+endif()
 
 macro(add_game GAME)
 add_executable(${GAME}

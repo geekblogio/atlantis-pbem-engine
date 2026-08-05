@@ -76,10 +76,13 @@ jobs:
       # CMake generates correct dependencies, so -j is safe here. It is NOT safe for the
       # hand-written Makefile, where all six rulesets share a single obj/ directory and
       # `mkdir obj` races the compiles.
+      #
+      # RelWithDebInfo, not Debug: this job runs the snapshot suite, and the binary it tests
+      # should be built the way the shipped one is (-O2 -g).
       - name: Configure
         run: >
           cmake -B build -S .
-          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build

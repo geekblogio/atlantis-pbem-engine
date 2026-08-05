@@ -3748,7 +3748,8 @@ void assertAllRegionsHaveName(const int w, const int h, ARegionArray* arr) {
                 continue;
             }
 
-            ARegion* reg = arr->GetRegion(x, y);
+            // maybe_unused: NDEBUG compiles the assert away, and reg exists only for it.
+            [[maybe_unused]] ARegion* reg = arr->GetRegion(x, y);
             assert(!reg->name.empty() && "Region must have name");
         }
     }
