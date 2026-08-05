@@ -493,8 +493,12 @@ void Soldier::SetupCombatItems()
                 slevel = pBat.skillLevel;
             }
 
-            if (pBat.flags & BattleItemType::SHIELD) {
-                auto sp = find_special(pBat.special ? pBat.special : "").value().get();
+            // A shield item whose special does not resolve grants no shield rather than
+            // throwing; pBat.special may be NULL or an empty string.
+            auto shield_special = (pBat.flags & BattleItemType::SHIELD)
+                ? find_special(pBat.special ? pBat.special : "") : std::nullopt;
+            if (shield_special) {
+                auto sp = shield_special.value().get();
                 for (int i = 0; i < 4; i++) {
                     if (sp.shield[i] == NUM_ATTACK_TYPES) {
                         for (int j = 0; j < NUM_ATTACK_TYPES; j++) {
