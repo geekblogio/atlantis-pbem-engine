@@ -439,14 +439,19 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
             // Just in case, move any units in the anomaly.
             for(const auto u : far_anomaly->units) u->MoveUnit(far_anomaly->region->GetDummy());
 
-            std::erase(far_anomaly->region->objects, far_anomaly);
+            // Take the region before the object is destroyed. Everything below used to reach
+            // it through far_anomaly->region, which reads freed memory once the object is
+            // gone; gcc flags all three under -Wuse-after-free.
+            ARegion *anomaly_region = far_anomaly->region;
+
+            std::erase(anomaly_region->objects, far_anomaly);
             delete far_anomaly;
 
             // Notify any factions in that region that the anomaly has been removed.
-            auto reg_faction = far_anomaly->region->PresentFactions();
+            auto reg_faction = anomaly_region->PresentFactions();
             for(const auto f : reg_faction) {
                 if (f->is_npc) continue;
-                f->event("The anomaly in " + far_anomaly->region->short_print() + " vanishes.", "anomaly", far_anomaly->region);
+                f->event("The anomaly in " + anomaly_region->short_print() + " vanishes.", "anomaly", anomaly_region);
             }
             return;
         }
