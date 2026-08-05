@@ -30,6 +30,26 @@
 #include "game.h"
 #include "gamedata.h"
 
+#include <list>
+
+// Several data table fields (MonType::special, WeaponType::baseSkill, MountType::skill and
+// others) are raw `char const *` pointing at long-lived string literals in the static tables.
+// The modify_* helpers below take their strings as `const std::string&`, which at most call
+// sites binds to a temporary -- a string literal passed by a ruleset's ModifyTablesPerRuleset.
+// Storing arg.c_str() straight into the field leaves it dangling as soon as that temporary is
+// destroyed, and the field then reads freed memory. It is not theoretical: it made
+// modify_monster_special() leave the monster's special pointing at garbage, which later threw
+// bad_optional_access out of find_special() during combat.
+//
+// intern() copies the string into storage with static lifetime and stable addresses --
+// std::list never relocates its elements -- so the char* stays valid for the whole run.
+static char const *intern(const std::string& s)
+{
+    static std::list<std::string> pool;
+    pool.push_back(s);
+    return pool.back().c_str();
+}
+
 void Game::EnableSkill(int sk)
 {
     if (sk < 0 || sk > (NSKILLS-1)) return;
@@ -288,7 +308,7 @@ void Game::modify_monster_special(const std::string& mon, const std::string& spe
     if (!monster) return;
     if (!special.empty() && !find_special(special)) return;
     if (lev < 0) return;
-    monster->get().special = special.c_str();
+    monster->get().special = intern(special);
     monster->get().specialLevel = lev;
 }
 
@@ -318,8 +338,8 @@ void Game::modify_weapon_skills(const std::string& weap, const std::string& base
     if (!weapon) return;
     if (!baseSkill.empty() && !FindSkill(baseSkill.c_str())) return;
     if (!orSkill.empty() && !FindSkill(orSkill.c_str())) return;
-    weapon->get().baseSkill = baseSkill.c_str();
-    weapon->get().orSkill = orSkill.c_str();
+    weapon->get().baseSkill = intern(baseSkill);
+    weapon->get().orSkill = intern(orSkill);
 }
 
 void Game::modify_weapon_flags(const std::string& weap, int flags)
@@ -356,10 +376,9 @@ void Game::modify_weapon_bonus_malus(
     auto weapon = find_weapon(weap);
     if (!weapon) return;
     if (index < 0 || index >= (int)(sizeof(weapon->get().bonusMalus)/sizeof(weapon->get().bonusMalus[0]))) return;
-    if (weapon->get().bonusMalus[index].weaponAbbr) {
-        delete weapon->get().bonusMalus[index].weaponAbbr;
-    }
-    weapon->get().bonusMalus[index].weaponAbbr = weaponAbbr.c_str();
+    // weaponAbbr points either into the static tables or into intern()'s pool -- never at a
+    // `new`-allocated buffer -- so the previous value must not be deleted. Just re-point it.
+    weapon->get().bonusMalus[index].weaponAbbr = intern(weaponAbbr);
     weapon->get().bonusMalus[index].attackModifer = attackModifer;
     weapon->get().bonusMalus[index].defenseModifer = defenseModifer;
 }
@@ -393,7 +412,7 @@ void Game::modify_mount_skill(const std::string& mount, const std::string& skill
     auto pm = find_mount(mount);
     if (!pm) return;
     if (!skill.empty() && !FindSkill(skill.c_str())) return;
-    pm->get().skill = skill.c_str();
+    pm->get().skill = intern(skill);
 }
 
 void Game::modify_mount_bonuses(const std::string& mount, int min, int max, int hampered)
@@ -414,7 +433,7 @@ void Game::modify_mount_special(const std::string& mount, const std::string& spe
     if (!pm) return;
     if (!special.empty() && !find_special(special)) return;
     if (level < 0) return;
-    pm->get().mountSpecial = special.c_str();
+    pm->get().mountSpecial = intern(special);
     pm->get().specialLev = level;
 }
 
@@ -621,7 +640,7 @@ void Game::modify_battle_item_special(const std::string& item, const std::string
     if (!pb) return;
     if (!find_special(special)) return;
     if (level < 0) return;
-    pb->get().special = special.c_str();
+    pb->get().special = intern(special);
     pb->get().skillLevel = level;
 }
 
