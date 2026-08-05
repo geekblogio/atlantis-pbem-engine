@@ -17,7 +17,6 @@ havilah/html/havilah.html
 neworigins/obj
 neworigins/neworigins
 neworigins/html/neworigins.html
-snapshot-tests/standard
 snapshot-tests/output
 unittest/obj
 unittest/unittest
@@ -36,6 +35,33 @@ map_viewer/.parcel-cache
 map_viewer/dist
 !*.[ch]
 !*.[ch]pp
+
+# Snapshot fixtures are tracked test data, not engine scratch output. The bare
+# game.* / players.* / report.* / template.* / times.* / orders.* patterns above
+# match them as well, so the files of a NEWLY created turn directory (see
+# snapshot-tests/turns/new-turn.sh) are silently left out of the commit and the
+# replay then fails with "turn N missing". Re-include the recorded trees.
+!/snapshot-tests/turns/**
+!/snapshot-tests/neworigins_turns/**
+
+# ... but not the backups update-game-snapshots.sh leaves behind on a re-record.
+# They are invisible to `git status`; remove them with `git clean -xfd snapshot-tests`.
+/snapshot-tests/turns/turn_*.bak/
+/snapshot-tests/neworigins_turns/turn_*.bak/
+
+# Engine binaries the snapshot runners copy into place, plus their scratch output.
+/snapshot-tests/basic
+/snapshot-tests/fracas
+/snapshot-tests/havilah
+/snapshot-tests/kingdoms
+/snapshot-tests/neworigins
+/snapshot-tests/standard
+/snapshot-tests/*.html
+/snapshot-tests/*.html.strip
+/snapshot-tests/engine-output.txt
+/snapshot-tests/turn-difference.txt
+/snapshot-tests/rules-difference.txt
+
 .gdb_history
 /out
 /build
