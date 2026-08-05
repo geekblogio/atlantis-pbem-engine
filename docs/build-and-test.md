@@ -36,13 +36,16 @@ CMake path.
 ### CMake — output `build/<game>` and `build/unittest`
 
 ```bash
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake -B build -S .                       # defaults to RelWithDebInfo
 cmake --build build -j"$(nproc)"
 ctest --test-dir build --output-on-failure
 ```
 
 CMake generates correct dependencies, so `-j` is safe here. The shorthand scripts do the same
 thing without the parallelism: `./s/configure`, `./s/build`, `./s/runtests`.
+
+Pass `-DCMAKE_BUILD_TYPE=Debug` for an unoptimised build. Without any build type CMake would
+pass no optimisation flag at all, so the project sets `RelWithDebInfo` to match the Makefile.
 
 CMake builds the engine once as a static library and links it into all seven executables. It
 also runs `genrules` for every ruleset as part of the default target, which is a free check
@@ -53,10 +56,35 @@ that the rulebook generator still works.
 Adding a source file means registering it in **`CMakeLists.txt` and `Makefile`**. Nothing
 detects a mismatch except CI, which builds both paths for exactly this reason.
 
+## Optimisation, and the one file exempt from it
+
+Both build systems compile at **`-O2 -g`** by default. The engine is CPU-bound during a turn
+and the downstream simulation runs thousands of them, so this is not a marginal setting.
+
+**`genrules.cpp` is compiled at `-O0` regardless.** It is a single enormous function that GCC's
+optimiser scales badly on — measured on GCC 13.3.0:
+
+| Translation unit | `-O0` | `-O2` |
+| --- | --- | --- |
+| `genrules.cpp` | 6.6 s, 0.76 GB | **119.9 s, 1.81 GB** |
+| `aregion.cpp`, for comparison | 4.8 s, 0.57 GB | 8.8 s, 0.69 GB |
+
+GCC says so itself: *variable tracking size limit exceeded*. The rulebook generator runs once
+per ruleset release, so its own speed is irrelevant.
+
+The Makefile **appends** `-O0` to `CFLAGS` for that one object rather than removing `-O2`, so
+the exemption survives a `CFLAGS=` override on the command line. CMake does the same through
+`set_source_files_properties(... COMPILE_OPTIONS)`, which lands after the build type's flags.
+
 ## Warnings are errors
 
 GCC and Clang build with `-Wextra -Wall -Werror -pedantic`. Any new diagnostic is a hard
 failure.
+
+**The two build systems do not warn identically.** CMake's `RelWithDebInfo` adds `-DNDEBUG`,
+which the Makefile does not, so `assert()` disappears and anything that existed only to feed one
+becomes an unused variable. A clean `make all` is therefore not proof that the cmake job will
+pass. The cmake CI job is the authority.
 
 **MSVC is materially laxer**: `/WX` is disabled and `4244`, `4267` and `4700` are suppressed.
 Code that is clean under MSVC can still fail CI. If you develop on Windows, build once under
@@ -104,5 +132,6 @@ that target monthly and opens a pull request when something moved.
 | `Compiler lacks full support for C++20 ranges` | toolchain too old; `CompilerSupport.cmake` refused |
 | undefined reference to a member defined in a `.cpp` | an `inline` on an out-of-line definition — legal only while nothing optimises it away |
 | link succeeds locally, fails in CI | a source file registered in only one of the two build files |
+| `unused variable` under CMake but not under `make` | `RelWithDebInfo` adds `-DNDEBUG`, which compiles `assert()` away; a variable that exists only for an assertion needs `[[maybe_unused]]` |
 | a warning you did not introduce | a newer compiler; check whether `Platforms` is already red |
 | stale or half-linked objects after an interrupted `make` | `make all-clean`; and check you did not use `-j` |
