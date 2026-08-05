@@ -13,14 +13,17 @@ we carried it is the point.
 ## How to use this file
 
 Every commit on `master` that is not on `upstream/master` must correspond to exactly one entry
-here. The final acceptance check is:
+here, **and the entry must name its short SHA** so the check can be run rather than eyeballed:
 
 ```bash
-git log --oneline upstream/master..master
+git log --format='%h %s' upstream/master..master |
+  while read -r sha rest; do
+    grep -q "$sha" docs/fork/patches.md || echo "UNREGISTERED $sha $rest"
+  done
 ```
 
-Each line must be findable below. If it is not, either the entry is missing or the commit
-should not have landed.
+Silence means the register is complete. Any output means either the entry is missing or the
+commit should not have landed. Run it after every sync.
 
 ## Status vocabulary
 
@@ -178,9 +181,9 @@ Purely additive: the text report and template are unchanged.
 
 **Upstream value: borderline, low risk.** Consistency with what upstream already does elsewhere.
 
-### `neworigins8` — the fork's own ruleset
+### `0cf80ff` — `neworigins8`, the fork's own ruleset
 
-Added in a pull request of its own. `rules.cpp` is a copy of `neworigins/rules.cpp` with
+`rules.cpp` is a copy of `neworigins/rules.cpp` with
 `UPKEEP_FOOD_VALUE` 30 → 50; the other four files are `#include` shims. `RULESET_NAME` and
 `RULESET_VERSION` stay identical to `neworigins` because `Game::OpenGame` refuses a `game.in`
 whose name differs. See [ADR 0006](../decisions/0006-neworigins8-as-its-own-ruleset.md).
@@ -189,14 +192,45 @@ whose name differs. See [ADR 0006](../decisions/0006-neworigins8-as-its-own-rule
 
 ### Infrastructure
 
-`.github/**`, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, `docs/fork/`, `docs/decisions/` —
-the CI pipeline, branch protection, Dependabot, the pull request template, and this
-documentation. **Fork-local, permanently.** The `Upstream Hygiene` CI job fails any `upstream/*`
-branch that touches these paths, so they cannot leak into a contribution by accident.
+`2906bc6`, `426eb8d`, `001a5f4`, `dfe8cb0` — `.github/**`, `CLAUDE.md`, `CONTRIBUTING.md`,
+`README.md`, `docs/fork/`, `docs/decisions/`: the CI pipeline, branch protection, Dependabot,
+the vendored-header refresh workflow, the pull request template, and this documentation.
+
+**Fork-local, permanently.** The `Upstream Hygiene` CI job fails any `upstream/*` branch that
+touches these paths, so they cannot leak into a contribution by accident.
 
 `c1656a7` (map viewer type check, Dependabot) is infrastructure but does add
 `map_viewer/tsconfig.json` and two `package.json` scripts, which are upstream-friendly on their
 own.
+
+### Developer documentation
+
+`1aeef70`, `68a9559`, `a9ba283` — `docs/architecture.md`, `docs/rulesets.md`,
+`docs/build-and-test.md`, `docs/snapshot-tests.md` and `docs/interface/**`, plus the three
+fork-local documents and the decision records.
+
+Upstream ships no developer documentation by choice; the README says so. The engine reference
+and the interface specification are **upstream-friendly in content** — each carries a
+`Provenance:` header saying so — but offering documentation upstream is a conversation about
+their project's shape, not a bug fix, and is not proposed here.
+
+---
+
+## Prepared for upstream — documentation
+
+### `09e3b05` — the gamemaster guide's compiling chapter
+
+`GAMEMASTER.md` section 2. It listed object files removed years ago (`astring.o`, `fileio.o`,
+`shields.o`, `template.o`), a sample compile without `-std=c++20` or `-Werror`, and step-by-step
+instructions for Cygwin, Visual C++ and Dev-C++ 5 beta — including a CVS checkout from
+`cvs.dragoncat.net`. CMake, which CI uses, was not mentioned at all. Following it would not
+produce a working build.
+
+206 lines out, 67 in, table of contents updated. Deliberately self-contained: it references no
+file upstream does not have, so it applies there unchanged.
+
+**Upstream value: high.** The staleness is upstream's, and the replacement was written to apply
+to their copy as-is.
 
 ---
 
@@ -211,3 +245,5 @@ own.
   `a388a00` fixes the one pattern where the guard is demonstrably misplaced.
 - **A null check on `GetUnitId()`'s result in `monthorders.cpp`**, noticed while fixing the
   uninitialised `t` next to it. Pre-existing and separate.
+- **Section 1 of `GAMEMASTER.md`**, which still points at a Yahoo Groups tarball for release
+  5.1.0. Stale in the same way as section 2, but a separate change.
