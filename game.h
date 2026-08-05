@@ -54,6 +54,9 @@ public:
     ~Game();
 
     int NewGame();
+    // Make NewGame() build the same world every time. Without this the seed comes from
+    // std::random_device. Has no effect on `run`, which restores the seed from game.in.
+    void set_deterministic_seed(int seed);
     int OpenGame();
     void DummyGame();
 
