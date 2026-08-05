@@ -258,8 +258,12 @@ their project's shape, not a bug fix, and is not proposed here.
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
 covered but no key named; `#29` stopped the acceptance check chasing its own tail, by skipping
-commits that touched nothing else. That exemption is gone again: with the pull request number as
-the key, a register-only pull request can name itself.
+commits that touched nothing else.
+
+`#31` — replaced the SHA-only key with the rule above and added the `Divergence Register` job to
+`ci.yml`. It also retired `#29`'s exemption, which was only ever needed because a commit cannot
+name its own SHA. This entry was written while `#31` was open and pushed onto the same branch,
+which is the whole point of the change.
 
 **Fork-local, permanently**, like everything under `docs/fork/`.
 
