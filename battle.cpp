@@ -175,9 +175,13 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 
     if (!behind && (a->riding != -1)) {
         auto mount = find_mount(ItemDefs[a->riding].abr).value().get();
-        if (mount.mountSpecial != NULL) {
+        // The NULL check is not sufficient: modify_mount_special() accepts an empty string,
+        // for which find_special() yields nullopt. A mount whose special does not resolve
+        // simply makes no special attack.
+        auto mount_special = mount.mountSpecial ? find_special(mount.mountSpecial) : std::nullopt;
+        if (mount_special) {
             int i, num, tot = -1;
-            auto spd = find_special(mount.mountSpecial ? mount.mountSpecial : "").value().get();
+            auto spd = mount_special.value().get();
             for (i = 0; i < 4; i++) {
                 int times = spd.damage[i].value;
                 int hitDamage =  spd.damage[i].hitDamage;

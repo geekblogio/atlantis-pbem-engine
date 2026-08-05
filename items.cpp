@@ -265,7 +265,13 @@ std::string show_special(const std::string& special, int level, int expandLevel,
     int last = -1;
     int val;
 
-    auto spd = find_special(special).value().get();
+    // Callers pass "" where a special pointer was NULL, and some table data carries an empty
+    // string rather than NULL, so find_special() can legitimately yield nullopt. Return an
+    // empty description instead of dereferencing it.
+    auto found = find_special(special);
+    if (!found) return temp;
+    auto spd = found.value().get();
+
     temp += spd.specialname;
     temp += " in battle";
     if (expandLevel)

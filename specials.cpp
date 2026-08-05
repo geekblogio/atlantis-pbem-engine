@@ -60,7 +60,11 @@ void Soldier::SetupHealing()
 
 int Army::CheckSpecialTarget(char const *special,int tar)
 {
-    auto spd = find_special(special).value().get();
+    // An unresolvable special imposes no target restriction rather than throwing.
+    auto found = find_special(special);
+    if (!found) return 1;
+    auto spd = found.value().get();
+
     int i;
     int match = 0;
 
@@ -157,7 +161,11 @@ void Battle::UpdateShields(Army *a)
         int shtype = -1;
 
         if (a->soldiers[i]->special == NULL) continue;
-        auto spd = find_special(a->soldiers[i]->special).value().get();
+        // The NULL check above does not cover an empty string, which some table data carries
+        // instead; find_special() then yields nullopt. Skip that soldier rather than throw.
+        auto found = find_special(a->soldiers[i]->special);
+        if (!found) continue;
+        auto spd = found.value().get();
 
         if (!(spd.effectflags & SpecialType::FX_SHIELD) && !(spd.effectflags & SpecialType::FX_DEFBONUS)) continue;
 
@@ -189,7 +197,10 @@ void Battle::DoSpecialAttack(Soldier *a, Army *attackers, Army *def, int canatta
 
     if (a->special == NULL) return;
 
-    auto spd = find_special(a->special).value().get();
+    // As in UpdateShields: NULL is not the only way a special can fail to resolve.
+    auto found = find_special(a->special);
+    if (!found) return;
+    auto spd = found.value().get();
 
     if (!(spd.effectflags & SpecialType::FX_DAMAGE)) return;
 
