@@ -58,7 +58,7 @@ make all                                    # six rulesets + unit tests — neve
 ./unittest/unittest
 cd snapshot-tests && ./run-snapshots.sh
 
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug   # the parallel-safe path
+cmake -B build -S .                            # the parallel-safe path; -O2 -g by default
 cmake --build build -j"$(nproc)"
 ctest --test-dir build --output-on-failure
 ```

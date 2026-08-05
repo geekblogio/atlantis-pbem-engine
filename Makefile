@@ -2,7 +2,7 @@ GAME ?= standard
 
 CPLUS ?= g++
 CC ?= gcc
-CFLAGS = -g -I. -I.. -Wextra -Wall -Werror -std=c++20 -pedantic -Wno-psabi
+CFLAGS = -O2 -g -I. -I.. -Wextra -Wall -Werror -std=c++20 -pedantic -Wno-psabi
 
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
 
@@ -123,6 +123,13 @@ $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.c
 
 $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 	$(CPLUS) $(CFLAGS) -c -o $@ $<
+
+# genrules.cpp is one enormous function that gcc's optimiser scales badly on.
+# -O0 is appended rather than -O2 removed, so this stays unoptimised even when
+# CFLAGS is overridden from the command line. The rules generator runs once per
+# ruleset release, so its own speed does not matter.
+obj/genrules.o: genrules.cpp
+	$(CPLUS) $(CFLAGS) -O0 -c -o $@ $<
 
 # If the boost.hpp file is updated, we need to rebuild the unit test files that include it.
 $(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp external/boost/ut.hpp

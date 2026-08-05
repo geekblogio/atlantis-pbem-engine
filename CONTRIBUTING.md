@@ -111,7 +111,7 @@ cd snapshot-tests && ./run-snapshots.sh
 unsafe. The CMake path is parallel-safe:
 
 ```bash
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake -B build -S .
 cmake --build build -j"$(nproc)"
 ctest --test-dir build --output-on-failure
 ```

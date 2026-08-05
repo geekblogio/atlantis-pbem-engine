@@ -36,13 +36,16 @@ CMake path.
 ### CMake — output `build/<game>` and `build/unittest`
 
 ```bash
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+cmake -B build -S .                       # defaults to RelWithDebInfo
 cmake --build build -j"$(nproc)"
 ctest --test-dir build --output-on-failure
 ```
 
 CMake generates correct dependencies, so `-j` is safe here. The shorthand scripts do the same
 thing without the parallelism: `./s/configure`, `./s/build`, `./s/runtests`.
+
+Pass `-DCMAKE_BUILD_TYPE=Debug` for an unoptimised build. Without any build type CMake would
+pass no optimisation flag at all, so the project sets `RelWithDebInfo` to match the Makefile.
 
 CMake builds the engine once as a static library and links it into all seven executables. It
 also runs `genrules` for every ruleset as part of the default target, which is a free check
@@ -52,6 +55,26 @@ that the rulebook generator still works.
 
 Adding a source file means registering it in **`CMakeLists.txt` and `Makefile`**. Nothing
 detects a mismatch except CI, which builds both paths for exactly this reason.
+
+## Optimisation, and the one file exempt from it
+
+Both build systems compile at **`-O2 -g`** by default. The engine is CPU-bound during a turn
+and the downstream simulation runs thousands of them, so this is not a marginal setting.
+
+**`genrules.cpp` is compiled at `-O0` regardless.** It is a single enormous function that GCC's
+optimiser scales badly on — measured on GCC 13.3.0:
+
+| Translation unit | `-O0` | `-O2` |
+| --- | --- | --- |
+| `genrules.cpp` | 6.6 s, 0.76 GB | **119.9 s, 1.81 GB** |
+| `aregion.cpp`, for comparison | 4.8 s, 0.57 GB | 8.8 s, 0.69 GB |
+
+GCC says so itself: *variable tracking size limit exceeded*. The rulebook generator runs once
+per ruleset release, so its own speed is irrelevant.
+
+The Makefile **appends** `-O0` to `CFLAGS` for that one object rather than removing `-O2`, so
+the exemption survives a `CFLAGS=` override on the command line. CMake does the same through
+`set_source_files_properties(... COMPILE_OPTIONS)`, which lands after the build type's flags.
 
 ## Warnings are errors
 
