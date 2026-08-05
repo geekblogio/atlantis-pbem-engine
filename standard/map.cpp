@@ -958,8 +958,10 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                                 found = 1;
                                 Object *o = new Object(AC);
                                 o->num = AC->buildingseq++;
-                                o->set_name("Gateway to " + std::string(TerrainDefs[type].name));
+                                // Set the type first: set_name() refuses to rename an
+                                // O_DUMMY object, which is what the constructor leaves it as.
                                 o->type = O_GATEWAY;
+                                o->set_name("Gateway to " + std::string(TerrainDefs[type].name));
                                 o->incomplete = 0;
                                 o->inner = reg->num;
                                 AC->objects.push_back(o);
