@@ -1,0 +1,50 @@
+# Only two ecosystems in this repository have a manifest Dependabot can read.
+#
+# The vendored header libraries (external/boost/ut.hpp, external/nlohmann/json.hpp) are
+# committed source with no manifest at all, so Dependabot structurally cannot see them.
+# They are refreshed by `make check-libraries`; automating that needs a scheduled workflow,
+# not this file.
+#
+# `target-branch` is deliberately omitted: Dependabot reads its configuration from the
+# default branch and targets it automatically. Naming it here would be redundant today and
+# would silently break if the default branch were ever renamed.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+    labels: [dependencies, ci]
+    # All actions are pinned to commit SHAs, which is exactly why this matters: without
+    # Dependabot the pins silently rot. Grouped because three separate pull requests a
+    # week for the same kind of bump is noise, not signal.
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/map_viewer"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    versioning-strategy: increase
+    commit-message:
+      prefix: chore
+      include: scope
+    labels: [dependencies, map_viewer]
+    # Minor and patch bumps travel together; a major arrives on its own, because a Parcel
+    # or TypeScript major is a change worth reading rather than merging in a batch.
+    #
+    # These pull requests are verified only by `yarn typecheck` — the viewer has no tests
+    # and cannot currently be bundled (see the Map Viewer job in ci.yml).
+    groups:
+      map-viewer:
+        patterns: ["*"]
+        update-types: [minor, patch]

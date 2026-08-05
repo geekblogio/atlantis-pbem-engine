@@ -121,6 +121,31 @@ jobs:
         working-directory: unittest
         run: ./unittest
 
+  viewer:
+    name: Map Viewer
+    needs: changes
+    if: needs.changes.outputs.viewer == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      # Exists so that a Dependabot bump of the viewer's dependencies arrives with some
+      # verification rather than none. Type checking is the only signal available today:
+      # `parcel build` currently fails under Yarn 4's PnP linker with
+      # "@parcel/reporter-dev-server ... defined here, but not installed", which is a
+      # packaging problem of its own and not something a CI job should paper over.
+      - name: Install
+        working-directory: map_viewer
+        run: corepack enable && yarn install --immutable
+
+      - name: Type check
+        working-directory: map_viewer
+        run: yarn typecheck
+
   hygiene:
     name: Upstream Hygiene
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'upstream/')
@@ -159,7 +184,7 @@ jobs:
   gate:
     name: CI
     if: always()
-    needs: [changes, cmake, make, hygiene]
+    needs: [changes, cmake, make, viewer, hygiene]
     runs-on: ubuntu-24.04
     steps:
       - name: Aggregate job results
