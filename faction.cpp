@@ -242,7 +242,7 @@ std::vector<FactionStatistic> Faction::compute_faction_statistics(Game *game, si
     return stats;
 }
 
-inline bool Faction::gets_gm_report(Game *game) {
+bool Faction::gets_gm_report(Game *game) {
     return is_npc && num == 1 && (Globals->GM_REPORT || (game->month == 0 && game->year == 1));
 }
 
