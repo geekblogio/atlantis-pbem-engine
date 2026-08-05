@@ -23,6 +23,8 @@ void usage()
     logger::write("");
     logger::write("Environment:");
     logger::write("  ATLANTIS_SEED=<integer>   fix the world generation seed used by `new`");
+    logger::write("  ATLANTIS_SIM_MODE         write only the JSON report, no text report or template");
+    logger::write("  ATLANTIS_NO_GM_REPORT     do not write the world-wide GM report");
 }
 
 int main(int argc, char *argv[])
@@ -59,6 +61,27 @@ int main(int argc, char *argv[])
         } catch (const std::exception&) {
             logger::write("Ignoring ATLANTIS_SEED: '" + std::string(seed_env) + "' is not an integer.");
         }
+    }
+
+    // ATLANTIS_SIM_MODE drops everything a human would read: the text report and the order
+    // template. Bulk self-play consumes only the JSON report, and writing the other two is
+    // pure overhead there. A ruleset that never enabled the JSON report is left alone --
+    // switching it on would produce a report the ruleset was not built to emit.
+    if (std::getenv("ATLANTIS_SIM_MODE")) {
+        if (Globals->REPORT_FORMAT & GameDefs::REPORT_FORMAT_JSON) {
+            Globals->REPORT_FORMAT = GameDefs::REPORT_FORMAT_JSON;
+            logger::write("Simulation mode: JSON report only (ATLANTIS_SIM_MODE).");
+        } else {
+            logger::write("Ignoring ATLANTIS_SIM_MODE: this ruleset does not produce a JSON report.");
+        }
+    }
+
+    // Deliberately a separate switch rather than a side effect of ATLANTIS_SIM_MODE: a
+    // recorded simulation still wants the GM report as ground truth, it is only the
+    // throwaway runs that do not.
+    if (std::getenv("ATLANTIS_NO_GM_REPORT")) {
+        Globals->GM_REPORT = 0;
+        logger::write("World GM report disabled (ATLANTIS_NO_GM_REPORT).");
     }
 
     game.ModifyTablesPerRuleset();
