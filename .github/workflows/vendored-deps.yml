@@ -1,0 +1,110 @@
+# The two third-party libraries in this repository are committed source files with no
+# manifest of any kind — external/boost/ut.hpp and external/nlohmann/json.hpp. Dependabot
+# resolves dependencies from manifests, so it cannot see them at all. This workflow is
+# their equivalent.
+#
+# It is deliberately NOT a required status check, and must never become one: it does not
+# run on `pull_request`, so the context would never be reported and every pull request
+# would stay pending forever.
+name: Vendored Deps
+
+on:
+  schedule:
+    # 06:00 UTC on the first of each month.
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    name: Refresh vendored headers
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Record current versions
+        id: before
+        run: |
+          {
+            echo "ut=$(grep -m 1 'BOOST_UT_VERSION' external/boost/ut.hpp | awk '{print $3}' | sed "s/'/./g")"
+            echo "json=$(grep -E '^#define NLOHMANN_JSON_VERSION_(MAJOR|MINOR|PATCH)' external/nlohmann/json.hpp | awk '{print $3}' | paste -sd. -)"
+          } >> "$GITHUB_OUTPUT"
+
+      # `make check-libraries` queries the GitHub releases API with plain `curl`. Anonymous
+      # requests are limited to 60 per hour per IP, shared across all Actions runners, so an
+      # unauthenticated run fails at random. Rather than patching the Makefile — which is
+      # upstream code and should not carry this fork's CI concerns — the credential is put
+      # where curl finds it by itself. Every request the target makes goes to GitHub.
+      - name: Authenticate curl against the GitHub API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          umask 077
+          printf 'header = "Authorization: Bearer %s"\n' "$GH_TOKEN" > "$HOME/.curlrc"
+
+      # Despite the name, this target does not check anything: it downloads and OVERWRITES
+      # the headers in place when a newer release exists. The change it leaves in the
+      # working tree is the result.
+      - name: Refresh the vendored headers
+        run: make check-libraries
+
+      - name: Remove curl credentials
+        if: always()
+        run: rm -f "$HOME/.curlrc"
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet -- external/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Vendored headers are already up to date."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "ut=$(grep -m 1 'BOOST_UT_VERSION' external/boost/ut.hpp | awk '{print $3}' | sed "s/'/./g")"
+              echo "json=$(grep -E '^#define NLOHMANN_JSON_VERSION_(MAJOR|MINOR|PATCH)' external/nlohmann/json.hpp | awk '{print $3}' | paste -sd. -)"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      # A pull request, never a direct commit: a header bump can break -Werror across every
+      # translation unit that includes it, and the pull request's own CI run is what proves
+      # it does not.
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        if: steps.diff.outputs.changed == 'true'
+        with:
+          branch: chore/vendored-deps
+          delete-branch: true
+          labels: dependencies
+          title: "chore(deps): update the vendored header libraries"
+          commit-message: |
+            chore(deps): update the vendored header libraries
+
+            boost.ut  ${{ steps.before.outputs.ut }} -> ${{ steps.diff.outputs.ut }}
+            nlohmann  ${{ steps.before.outputs.json }} -> ${{ steps.diff.outputs.json }}
+
+            Produced by `make check-libraries` from the Vendored Deps workflow.
+          body: |
+            Refreshed by `make check-libraries`, run from the **Vendored Deps** workflow.
+
+            | Library | From | To |
+            | --- | --- | --- |
+            | `external/boost/ut.hpp` | ${{ steps.before.outputs.ut }} | ${{ steps.diff.outputs.ut }} |
+            | `external/nlohmann/json.hpp` | ${{ steps.before.outputs.json }} | ${{ steps.diff.outputs.json }} |
+
+            These libraries are vendored source with no manifest, so Dependabot cannot see
+            them; this workflow is their replacement.
+
+            > [!IMPORTANT]
+            > **Close and reopen this pull request to start CI.**
+            > It was opened with the automatic `GITHUB_TOKEN`, and GitHub deliberately does
+            > not trigger workflow runs from that token, to avoid recursion. Without a run
+            > there is no `CI` status check, and branch protection will hold the pull
+            > request pending.
+
+            Review notes: `json.hpp` is close to a megabyte of generated single-header
+            source, so read the version macros and the changelog rather than the diff. What
+            actually needs verifying is that the engine still compiles warning-clean — every
+            translation unit that includes these headers is built under `-Werror`.
