@@ -30,10 +30,11 @@ about who depends on it and what that obligates.
   process. Changing that is a rewrite on their side, not an adaptation.
 - **`report.<n>.json`.** The simulation reads nothing else. A removed or renamed field is a
   silent failure the next time a turn runs.
-- **The three environment variables.** `ATLANTIS_SEED`, `ATLANTIS_SIM_MODE` and
-  `ATLANTIS_NO_GM_REPORT` are load-bearing for the simulation, by name. That is precisely why
-  they were ported as environment variables rather than converted to CLI flags — see
-  [ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md).
+- **The four environment variables.** `ATLANTIS_SEED`, `ATLANTIS_SIM_MODE` and
+  `ATLANTIS_NO_GM_REPORT` are load-bearing for the simulation, by name; `ATLANTIS_FORCE_GM_REPORT`
+  is load-bearing for the orchestrator, which sets it on every turn so that a `basic` game has a
+  world history at all. That is precisely why they are environment variables rather than CLI
+  flags — see [ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md).
 - **`neworigins8`** for the live game. Consumers that want NewOrigins 8 build that target
   rather than patching `neworigins` — this replaced a local patch and is a deliberate,
   downstream-visible change.

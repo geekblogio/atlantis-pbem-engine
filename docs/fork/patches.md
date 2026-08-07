@@ -199,6 +199,26 @@ simulation still wants the GM report as ground truth.
 **Fork-local.** An environment variable overriding a ruleset global is a policy decision
 upstream would reasonably reject. The right upstream shape is a `--no-gm-report` flag.
 
+### `#32` — `ATLANTIS_FORCE_GM_REPORT`
+
+`main.cpp`, one block plus a `usage()` line. The mirror of `ATLANTIS_NO_GM_REPORT`: sets
+`GM_REPORT` rather than clearing it, so a ruleset that ships with the world-wide report off
+writes it every turn. That is `basic` alone among the seven.
+
+Read *after* `ATLANTIS_NO_GM_REPORT`, so setting both is defined rather than diagnosable: force
+wins. Inert when unset, like the other three.
+
+**Fork-local**, for the same reason as `2b1d369`: an environment variable overriding a ruleset
+global is a policy decision upstream would reasonably reject, and the right upstream shape is a
+flag. It is also less obviously *wanted* upstream than the others — `GM_REPORT = 0` in `basic`
+is presumably deliberate, and this fork's reason for overriding it is that a hosted game keeps
+a world history the ruleset's author never needed.
+
+**Measured, not read off the source.** `engine_contract_check.py` asserts on every CI run that
+`basic` writes no `report.1.json` on turn two. With the variable set, that assertion goes red on
+`basic` and stays green on the other five — which is the evidence that the switch does exactly
+one thing.
+
 ### `e89a198` — JSON report for `havilah`
 
 `havilah/rules.cpp`, one flag. `neworigins` already carries `REPORT_FORMAT_JSON` upstream.

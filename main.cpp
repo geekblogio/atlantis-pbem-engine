@@ -25,6 +25,7 @@ void usage()
     logger::write("  ATLANTIS_SEED=<integer>   fix the world generation seed used by `new`");
     logger::write("  ATLANTIS_SIM_MODE         write only the JSON report, no text report or template");
     logger::write("  ATLANTIS_NO_GM_REPORT     do not write the world-wide GM report");
+    logger::write("  ATLANTIS_FORCE_GM_REPORT  write it even where the ruleset disables it");
 }
 
 int main(int argc, char *argv[])
@@ -82,6 +83,21 @@ int main(int argc, char *argv[])
     if (std::getenv("ATLANTIS_NO_GM_REPORT")) {
         Globals->GM_REPORT = 0;
         logger::write("World GM report disabled (ATLANTIS_NO_GM_REPORT).");
+    }
+
+    // The mirror image, for the rulesets that ship with GM_REPORT = 0 -- today
+    // `basic` alone. Those write the world report on the first turn only, via
+    // the year-1 fallback in Faction::gets_gm_report, so a game played under
+    // them has no world history at all past turn one. That is a ruleset global
+    // and not a rule: nothing in the simulation depends on the report being
+    // absent, it is simply not written.
+    //
+    // Set after ATLANTIS_NO_GM_REPORT deliberately, so that setting both is not
+    // an error to diagnose -- forcing it on wins, because that is the more
+    // specific request. Inert when unset, like the other three (ADR 0005).
+    if (std::getenv("ATLANTIS_FORCE_GM_REPORT")) {
+        Globals->GM_REPORT = 1;
+        logger::write("World GM report forced on (ATLANTIS_FORCE_GM_REPORT).");
     }
 
     game.ModifyTablesPerRuleset();

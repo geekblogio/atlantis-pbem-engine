@@ -80,7 +80,10 @@ A consumer that reads `report.*.json` with a glob will hit this. Either skip the
 explicitly, or key off the presence of `engine`.
 
 This is also the expensive one: it is a report for a faction that sees every region, and it
-dominates a turn's runtime. `ATLANTIS_NO_GM_REPORT` turns it off.
+dominates a turn's runtime. `ATLANTIS_NO_GM_REPORT` turns it off; `ATLANTIS_FORCE_GM_REPORT`
+turns it on for a ruleset whose `GM_REPORT` is 0, which is `basic` and no other. Without that
+variable, `basic` writes this document on its first turn and never again — see
+[cli.md](cli.md#what-atlantis_force_gm_report-is-for).
 
 ## A region
 
