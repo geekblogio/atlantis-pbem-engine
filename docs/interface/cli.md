@@ -104,7 +104,7 @@ Errors go to stdout as well, not stderr.
 
 ## Environment variables
 
-All three are **opt-in**: unset, the engine behaves exactly as it did before they existed, and
+All four are **opt-in**: unset, the engine behaves exactly as it did before they existed, and
 logs nothing about them.
 
 | Variable | Effect | Provenance |
@@ -112,9 +112,26 @@ logs nothing about them.
 | `ATLANTIS_SEED=<integer>` | fixes the world-generation seed used by `new`, making a world reproducible. No effect on `run`, which restores the seed from `game.in`. A non-integer value is rejected with a message and the run continues. | upstream candidate |
 | `ATLANTIS_SIM_MODE` | narrows `REPORT_FORMAT` to JSON: no text report, no order template. **Ignored, with a message, on a ruleset that does not enable the JSON report** — all seven do today, so the guard is a safety net for a future one that does not. | fork-local |
 | `ATLANTIS_NO_GM_REPORT` | clears `GM_REPORT`, so the world-wide report for the NPC faction is not built. Worth roughly 70% of a turn's wall time; the share grows with the map. | fork-local |
+| `ATLANTIS_FORCE_GM_REPORT` | sets `GM_REPORT`, so the world-wide report is built by a ruleset that ships with it off. Affects `basic` alone today; the other six already have it on and the variable is a no-op there. | fork-local |
 
 `ATLANTIS_SIM_MODE` and `ATLANTIS_NO_GM_REPORT` are deliberately independent: a recorded
 simulation still wants the GM report as ground truth, only throwaway runs do not.
+
+Setting both `ATLANTIS_NO_GM_REPORT` and `ATLANTIS_FORCE_GM_REPORT` is **not an error**. Force
+is read second and wins, because switching a report on is the more specific request and because
+the alternative — refusing to start over two variables the caller may not both control — is
+worse in the environment these are used in.
+
+### What `ATLANTIS_FORCE_GM_REPORT` is for
+
+`Faction::gets_gm_report` is `is_npc && num == 1 && (GM_REPORT || (month == 0 && year == 1))`.
+A ruleset with `GM_REPORT = 0` therefore writes `report.1.json` on its **first turn only**, via
+the year-1 fallback, and never again — so a game played under it has no world-wide record past
+turn one. `basic` is the one shipped ruleset in that state.
+
+Nothing in the simulation depends on the report being absent: it is written after the turn is
+resolved and it draws no random numbers, which is what the `#30` re-record demonstrated. The
+cost of forcing it on is wall time, the same 70 % the `NO` variant saves.
 
 ## Things that are *not* configurable
 

@@ -37,3 +37,18 @@ environment it does.
 
 Recorded in [../fork/downstream-consumers.md](../fork/downstream-consumers.md) as a consumer
 dependency.
+
+## Addendum, 2026-08-07 — a fourth switch
+
+`ATLANTIS_FORCE_GM_REPORT` was added in the same shape, and this ADR is what decided that
+without further debate: a new hook of this kind is an environment variable read in `main.cpp`,
+inert when unset, listed in `usage()`.
+
+It is the mirror of `ATLANTIS_NO_GM_REPORT` and exists for the orchestrator rather than the
+simulation — `basic` ships with `GM_REPORT = 0`, so a hosted `basic` game had no world-wide
+record past its first turn. Order of reading is defined rather than left to chance: force is
+read second and wins.
+
+The consequence noted above holds unchanged and now applies to four variables: they cannot be
+discovered except through `usage()` and [../interface/cli.md](../interface/cli.md), so both are
+part of adding one.
