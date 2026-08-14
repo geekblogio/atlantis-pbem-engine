@@ -1,3 +1,46 @@
+Changes in 5.2.5, in this fork
+--------------------------------------------------
+ This section covers what geekblogio/atlantis-pbem-engine added on top of
+ Atlantis-PBEM/Atlantis. The engine version constant has stood at 5.2.5
+ throughout; none of these changed it. Upstream's own 5.2.0 -> 5.2.5 work is
+ not recorded here or anywhere else in this file.
+
+ Game Changes:
+   -- Added ATLANTIS_SEED, which fixes the world generation seed so that a
+      given seed always produces the same world
+   -- Added ATLANTIS_SIM_MODE, which suppresses the times and template files
+      for a run whose output nobody reads
+   -- Added ATLANTIS_NO_GM_REPORT and ATLANTIS_FORCE_GM_REPORT, which turn
+      the gamemaster report off and on regardless of what the ruleset asks
+      for
+   -- Emitted the JSON report from every ruleset, not just neworigins.  It
+      used to be a neworigins privilege, then havilah's as well; now a
+      report.<n>.json accompanies every report.<n>
+   -- Added the neworigins8 ruleset, a variant of neworigins
+
+ Bug fixes:
+   -- Stopped storing pointers into freed memory in the data tables, which
+      crashed combat later
+   -- Guarded the optional returned by find_special(), which threw on
+      ruleset data carrying an empty special rather than none
+   -- Read an anomaly's region before deleting the anomaly rather than after
+   -- Named the nexus gateways of a freshly generated world instead of
+      leaving all of them called "Dummy"
+   -- Checked for R_NUM before indexing TerrainDefs, which was read past its
+      end on every world generation with an underworld level
+   -- Escaped the angle brackets in the ANNIHILATE example, which a browser
+      swallowed as a tag, so the published rulebook lost the coordinates
+   -- Kept a highest skill when every skill of a unit has zero days.
+      Recruiting grants experience but no study days, so in a ruleset with
+      REQUIRED_EXPERIENCE - kingdoms - buying men into a unit which already
+      held recruited men dereferenced a null pointer and crashed the turn
+   -- Fixed a build the compiler only rejects once it optimises: an inline
+      on an out-of-line definition, uninitialized variables gcc reports at
+      -O2, and a CMake numeric comparison applied to a compiler id
+   -- Stopped .gitignore from swallowing the fixtures of a newly recorded
+      snapshot turn, and pinned LF on the byte-compared trees
+
+
 Changes from 5.1.0 -> 5.2.0
 --------------------------------------------------
  Bug fixes:
