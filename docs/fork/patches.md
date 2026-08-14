@@ -306,6 +306,25 @@ upstream maintains the file too. This section will conflict in every future
 `chore/sync-upstream-*`. Keeping the fork's history under `docs/fork/` instead was considered and
 not taken.
 
+### `#36` — the `rimefall` ruleset decisions
+
+`docs/decisions/0010-…`, `0011-…`. Two records settling a new ruleset before any of it is written:
+one tapering continent from tundra to desert, two monster fronts, start locations across five
+latitude bands, neighbouring factions starting mutually allied, and victory by election once both
+hordes are put down.
+
+0010's governing constraint is that **nothing outside the ruleset directory changes**, which is why
+this entry expects no engine divergence to follow. The classic map generator is used instead of the
+natural one for exactly that reason: reshaping `Map::Generate`'s latitude model would have meant
+touching `mapgen.cpp`.
+
+0011 exists because planning found two design gaps — no victory condition and no invasion trigger —
+plus a self-contradiction in 0010 section 8. Per the append-only rule 0010 was left as accepted and
+extended rather than corrected in place.
+
+**Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
+upstream.
+
 ### `#37` — a guard against agent writes to upstream
 
 `.claude/hooks/upstream-guard.sh`, `.claude/settings.json`, `CONTRIBUTING.md`,
