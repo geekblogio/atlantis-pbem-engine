@@ -290,6 +290,22 @@ and the interface specification are **upstream-friendly in content** — each ca
 `Provenance:` header saying so — but offering documentation upstream is a conversation about
 their project's shape, not a bug fix, and is not proposed here.
 
+### `#35` — the fork's own `CHANGELOG` section
+
+`CHANGELOG` had stood untouched since 2019, ending at *5.1.0 -> 5.2.0*, so none of the entries in
+this register had ever reached it. `#35` opens *Changes in 5.2.5, in this fork* and fills it from
+this file, which is why every line there maps onto an entry here.
+
+Deliberately **not** titled *5.2.0 -> 5.2.5*: upstream set that constant themselves in `c38361d`,
+and our work sits on top of it without moving it. Upstream's own 5.2.0 -> 5.2.5 — 167 commits
+across four years — stays unrecorded, and the section's preamble says so rather than letting the
+gap pass for completeness.
+
+**Fork-local, and a standing cost.** `CHANGELOG` is not on the `Upstream Hygiene` list, because
+upstream maintains the file too. This section will conflict in every future
+`chore/sync-upstream-*`. Keeping the fork's history under `docs/fork/` instead was considered and
+not taken.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
