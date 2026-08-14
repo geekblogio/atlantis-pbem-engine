@@ -20,3 +20,5 @@ old one stays, marked as superseded. Nothing is edited into agreement with the p
 | [0007](0007-build-at-o2.md) | Build at `-O2`, with `genrules.cpp` exempt |
 | [0008](0008-prepare-upstream-fixes-do-not-submit.md) | Prepare and register upstream fixes; do not submit them |
 | [0009](0009-documentation-split-by-lifetime.md) | Split documentation by lifetime, behind one router |
+| [0010](0010-climate-banded-single-continent-ruleset.md) | A climate-banded single-continent ruleset |
+| [0011](0011-rimefall-invasion-triggers-and-victory.md) | Rimefall: invasion triggers, the front's clock, and victory |
