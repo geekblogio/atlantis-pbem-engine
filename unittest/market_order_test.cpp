@@ -165,4 +165,63 @@ ut::suite<"Market Orders"> market_order_suite = []
     expect(unit->oldorders.back() == "@sell 1 " + std::string(ItemDefs[item_id].abr));
     expect(unit2->oldorders.front() == "@sell " + std::to_string(max_amount) + ' ' + std::string(ItemDefs[item_id].abr));
   };
+
+  "Recruiting into a unit which already holds recruited men"_test = []
+  {
+    UnitTestHelper helper;
+    helper.initialize_game();
+    helper.setup_turn();
+
+    // Recruiting only seeds specialized skill experience in rulesets which require experience
+    // (kingdoms is the only one that does), so switch that on for the duration of this test.
+    int saved_experience = Globals->REQUIRED_EXPERIENCE;
+    Globals->REQUIRED_EXPERIENCE = 50;
+
+    std::string name = "Test Faction";
+    Faction *faction = helper.create_faction(name);
+    Unit *leader = helper.get_first_unit(faction);
+    ARegion *region = leader->object->region;
+
+    // Barbarians have four specialized skills. A race with more than one is required here: each of
+    // them gets experience but no study days on recruit, and that is the state which used to make
+    // the next recruit into the same unit segfault.
+    int price = 10;
+    Market *market = new Market(Market::MarketType::M_BUY, I_BARBARIAN, price, 200, 0, 10000, 0, 200);
+    region->markets.push_back(market);
+
+    // An empty unit, which is what FORM leaves behind.
+    Unit *recruits = helper.create_unit(faction, region);
+    recruits->items.SetNum(I_LEADERS, 0);
+    recruits->items.SetNum(I_SILVER, 10000);
+
+    std::stringstream first_buy;
+    first_buy << "#atlantis " << faction->num << std::endl;
+    first_buy << "unit " << recruits->num << std::endl;
+    first_buy << "buy 70 " << ItemDefs[I_BARBARIAN].abr << std::endl;
+    helper.parse_orders(faction->num, first_buy);
+    helper.run_buy_orders();
+
+    expect(recruits->items.GetNum(I_BARBARIAN) == 70_i);
+    // Four skills, each holding experience and no study days at all.
+    expect(recruits->skills.size() == 4_i);
+    for (const auto skill : recruits->skills) {
+      expect(skill->days == 0_ul);
+      expect(skill->exp > 0_ul);
+    }
+
+    // Buying a single further man into that unit used to dereference a null pointer while diluting
+    // the unit's skills, because no skill of it had any days to be the highest one.
+    std::stringstream second_buy;
+    second_buy << "#atlantis " << faction->num << std::endl;
+    second_buy << "unit " << recruits->num << std::endl;
+    second_buy << "buy 1 " << ItemDefs[I_BARBARIAN].abr << std::endl;
+    helper.parse_orders(faction->num, second_buy);
+    helper.run_buy_orders();
+
+    expect(recruits->items.GetNum(I_BARBARIAN) == 71_i);
+    expect(recruits->skills.size() == 4_i);
+    expect(faction->errors.size() == 0_ul);
+
+    Globals->REQUIRED_EXPERIENCE = saved_experience;
+  };
 };
