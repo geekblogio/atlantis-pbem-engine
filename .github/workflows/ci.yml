@@ -162,6 +162,10 @@ jobs:
       # Atlantis-PBEM/Atlantis. They must not carry anything specific to this fork,
       # because that content would leak into an upstream pull request. A checklist does
       # not survive a late evening; this does.
+      #
+      # `.claude/` is on the list because it holds the guard that keeps agents from
+      # writing to upstream at all. Letting that leak into an upstream pull request
+      # would be the most embarrassing possible way for it to travel.
       - name: Reject fork-local paths on an upstream/* branch
         env:
           BASE_REF: ${{ github.base_ref }}
@@ -170,7 +174,7 @@ jobs:
           changed=$(git diff --name-only "origin/$BASE_REF...HEAD")
           echo "Changed files:"
           echo "$changed"
-          offending=$(echo "$changed" | grep -E '^(CLAUDE\.md|CONTRIBUTING\.md|README\.md|docs/fork/|docs/decisions/|\.github/)' || true)
+          offending=$(echo "$changed" | grep -E '^(CLAUDE\.md|CONTRIBUTING\.md|README\.md|docs/fork/|docs/decisions/|\.github/|\.claude/)' || true)
           if [ -n "$offending" ]; then
             echo "::error::Fork-local paths must not appear on an upstream/* branch:"
             echo "$offending"
