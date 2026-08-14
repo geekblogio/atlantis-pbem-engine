@@ -1476,10 +1476,14 @@ void Unit::AdjustSkills()
             //
             // Find highest skill, eliminate others
             //
+            // Every skill may have zero days: recruiting grants experience but no study days, so a
+            // unit in a REQUIRED_EXPERIENCE ruleset which has only ever recruited holds exactly
+            // that. Keep the first skill in that case, otherwise there is no highest skill at all
+            // and the loop below dereferences a null maxskill.
             unsigned int max = 0;
             Skill *maxskill = 0;
             for(const auto s: skills) {
-                if (s->days > max) {
+                if (!maxskill || s->days > max) {
                     max = s->days;
                     maxskill = s;
                 }
