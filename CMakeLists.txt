@@ -114,6 +114,7 @@ havilah
 kingdoms
 neworigins
 neworigins8
+rimefall
 standard
 )
 

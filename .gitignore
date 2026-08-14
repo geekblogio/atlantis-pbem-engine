@@ -20,6 +20,9 @@ neworigins/html/neworigins.html
 neworigins8/obj
 neworigins8/neworigins8
 neworigins8/html/neworigins8.html
+rimefall/obj
+rimefall/rimefall
+rimefall/html/rimefall.html
 snapshot-tests/output
 unittest/obj
 unittest/unittest
@@ -59,6 +62,7 @@ map_viewer/dist
 /snapshot-tests/kingdoms
 /snapshot-tests/neworigins
 /snapshot-tests/neworigins8
+/snapshot-tests/rimefall
 /snapshot-tests/standard
 /snapshot-tests/*.html
 /snapshot-tests/*.html.strip

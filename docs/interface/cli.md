@@ -28,8 +28,8 @@ ordinary relative or absolute paths.
 ## Subcommands
 
 Each ruleset compiles to its own executable — `standard`, `basic`, `fracas`, `havilah`,
-`kingdoms`, `neworigins`, `neworigins8`. The subcommand set is identical for all of them; the
-ruleset determines the game rules, not the interface.
+`kingdoms`, `neworigins`, `neworigins8`, `rimefall`. The subcommand set is identical for all of
+them; the ruleset determines the game rules, not the interface.
 
 | Invocation | Reads | Writes |
 | --- | --- | --- |
