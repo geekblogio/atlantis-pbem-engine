@@ -184,7 +184,12 @@ static GameDefs g = {
 	100,	// TOWN_SPREAD
 	100,	// TOWNS_NOT_ADJACENT
 	0,	// LESS_ARCTIC_TOWNS
-	55,	// OCEAN
+	// Raised from the NewOrigins 55. Land is confined to the taper in rimefall/map.cpp, and
+	// SEA_LIMIT below scales this up by a further 12% internally, so 55 would demand more land
+	// than the taper can hold and MakeLand would never reach its target. THIS VALUE AND
+	// RIMEFALL_TAPER_* IN rimefall/rimefall.h ARE ONE SETTING — read the note in that header
+	// before moving either. MakeLand checks the two against each other and fails loudly.
+	65,	// OCEAN
 	14,	// CONTINENT_SIZE
 	4,	// TERRAIN_GRANULARITY
 	5,	// LAKES
