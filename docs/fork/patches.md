@@ -301,6 +301,10 @@ commits that touched nothing else.
 name its own SHA. This entry was written while `#31` was open and pushed onto the same branch,
 which is the whole point of the change.
 
+`#34` — added the entry for `6e16846`, which came off an `upstream/*` branch and could only be
+keyed once the rebase-merge had invented its SHA. The register-only pull request that carries it
+names itself here, which is exactly the second push `#31` describes.
+
 **Fork-local, permanently**, like everything under `docs/fork/`.
 
 ### `bea2a21` — vendored nlohmann/json 3.11.3 → 3.12.0
