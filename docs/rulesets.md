@@ -74,9 +74,16 @@ one to rename apprentices — `APPRENTICE_NAME` is `"acolyte"`.
 
 ### World generation and movement
 
-- **`neworigins`** offers three surface generators (*Original*, *Parametrical*, *Island Ring*);
-  every other ruleset has one. It also runs with `ODD_TERRAIN` at 80 against 0–20 elsewhere,
-  `TOWNS_NOT_ADJACENT` at 100, and is the only ruleset with **no weather** at all.
+- **`neworigins`** offers three surface generators (*Original*, *Parametrical*, *Island Ring*) and
+  asks which to use; every other ruleset has one and asks nothing. It also runs with `ODD_TERRAIN`
+  at 80 against 0–20 elsewhere and `TOWNS_NOT_ADJACENT` at 100. It is one of the rulesets with
+  **no weather** at all — `neworigins8` and `rimefall` inherit that from it.
+- **`rimefall`** is the only ruleset whose `GetRegType` is **monotonic in latitude**. Every other
+  one folds latitude about the equator (`if (lat > 3) lat = 7 - lat`), producing a world that is
+  cold at both edges and warm in the middle. Rimefall is cold at one edge and dry at the other,
+  which is the whole point of its map, so it must not fold. It is also the only one that confines
+  land to a shape — a taper, wide north and narrow south — rather than letting continents seed
+  anywhere.
 - **`standard`** is the only one whose `CreateWorld` never asks for map dimensions: they are
   pinned at 64×64 in the source.
 - **`fracas`** is the only shipped ruleset with `NEXUS_EXISTS` off. It also allows unrestricted
@@ -198,17 +205,36 @@ the `neworigins` one in exactly four lines — the stylesheet reference and the 
 
 ## `rimefall`, and what it is not yet
 
-`rimefall/` is the second fork-local ruleset, and at present it is **a skeleton, not a game**. It
-builds, generates a world and processes turns, but it plays as `neworigins` with the underworld
-removed. Everything that will make it its own variant is still to come.
+`rimefall/` is the second fork-local ruleset, and at present it is **a world without a game in it
+yet**. It builds its own continent — one landmass tapering from a wide, frozen north to a narrow,
+dry south — but everything played on that continent is still `neworigins`. Start selection is
+still keyed on terrain rather than latitude, there are no invasion fronts, no starting alliances
+and no victory condition.
 
 Unlike `neworigins8`, its `RULESET_NAME` and `RULESET_VERSION` are **deliberately distinct**. Its
 world is incompatible with every existing one, so `Game::OpenGame` refusing another variant's
 `game.in` is the wanted behaviour rather than an obstacle.
 
-What is real today: `rules.cpp` is a copy of `neworigins/rules.cpp` with `UNDERWORLD_LEVELS`,
-`UNDERDEEP_LEVELS`, `ABYSS_LEVEL` and `ARCHIPELAGO` at 0. The other four files are shims, and
-`monsters.cpp` stays one permanently. `rimefall_intro.html` is an explicit placeholder.
+What is real today: the world. `rules.cpp`, `world.cpp` and `map.cpp` are its own; `extra.cpp` is
+still a shim over `neworigins` and `monsters.cpp` stays one permanently. `rimefall_intro.html` is
+an explicit placeholder.
+
+`rimefall.h` holds the shape constants — the band count and the taper — because `world.cpp` and
+`map.cpp` both read them, and from stage 3 the bands also key the gateways and the start slots.
+One header is what stops those from disagreeing about how many bands the world has.
+
+**The taper and `OCEAN` are one setting, not two.** `MakeLand` grows land until the ocean count
+falls below its target; rimefall confines land to the taper. If the taper cannot hold the land the
+target demands, the loop can never finish. That is why `OCEAN` is 65 here against NewOrigins' 55 —
+`SEA_LIMIT` scales it up a further 12% internally, and at 55 the demand exceeds what the taper can
+supply. `MakeLand` checks the two against each other before it starts and throws with both numbers
+rather than hanging, and a stall counter catches the same failure from the other direction.
+
+**Every band carries mountains, deliberately, and the southern bands carry extra.** With no
+underworld, mountain and desert are the only sources of mithril and rootstone — but *adamantium
+comes from mountain alone*; desert does not yield it. The far south has the least land and so the
+fewest terrain anchors to roll on, so bands 3 and 4 are weighted up to compensate. At the first
+weighting tried, one generated world in five came out with a single mountain in the far south.
 
 Two fields carry `MUST stay 0` comments because flipping either leaves a ruleset that still
 builds, still runs, and is quietly no longer the game:

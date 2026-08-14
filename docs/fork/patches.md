@@ -363,6 +363,32 @@ it is the reason this entry exists at all.
 **Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
 upstream.
 
+### `#39` — the `rimefall` continent
+
+`rimefall/world.cpp`, `rimefall/map.cpp`, `rimefall/rimefall.h` (new), `rimefall/rules.cpp`.
+Stage 2: the taper and the climate bands. `world.cpp` and `map.cpp` stop being shims and become
+the ruleset's own; `CreateWorld` drops the generator prompt and every underworld, underdeep, abyss
+and shaft block; `GetRegType` replaces NewOrigins' equator-symmetric latitude fold with a
+monotonic five-band index; `MakeLand` confines continent seeding and growth to the taper.
+
+**Wholly inside `rimefall/`, so an upstream sync cannot conflict with it** — unlike `#38`, which
+had to touch the shared registration files. This is the shape 0010 section 0 predicted, and the
+rest of the ruleset should look like this rather than like `#38`.
+
+Two things found while building it, recorded because both contradict what was written beforehand:
+
+- **`OCEAN` and the taper are one setting.** `MakeLand` loops until the ocean count falls below
+  its target, so a taper too small to hold that much land is an infinite loop. `OCEAN` rose from
+  55 to 65 to match, and the function now checks the two against each other up front and throws
+  with both numbers, plus a stall counter for the same failure reached from the other side.
+- **Adamantium comes from mountain alone.** The plan recorded mountain and desert as the sources
+  of mithril, rootstone and adamantium; desert in fact yields no adamantium. That makes mountains
+  in every band a harder requirement than stated, and the southern bands are weighted up because
+  they have the least land to roll anchors on.
+
+**Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
+upstream.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

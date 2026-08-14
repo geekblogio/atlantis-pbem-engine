@@ -23,6 +23,11 @@ Five files per ruleset, all mandatory:
 | `map.cpp` | the `ARegionList::create_*_level` functions and the land-shaping helpers |
 | `monsters.cpp` | `Game::CreateVMons`, `Game::GrowVMons` |
 
+Those five are what the build compiles, and the list is closed: adding a sixth source file would
+mean touching the shared `Makefile` rule. A ruleset may still add **headers** of its own —
+`rimefall/rimefall.h` holds constants that its `world.cpp` and `map.cpp` both read — since a header
+needs no build change.
+
 See [rulesets.md](rulesets.md) for the contract in detail, including the traps.
 
 ## Game data lives in global tables
