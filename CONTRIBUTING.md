@@ -57,12 +57,18 @@ git switch -c fix/some-thing master
 # work, then have the diff reviewed before committing
 git push -u origin fix/some-thing
 gh pr create --repo geekblogio/atlantis-pbem-engine --base master
-gh pr merge --auto --squash --delete-branch
+gh pr merge --repo geekblogio/atlantis-pbem-engine --auto --squash --delete-branch
 ```
 
-`gh` defaults to a fork's parent repository. `gh repo set-default geekblogio/atlantis-pbem-engine`
-is already configured locally; pass `--repo` explicitly if you work from a fresh clone, or you
-will open a pull request against upstream by accident.
+**Pass `--repo` to every `gh` command, without exception.** `gh` defaults to a fork's *parent*
+repository, so an omitted flag aims at `Atlantis-PBEM/Atlantis`. `gh repo set-default` is a
+per-clone setting that a fresh clone does not have — and this file used to claim it was "already
+configured locally", which was untrue and is how pull request #297 was opened against upstream by
+accident on 2026-08-14. Do not rely on a default you have not just verified.
+
+The `.claude/hooks/upstream-guard.sh` guard enforces this for agent sessions: a GitHub write with
+no `--repo` is refused outright, and anything deliberately aimed at upstream needs a human to
+approve it. It cannot help a human typing into a terminal.
 
 **Squash-merge** fork-local work. **Rebase-merge** `upstream/*` branches, so the individual
 commits land on `master` unchanged and stay cherry-pickable (see below).

@@ -325,6 +325,26 @@ extended rather than corrected in place.
 **Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
 upstream.
 
+### `#37` — a guard against agent writes to upstream
+
+`.claude/hooks/upstream-guard.sh`, `.claude/settings.json`, `CONTRIBUTING.md`,
+`.github/workflows/ci.yml`. A `PreToolUse` hook that refuses a GitHub write carrying no `--repo`
+inside a clone that can reach upstream, asks a human before anything deliberately aimed there, and
+leaves reads alone. It lives in the repository rather than in `~/.claude` so it applies in every
+clone on every machine, and it matches its own paths by suffix so the self-protection survives a
+different checkout location.
+
+Written after an agent opened a pull request against upstream on 2026-08-14 by omitting `--repo`;
+`gh` defaults to a fork's parent, so the command named upstream nowhere. `CONTRIBUTING.md` carried
+the same hazard — its documented merge command had no `--repo`, and it claimed a default repository
+was already configured locally, which was untrue. Both corrected here.
+
+`Upstream Hygiene` now rejects `.claude/` on `upstream/*` branches, so the guard cannot leak into
+an upstream pull request.
+
+**Fork-local, permanently.** Upstream is not a fork and has no parent to default to; the hazard
+does not exist there.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
