@@ -506,6 +506,21 @@ private:
     //
     Faction *CheckVictory();
 
+    //
+    // Ruleset-supplied. Called when a unit steps into a gateway, after the candidate
+    // destinations have been collected and before the occupancy cascade chooses between them,
+    // so a ruleset may narrow the set.
+    //
+    // `gateway` is the object entered and `nominal` the region it names; `candidates` is the
+    // list to narrow in place. Every ruleset but one defines this empty, leaving the candidate
+    // list, the cascade and the rng draw sequence exactly as they were.
+    //
+    // It exists because a gateway's destination otherwise does not survive the move: only the
+    // terrain of `nominal` is kept, and the set is rebuilt from the whole map. See
+    // docs/decisions/0012.
+    //
+    void filter_gateway_destinations(Object *gateway, ARegion *nominal, std::vector<ARegion *>& candidates);
+
     void EndGame(Faction *pVictor);
 
     void RunBuyOrders();

@@ -205,11 +205,11 @@ the `neworigins` one in exactly four lines — the stylesheet reference and the 
 
 ## `rimefall`, and what it is not yet
 
-`rimefall/` is the second fork-local ruleset, and at present it is **a world without a game in it
-yet**. It builds its own continent — one landmass tapering from a wide, frozen north to a narrow,
-dry south — but everything played on that continent is still `neworigins`. Start selection is
-still keyed on terrain rather than latitude, there are no invasion fronts, no starting alliances
-and no victory condition.
+`rimefall/` is the second fork-local ruleset. It builds its own continent — one landmass tapering
+from a wide, frozen north to a narrow, dry south — and starts its factions across five latitude
+bands. What is still `neworigins` underneath: there are no invasion fronts, no starting alliances
+and no victory condition of its own, and `extra.cpp` still carries the quest and annihilation
+machinery it was copied from until stage 6 replaces it.
 
 Unlike `neworigins8`, its `RULESET_NAME` and `RULESET_VERSION` are **deliberately distinct**. Its
 world is incompatible with every existing one, so `Game::OpenGame` refusing another variant's
@@ -235,6 +235,43 @@ underworld, mountain and desert are the only sources of mithril and rootstone �
 comes from mountain alone*; desert does not yield it. The far south has the least land and so the
 fewest terrain anchors to roll on, so bands 3 and 4 are weighted up to compensate. At the first
 weighting tried, one generated world in five came out with a single mountain in the far south.
+
+### Start slots, and the registry that is not stored
+
+`rimefall` is the only ruleset with a **fixed number of starting locations**. Twenty on a 64×64
+map, distributed by the density curve in `rimefall.h` — 3, 5, 8, 3, 1 from the frozen north to the
+far south — so the middle is roughly twice as crowded per hex of land as either edge. The curve is
+set against *measured* land rather than against 0010 table 7's assumption that the far north holds
+the most: it is the widest band, but `MakeLand` never seeds the rows beside the pole, so it holds
+less land than the middle.
+
+**One gateway object is one start slot, and the gateway objects are the registry.** There is
+nowhere else to keep it: `rulesetSpecificData` is not persisted, and `ARegion::Writeout` has no
+field for "this hex is a start slot" — adding one would change the `game.in` format, a published
+interface. Objects are persisted, so the registry is read back out of the Nexus every time it is
+needed. A gateway's **band is derived from its destination's latitude**, never parsed out of its
+name, so the names can be reworded freely.
+
+Occupancy is derived the same way — a slot is taken while a player faction stands on it — which
+means a slot returns to the pool when its holder dies or walks away, without anything having to
+maintain it. `CheckVictory` renames a taken slot to `Sealed gateway to …` rather than removing the
+object, because these carry `buildingseq` numbers and churning them would move object numbers
+around in reports and in the JSON.
+
+Two traps are worth knowing before touching this:
+
+- **`movement_forbidden_by_ruleset` is called on every move in the game**, not just on arrivals.
+  `rimefall`'s implementation keys on the *source* region being the Nexus. Without that test, every
+  start region would become permanently unenterable for the rest of the game — including for its
+  own owner walking home.
+- **Object names lose `(` and `)`.** `filter::legal_characters` strips them, and
+  `filter::strip_number` cuts everything from the last `(` when a save file is read back, so a
+  parenthesised suffix survives world creation and is then truncated on the next load. The gateway
+  names use a comma.
+
+This is also the ruleset where a game master meets a **refused faction**: once every slot is held,
+`SetupFaction` returns 0 and the engine aborts the whole turn without writing anything. See
+[GAMEMASTER.md](../GAMEMASTER.md) section 3.3.
 
 Two fields carry `MUST stay 0` comments because flipping either leaves a ruleset that still
 builds, still runs, and is quietly no longer the game:

@@ -391,8 +391,8 @@ upstream.
 
 ### `#40` — the decision to add a gateway hook to the engine
 
-`docs/decisions/0012-…`. A record, no code. It **amends [0010](../decisions/0010-climate-banded-single-continent-ruleset.md)
-section 0**, which forbade `rimefall` from changing anything outside its own directory.
+`docs/decisions/0012-…`. A record, no code. It **amends 0010 section 0**, which forbade `rimefall`
+from changing anything outside its own directory.
 
 Building stage 3 showed that constraint could not be met. A gateway's destination does not survive
 the move: `monthorders.cpp` takes only the *terrain* of the region a ruleset chose and rebuilds the
@@ -408,6 +408,33 @@ request; it is registered separately when it lands.
 by the criterion in `docs/rulesets.md`, so the engine hard-coding *scatter by terrain* is arguably
 upstream's problem too. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is
 prepared and registered, **not offered**.
+
+### `#41` — band-keyed start selection, and the one engine hook it needed
+
+`game.h`, `monthorders.cpp`, and `extra.cpp` in all seven rulesets plus `rimefall/`. **This is the
+first `rimefall` divergence that touches the engine**, permitted and bounded by
+[0012](../decisions/0012-a-ruleset-hook-for-gateway-destinations.md). `#38` touched only
+registration files and `#39` nothing shared at all.
+
+The engine side is one hook, `Game::filter_gateway_destinations`, called in the gateway branch of
+`Game::DoAMoveOrder` after the candidate list is built and before the occupancy cascade runs. Every
+ruleset but `rimefall` defines it empty. **Verified as a no-op:** with the hook in place and the
+ruleset side not yet written, unit test output and the entire snapshot run were byte-identical to a
+baseline recorded beforehand.
+
+The ruleset side re-keys the gateways from terrain to latitude band. One gateway object is one
+start slot, which is also how the registry survives a save cycle — objects are persisted,
+`rulesetSpecificData` is not, and `ARegion::Writeout` has no field to add one to without changing
+`game.in`.
+
+**Upstream-worthy, not offered.** Start-selection policy is ruleset-legal by the criterion in
+`docs/rulesets.md`, so the engine hard-coding *scatter by terrain* is arguably upstream's problem
+too. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) the hook is prepared and
+registered here and **nothing has been offered**. The `rimefall/` half is fork-local permanently.
+
+**This is the divergence to watch on an upstream sync.** `monthorders.cpp` and `game.h` are
+actively maintained upstream, and the seven near-empty `extra.cpp` definitions will conflict on any
+upstream change near `movement_forbidden_by_ruleset`.
 
 ### Maintenance of this register
 

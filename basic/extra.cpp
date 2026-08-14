@@ -156,3 +156,9 @@ void Game::ModifyTablesPerRuleset(void)
 const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, ARegion *, ARegionList&) {
     return std::nullopt;
 }
+
+// Ruleset hook from docs/decisions/0012. This ruleset keys its gateways on terrain, which is
+// what the engine already derives on its own, so it has nothing to narrow and leaves the
+// candidate list untouched. Only rimefall implements this.
+void Game::filter_gateway_destinations(Object *, ARegion *, std::vector<ARegion *>&) {
+}
