@@ -43,5 +43,9 @@ fi
 if [[ $? != 0 ]]; then
   failure=1
 fi
+./run-rules-snapshot.sh rimefall
+if [[ $? != 0 ]]; then
+  failure=1
+fi
 
 exit $failure

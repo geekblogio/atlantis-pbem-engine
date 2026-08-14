@@ -8,7 +8,7 @@ the others.
 
 ## The variants
 
-Seven rulesets ship here, plus the minimal one under `unittest/`. They are not variations on a
+Eight rulesets ship here, plus the minimal one under `unittest/`. They are not variations on a
 theme: of the 138 `GameDefs` fields, **97 hold different values in at least two of them**. Only
 41 are constant everywhere — `TOWNS_EXIST`, `RACES_EXIST`, `FACTION_LIMIT_TYPE` (always
 `FACLIM_FACTION_TYPES`), `CONQUEST_GAME` (always 0) and the like.
@@ -22,6 +22,7 @@ theme: of the 138 `GameDefs` fields, **97 hold different values in at least two 
 | `kingdoms/` | Kingdoms | 1.0.0 | + 1 underworld | none |
 | `neworigins/` | NewOrigins | 3.0.0 | + 1 underworld | quests, annihilation |
 | `neworigins8/` | NewOrigins | 3.0.0 | as `neworigins` | as `neworigins` |
+| `rimefall/` | Rimefall | 1.0.0 | nexus + surface | *not yet built* — see below |
 
 The first trap is in the table: **the directory named `standard` is not standard Atlantis.** It
 calls itself Wyreth, carries its own mythology, and holds the only real win condition in the
@@ -179,7 +180,7 @@ file containing the directive, so a shim behaves exactly like the original.
 
 ## `neworigins8`, and why it shares a name
 
-`neworigins8/` is the shim pattern in practice, and the only fork-local ruleset here. It exists
+`neworigins8/` is the shim pattern in practice, and the first of this fork's two own rulesets. It exists
 because the live game runs NewOrigins 8, whose sole published rule change against 7 is that
 **meals cost 50 silver instead of 30**. `rules.cpp` is a copy of `neworigins/rules.cpp` with
 that one value changed; the other four files are shims.
@@ -194,6 +195,36 @@ turn under both.
 The consequence to keep in mind: nothing in a report or a game file distinguishes the two. The
 rulebook is the only visible difference, and the generated `neworigins8` baseline differs from
 the `neworigins` one in exactly four lines — the stylesheet reference and the meal price.
+
+## `rimefall`, and what it is not yet
+
+`rimefall/` is the second fork-local ruleset, and at present it is **a skeleton, not a game**. It
+builds, generates a world and processes turns, but it plays as `neworigins` with the underworld
+removed. Everything that will make it its own variant is still to come.
+
+Unlike `neworigins8`, its `RULESET_NAME` and `RULESET_VERSION` are **deliberately distinct**. Its
+world is incompatible with every existing one, so `Game::OpenGame` refusing another variant's
+`game.in` is the wanted behaviour rather than an obstacle.
+
+What is real today: `rules.cpp` is a copy of `neworigins/rules.cpp` with `UNDERWORLD_LEVELS`,
+`UNDERDEEP_LEVELS`, `ABYSS_LEVEL` and `ARCHIPELAGO` at 0. The other four files are shims, and
+`monsters.cpp` stays one permanently. `rimefall_intro.html` is an explicit placeholder.
+
+Two fields carry `MUST stay 0` comments because flipping either leaves a ruleset that still
+builds, still runs, and is quietly no longer the game:
+
+- **`OPEN_ENDED`** — `runorders.cpp` calls `Game::CheckVictory` only when it is 0, and that is the
+  only per-turn ruleset hook. The gateway rebuild, both invasion fronts and the election all hang
+  off it.
+- **`START_CITIES_EXIST`** — 0 selects the curated gateway path in `ARegionList::SetACNeighbors`,
+  which is what the latitude-band start selection is built on.
+
+The design is settled in writing before the code:
+[0010](decisions/0010-climate-banded-single-continent-ruleset.md) for what the ruleset is, and
+[0011](decisions/0011-rimefall-invasion-triggers-and-victory.md) for the invasion triggers, the
+front's clock and the victory condition. Read both before touching `rimefall/`; the governing
+constraint is that **nothing outside that directory changes**, and the registration touchpoints in
+this ruleset's first commit are the one stated exception.
 
 ## The unit test ruleset
 

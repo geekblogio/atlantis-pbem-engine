@@ -22,7 +22,7 @@ OBJECTS =  $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)) $(patsubst %.o,$(GAME)/obj/
 $(GAME)-m: objdir $(OBJECTS)
 	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
-all: basic standard fracas kingdoms havilah neworigins neworigins8 unittest
+all: basic standard fracas kingdoms havilah neworigins neworigins8 rimefall unittest
 
 basic: FORCE
 	$(MAKE) GAME=basic
@@ -45,11 +45,14 @@ neworigins: FORCE
 neworigins8: FORCE
 	$(MAKE) GAME=neworigins8
 
+rimefall: FORCE
+	$(MAKE) GAME=rimefall
+
 $(GAME)/$(GAME): FORCE
 	$(MAKE) GAME=$(GAME)
 
 all-clean: basic-clean standard-clean fracas-clean kingdoms-clean \
-	havilah-clean neworigins-clean neworigins8-clean unittest-clean
+	havilah-clean neworigins-clean neworigins8-clean rimefall-clean unittest-clean
 
 basic-clean:
 	$(MAKE) GAME=basic clean
@@ -72,6 +75,9 @@ neworigins-clean:
 neworigins8-clean:
 	$(MAKE) GAME=neworigins8 clean
 
+rimefall-clean:
+	$(MAKE) GAME=rimefall clean
+
 unittest-clean:
 	$(MAKE) GAME=unittest clean
 
@@ -82,7 +88,7 @@ clean:
 	rm -f $(GAME)/$(GAME)
 
 all-rules: basic-rules standard-rules fracas-rules kingdoms-rules \
-	havilah-rules neworigins-rules neworigins8-rules
+	havilah-rules neworigins-rules neworigins8-rules rimefall-rules
 
 basic-rules:
 	$(MAKE) GAME=basic rules
@@ -104,6 +110,9 @@ neworigins-rules:
 
 neworigins8-rules:
 	$(MAKE) GAME=neworigins8 rules
+
+rimefall-rules:
+	$(MAKE) GAME=rimefall rules
 
 rules: $(GAME)/$(GAME)
 	(cd $(GAME); \

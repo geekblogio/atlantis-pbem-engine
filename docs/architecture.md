@@ -11,7 +11,7 @@ change belongs.
 The engine library is every `*.cpp` in the repository root. It is game-agnostic: it declares
 functions it never defines, and each **ruleset** directory supplies them. A ruleset compiles
 together with the engine into its own standalone executable — `standard`, `basic`, `fracas`,
-`havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8`.
+`havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8` and `rimefall`.
 
 Five files per ruleset, all mandatory:
 

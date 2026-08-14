@@ -345,6 +345,24 @@ an upstream pull request.
 **Fork-local, permanently.** Upstream is not a fork and has no parent to default to; the hazard
 does not exist there.
 
+### `#38` — the `rimefall` skeleton, and its registration
+
+`rimefall/` (new), `CMakeLists.txt`, `Makefile`, `.gitignore`,
+`snapshot-tests/run-snapshots.sh`, `snapshot-tests/update-all-rule-snapshots.sh`,
+`snapshot-tests/rules/rimefall.html`. Stage 1 of the ruleset settled in `#36`: a binary that
+builds, generates a world and processes a turn, playing as `neworigins` without the underworld.
+`rules.cpp` is a copy with four fields zeroed; the other four files are shims.
+
+**0010 said this register would need no entry, and that is wrong for this stage.** Its section 0
+constraint — nothing outside `rimefall/` changes — holds for the ruleset's behaviour, but a new
+ruleset has to be *registered*, and every registration touchpoint is a file upstream also
+maintains. A new directory cannot conflict on an upstream sync; these six shared files can, and
+`Makefile` carries the change in six separate places. That is the divergence worth recording, and
+it is the reason this entry exists at all.
+
+**Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
+upstream.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

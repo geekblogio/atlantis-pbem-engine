@@ -26,7 +26,7 @@ belongs in `docs/`; add it there and reference it from the index below, not here
 
 The Atlantis play-by-email engine (C++20). One shared engine library plus several **rulesets**
 (game variants); each compiles into its own standalone executable — `standard`, `basic`,
-`fracas`, `havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8`.
+`fracas`, `havilah`, `kingdoms`, `neworigins`, and the fork-local `neworigins8` and `rimefall`.
 
 It is a batch turn processor, not a server: it reads `game.in`, `players.in` and
 `orders.<faction#>` from the working directory, runs one turn, and writes `game.out`,
