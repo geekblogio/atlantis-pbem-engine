@@ -22,3 +22,4 @@ old one stays, marked as superseded. Nothing is edited into agreement with the p
 | [0009](0009-documentation-split-by-lifetime.md) | Split documentation by lifetime, behind one router |
 | [0010](0010-climate-banded-single-continent-ruleset.md) | A climate-banded single-continent ruleset |
 | [0011](0011-rimefall-invasion-triggers-and-victory.md) | Rimefall: invasion triggers, the front's clock, and victory |
+| [0012](0012-a-ruleset-hook-for-gateway-destinations.md) | A ruleset hook for gateway destinations — amends 0010 section 0 |

@@ -389,6 +389,26 @@ Two things found while building it, recorded because both contradict what was wr
 **Fork-local, permanently.** A new game variant is this fork's own; nothing here is offered
 upstream.
 
+### `#40` — the decision to add a gateway hook to the engine
+
+`docs/decisions/0012-…`. A record, no code. It **amends [0010](../decisions/0010-climate-banded-single-continent-ruleset.md)
+section 0**, which forbade `rimefall` from changing anything outside its own directory.
+
+Building stage 3 showed that constraint could not be met. A gateway's destination does not survive
+the move: `monthorders.cpp` takes only the *terrain* of the region a ruleset chose and rebuilds the
+candidate set from the whole map, so gateways cannot be keyed on latitude band. The function that
+does it, `get_starting_region_candidates`, is declared in `aregion.h` but defined in `aregion.cpp`
+— engine code, unlike the world-generation chain around it — so no ruleset can override it.
+
+0012 permits **one** hook, `filter_gateway_destinations`, called before the occupancy cascade and
+defined empty by every ruleset but `rimefall`. The engine change itself is not in this pull
+request; it is registered separately when it lands.
+
+**Fork-local for now, and upstream-worthy in principle.** Start-selection policy is ruleset-legal
+by the criterion in `docs/rulesets.md`, so the engine hard-coding *scatter by terrain* is arguably
+upstream's problem too. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is
+prepared and registered, **not offered**.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
