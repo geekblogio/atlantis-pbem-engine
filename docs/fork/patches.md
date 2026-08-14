@@ -163,6 +163,22 @@ incomplete commit and the replay then fails with *"turn N missing"*. `.gitattrib
 **Upstream value: high.** The same bug exists upstream. Verified content-neutral: the index
 holds zero CR bytes across all 325 snapshot files.
 
+### `6e16846` — null skill when recruiting into a unit that already holds men
+
+`unit.cpp`, plus a regression test in `unittest/market_order_test.cpp`. `Unit::AdjustSkills`
+looks for the skill with the most study days starting from zero days and a null candidate, so a
+unit whose skills *all* have zero days reaches the elimination loop with `maxskill` still null
+and dereferences it. Recruiting creates exactly those skills: `Game::DoBuy` seeds specialized
+skill experience, which carries experience and no days at all. Any ruleset with
+`REQUIRED_EXPERIENCE` — of ours only `kingdoms` — therefore segfaults when a unit that already
+holds recruited men buys one more, for every race with more than one specialized skill. Fixed by
+falling back to the first skill; *skipping* the elimination instead leaves several skills on a
+non-leader and kills the `neworigins` snapshot replay with a bus error.
+
+Reported from the downstream bot project, which hit it in a live game.
+
+**Upstream value: high.** A crash on an ordinary order, fixed in one condition.
+
 ---
 
 ## Fork-local
