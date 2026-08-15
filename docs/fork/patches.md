@@ -422,6 +422,11 @@ ruleset but `rimefall` defines it empty. **Verified as a no-op:** with the hook 
 ruleset side not yet written, unit test output and the entire snapshot run were byte-identical to a
 baseline recorded beforehand.
 
+Also carries [0013](../decisions/0013-the-gateway-hook-sets-the-candidate-list.md), which corrects
+0012's description of the hook. 0012 called it a filter; the ruleset in fact *sets* the list,
+because a start slot curated at world creation must stay reachable even after the engine's live
+candidacy test would stop listing it. The decision is unchanged, only its contract made exact.
+
 The ruleset side re-keys the gateways from terrain to latitude band. One gateway object is one
 start slot, which is also how the registry survives a save cycle — objects are persisted,
 `rulesetSpecificData` is not, and `ARegion::Writeout` has no field to add one to without changing

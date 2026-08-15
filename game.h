@@ -508,16 +508,21 @@ private:
 
     //
     // Ruleset-supplied. Called when a unit steps into a gateway, after the candidate
-    // destinations have been collected and before the occupancy cascade chooses between them,
-    // so a ruleset may narrow the set.
+    // destinations have been collected and before the occupancy cascade chooses between them.
     //
-    // `gateway` is the object entered and `nominal` the region it names; `candidates` is the
-    // list to narrow in place. Every ruleset but one defines this empty, leaving the candidate
-    // list, the cascade and the rng draw sequence exactly as they were.
+    // `gateway` is the object entered and `nominal` the region it names; `candidates` is the list
+    // the ruleset may modify in place. It MAY NARROW, REPLACE, OR LEAVE THE LIST ALONE — do not
+    // assume what comes back is a subset of what went in, because a ruleset's own start locations
+    // need not still satisfy the engine's live candidacy test. Every ruleset but one defines this
+    // empty, leaving the candidate list, the cascade and the rng draw sequence exactly as before.
+    //
+    // An empty result is a legitimate answer meaning "this gateway leads nowhere available". The
+    // engine then falls back to `nominal`, and the ruleset is expected to refuse that arrival from
+    // ARegion::movement_forbidden_by_ruleset.
     //
     // It exists because a gateway's destination otherwise does not survive the move: only the
     // terrain of `nominal` is kept, and the set is rebuilt from the whole map. See
-    // docs/decisions/0012.
+    // docs/decisions/0012, and 0013 for why this sets rather than only filters.
     //
     void filter_gateway_destinations(Object *gateway, ARegion *nominal, std::vector<ARegion *>& candidates);
 
