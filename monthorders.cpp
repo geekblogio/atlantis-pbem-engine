@@ -1568,6 +1568,12 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
             ARegionArray *level = regions.GetRegionArray(newreg->zloc);
             std::vector<ARegion *> start_locations = level->get_starting_region_candidates(newreg->type);
 
+            // Let the ruleset narrow the set before the cascade picks from it. Only the terrain
+            // of the gateway's destination survives the lookup above, so a ruleset that keys its
+            // gateways on anything else — latitude, for instance — has no other way to be heard.
+            // Every ruleset but rimefall leaves the list alone. See docs/decisions/0012.
+            filter_gateway_destinations(obj, newreg, start_locations);
+
             // match levels to try for, in order:
             // 0 - completely empty towns
             // 1 - towns with only guardsmen

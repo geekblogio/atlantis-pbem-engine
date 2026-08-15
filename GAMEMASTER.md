@@ -25,6 +25,7 @@ valuable feedback.
 3.      Running a game
 3.1     Running a game of Atlantis by hand (the hard way)
 3.2     Running a game the easy way (with scripts)
+3.3     Running a rimefall game: a world that can fill up
 
 4.      A GM's 'Code of Conduct'
 
@@ -443,6 +444,47 @@ for turn submissions (a really good idea). When the turn is actually
 rerun, the subject line of everything that you send out should clearly
 state that it is a rerun, so that players don't get confused.
 
+
+### 3.3 Running a rimefall game: a world that can fill up
+
+Every other ruleset here will take as many factions as you send it. **`rimefall` will not**, and
+that is deliberate rather than a limitation. Its world holds a fixed number of starting locations —
+twenty on a 64x64 map, spread across five latitude bands — and once every one of them is held by a
+living faction, there is nowhere left to put a newcomer.
+
+You can see the state of the world in any report from a faction still in the Nexus. Each starting
+location is one gateway object:
+
+```
++ Gateway to the middle lands, plain [13] : Gateway, contains an inner location.
++ Sealed gateway to the frozen north, tundra [1] : Gateway, contains an inner location.
+```
+
+A **sealed** gateway is one whose land is currently held. Sealing is not permanent: occupancy is
+worked out fresh every turn from who is actually standing there, so if a faction is destroyed or
+simply walks away, its gateway opens again and the land can be claimed by someone new. Object
+numbers never change, so `[13]` is the same location for the life of the game.
+
+**What happens when you add a faction to a full world, and why it stops the turn.**
+
+If you leave a `Faction: new` line in `players.in` when no starting location is free, the engine
+logs
+
+```
+Rimefall: every start location is held; the world is full. Faction not created.
+Failed to add a new faction!
+Couldn't run the game!
+```
+
+and **the whole turn is not processed**. Nothing is written: no `game.out`, no reports, and your
+`game.in` is untouched. Remove the `Faction: new` line and run the turn again, and everything
+proceeds normally.
+
+This abort is engine behaviour and not specific to `rimefall` — `neworigins` does the same when its
+end-game closes registration — but `rimefall` is the ruleset where you should expect to meet it,
+because a full world is an ordinary thing for it to become rather than an end-game state. If you
+take signups through a script, cap them at the number of free gateways and you will never see it.
+The cap is a convenience, not a requirement: the engine refuses the faction correctly either way.
 
 ## 5. Altering game rules
 

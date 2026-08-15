@@ -1935,6 +1935,36 @@ bool rimefall_inside_taper(ARegionArray *pRegs, int x, int y)
     return dx <= rimefall_taper_half_width(pRegs, y);
 }
 
+const int rimefall_starts_per_band[RIMEFALL_BANDS] = { 3, 5, 8, 3, 1 };
+
+static const std::string rimefall_band_names[RIMEFALL_BANDS] = {
+    "the frozen north",
+    "the northern frontier",
+    "the middle lands",
+    "the southern reaches",
+    "the far south",
+};
+
+const std::string& rimefall_band_name(int band)
+{
+    if (band < 0) band = 0;
+    if (band >= RIMEFALL_BANDS) band = RIMEFALL_BANDS - 1;
+    return rimefall_band_names[band];
+}
+
+int rimefall_band_of_row(ARegionArray *pRegs, int y)
+{
+    int band = (y * RIMEFALL_BANDS) / pRegs->y;
+    if (band < 0) band = 0;
+    if (band >= RIMEFALL_BANDS) band = RIMEFALL_BANDS - 1;
+    return band;
+}
+
+int rimefall_band_of(ARegion *reg, ARegionList& regions)
+{
+    return rimefall_band_of_row(regions.GetRegionArray(reg->zloc), reg->yloc);
+}
+
 int rimefall_taper_area(ARegionArray *pRegs)
 {
     int area = 0;
@@ -2807,72 +2837,110 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
             }
             else
             {
-                // The previous code would *always* choose the northernmost and westernmost location
-                // of the specific terrain.  The new algorithm is going to be to
+                // Rimefall keys its gateways on LATITUDE BAND, not on terrain. NewOrigins builds
+                // one gateway per terrain type; this builds one per band, and behind each band a
+                // set of start slots sized by the density curve in rimefall.h.
                 //
-                // 1. collect all the candidates of each terrain type
-                //    a. a hex is a candidate if it is close (within 2hex) of a hex containing each of the following
-                //       1. wood
-                //       2. iron
-                //       3. stone
-                //       4. food (grain or livestock)
-                //       5. mounts (horse or camel)
-                // 2. choose a random candidate from each set of valid candidates.
-                // Hopefully we won't have a situation where the is no viable candidate.  If we do, we will error out.
-
-                // First, we need to find the candidates
+                // The curation is inherited rather than reinvented: get_starting_region_candidates
+                // already requires wood, iron, stone, grain or livestock, and horses or camels
+                // within two hexes on a landmass of at least ten hexes. Candidates of every
+                // terrain are pooled and then bucketed by band, so a band's slots may sit on any
+                // terrain it happens to have — which matters most in the far south, where there is
+                // too little land to insist on a particular one.
+                //
+                // The spacing pass below is NewOrigins' own, applied within a band instead of
+                // across terrains: up to fifty attempts maximising the minimum distance to slots
+                // already chosen, stopping once it clears twenty.
                 ARegionArray *to = GetRegionArray(levelTo);
-                std::map<int, std::vector<ARegion *> > candidates;
+                std::vector<std::vector<ARegion *>> by_band(RIMEFALL_BANDS);
                 for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
-                    candidates[type] = to->get_starting_region_candidates(type);
-                }
-                // Now for each type, choose a random candidate
-                std::map<int, ARegion *> dests;
-                for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
-                    if (candidates[type].size() == 0) {
-                        logger::write("Error: No valid candidate found for gateway to " + TerrainDefs[type].name);
-                        exit(1);
+                    for (ARegion *cand : to->get_starting_region_candidates(type)) {
+                        by_band[rimefall_band_of_row(to, cand->yloc)].push_back(cand);
                     }
-                    logger::write("Found " + std::to_string(candidates[type].size()) + " candidates for " +
-                        TerrainDefs[type].name + " gateway");
-                    int index = rng::get_random(candidates[type].size());
-                    ARegion *dest = candidates[type][index];
-                    ARegion *best = dest;
-                    int tries = 50;
-                    int maxMin = -1;
-                    while(tries--) {
-                        // See if it's too close to any existing dest
-                        int minDist = 1000;
-                        for (int otherTypes = R_PLAIN; otherTypes < type; otherTypes++) {
-                            ARegion *otherDest = dests[otherTypes];
-                            int curDist = GetPlanarDistance(dest, otherDest, 0);
-                            if (curDist < minDist) minDist = curDist;
-                        }
-                        if (minDist > 20) break;
-                        if (minDist > maxMin) {
-                            maxMin = minDist;
-                            best = dest;
-                        }
-                        // too close, try again
-                        index = rng::get_random(candidates[type].size());
-                        dest = candidates[type][index];
-                    }
-                    // store the best we have so far
-                    logger::write("Best distance of " + std::to_string(maxMin) + " for " + TerrainDefs[type].name);
-                    dests[type] = best;
                 }
 
-                for (int type = R_PLAIN; type <= R_TUNDRA; type++) {
+                std::vector<ARegion *> chosen;
+                std::vector<int> chosen_band;
+                for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                    int wanted = rimefall_starts_per_band[band];
+                    logger::write(
+                        "Band " + std::to_string(band) + " (" + rimefall_band_name(band) + "): " +
+                        std::to_string(by_band[band].size()) + " candidates for " +
+                        std::to_string(wanted) + " start slots"
+                    );
+                    // A band with too few candidates gets what it has. It is NOT an error: the far
+                    // south is small by design and a thin world is a playable world, just a
+                    // smaller one. SetupFaction refuses factions once every slot is held.
+                    if ((int) by_band[band].size() < wanted) {
+                        logger::write(
+                            "  short by " + std::to_string(wanted - (int) by_band[band].size()) +
+                            "; this band will offer fewer starts than the density curve asks for"
+                        );
+                    }
+                    for (int n = 0; n < wanted && !by_band[band].empty(); n++) {
+                        int index = rng::get_random(by_band[band].size());
+                        ARegion *dest = by_band[band][index];
+                        ARegion *best = dest;
+                        int best_index = index;
+                        int tries = 50;
+                        int maxMin = -1;
+                        while (tries--) {
+                            int minDist = 1000;
+                            for (ARegion *other : chosen) {
+                                int curDist = GetPlanarDistance(dest, other, 0);
+                                if (curDist < minDist) minDist = curDist;
+                            }
+                            if (minDist > 20) { best = dest; best_index = index; break; }
+                            if (minDist > maxMin) {
+                                maxMin = minDist;
+                                best = dest;
+                                best_index = index;
+                            }
+                            index = rng::get_random(by_band[band].size());
+                            dest = by_band[band][index];
+                        }
+                        chosen.push_back(best);
+                        chosen_band.push_back(band);
+                        by_band[band].erase(by_band[band].begin() + best_index);
+                    }
+                }
+
+                // ONE GATEWAY OBJECT PER START SLOT, and this is what makes the slot registry
+                // work at all.
+                //
+                // The slots have to survive a save cycle, and there is nowhere else to put them:
+                // rulesetSpecificData is not persisted (0011), and ARegion::Writeout has no field
+                // for "this hex is a start slot" — adding one would change the game.in format,
+                // which is a published interface. Objects ARE persisted, so the set of gateway
+                // objects in the nexus IS the slot registry, recovered by reading them back.
+                //
+                // A gateway's BAND IS DERIVED FROM ITS DESTINATION'S LATITUDE, never parsed back
+                // out of the name. The name is for players and may be reworded freely.
+                //
+                // Created once here and never destroyed or recreated. 0010's consequences call
+                // that out: these carry numbers from buildingseq, and churning them would move
+                // object numbers around in reports and in the JSON. CheckVictory renames a slot
+                // that has been taken instead of removing it, which also shows players the world
+                // filling up rather than silently shrinking the list.
+                for (size_t i = 0; i < chosen.size(); i++) {
                     Object *o = new Object(AC);
                     o->num = AC->buildingseq++;
                     // Set the type first: set_name() refuses to rename an O_DUMMY object,
                     // which is what the constructor leaves it as.
                     o->type = O_GATEWAY;
-                    o->set_name("Gateway to " + std::string(TerrainDefs[type].name));
+                    // A comma, not brackets. filter::legal_characters drops '(' and ')' outright,
+                    // and filter::strip_number cuts everything from the last '(' when a save file
+                    // is read back — so a parenthesised terrain would survive generation and then
+                    // be truncated on the next load.
+                    o->set_name(
+                        "Gateway to " + rimefall_band_name(chosen_band[i]) +
+                        ", " + std::string(TerrainDefs[chosen[i]->type].name)
+                    );
                     o->incomplete = 0;
-                    o->inner = dests[type]->num;
+                    o->inner = chosen[i]->num;
                     AC->objects.push_back(o);
                 }
+                logger::write("Placed " + std::to_string(chosen.size()) + " start slots in total");
             }
         }
     }

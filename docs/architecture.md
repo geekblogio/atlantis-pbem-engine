@@ -23,6 +23,10 @@ Five files per ruleset, all mandatory:
 | `map.cpp` | the `ARegionList::create_*_level` functions and the land-shaping helpers |
 | `monsters.cpp` | `Game::CreateVMons`, `Game::GrowVMons` |
 
+`extra.cpp` also supplies `Game::filter_gateway_destinations`, which the engine calls when a unit
+steps into a gateway so a ruleset can decide where that gateway actually leads. Every ruleset but
+`rimefall` defines it empty; see [decisions/0012](decisions/0012-a-ruleset-hook-for-gateway-destinations.md).
+
 Those five are what the build compiles, and the list is closed: adding a sixth source file would
 mean touching the shared `Makefile` rule. A ruleset may still add **headers** of its own —
 `rimefall/rimefall.h` holds constants that its `world.cpp` and `map.cpp` both read — since a header

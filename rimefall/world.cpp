@@ -425,9 +425,10 @@ int ARegionList::GetRegType( ARegion *pReg )
     // middle. Rimefall runs cold at ONE edge and dry at the other, so the index must be
     // monotonic in yloc and must not be folded.
     //
-    int band = (pReg->yloc * RIMEFALL_BANDS) / pRegionArrays[pReg->zloc]->y;
-    if (band < 0) band = 0;
-    if (band >= RIMEFALL_BANDS) band = RIMEFALL_BANDS - 1;
+    // Shared with the gateways and the start slots (rimefall_band_of_row lives in map.cpp). If
+    // terrain and start selection ever used two different band edges, they would drift apart in
+    // ways nothing would report.
+    int band = rimefall_band_of_row(pRegionArrays[pReg->zloc], pReg->yloc);
 
     //
     // One draw from rng, as in the original, weighted per band out of 64.
