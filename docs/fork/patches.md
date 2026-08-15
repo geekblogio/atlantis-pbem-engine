@@ -441,6 +441,30 @@ registered here and **nothing has been offered**. The `rimefall/` half is fork-l
 actively maintained upstream, and the seven near-empty `extra.cpp` definitions will conflict on any
 upstream change near `movement_forbidden_by_ruleset`.
 
+### `#42` — the decision that a refused faction must not stop the turn
+
+`docs/decisions/0014-…`. A record, no code. It is the **second** engine change for `rimefall`, and
+[0012](../decisions/0012-a-ruleset-hook-for-gateway-destinations.md) required exactly that: one
+hook for one purpose, anything further argued again from scratch.
+
+`Game::SetupFaction` returning 0 is how a ruleset refuses a faction, and `#41` made refusal an
+ordinary event — a `rimefall` world holds a fixed number of start slots and filling them is normal.
+But `ReadPlayers` sets `return_code = false` on refusal, so the whole turn is abandoned: no
+`game.out`, no reports, non-zero exit. 0010 section 9 described that path only as *discard and log*.
+
+That matters because this repository is an engine supplier and two Python projects drive the binary
+as a subprocess. A non-zero exit is how they learn a turn failed, and raising it for something that
+is not a failure trains the operator to ignore the only signal there is.
+
+0014 decides the faction is skipped and the turn runs, and records the trap: the parse loop applies
+each subsequent line to the current faction pointer, so continuing naively would write the refused
+newcomer's name, address and password over the **previous** player's registration.
+
+**Upstream-worthy, not offered.** The fix is not conditional on any ruleset and helps `neworigins`
+first, whose registration close has the same defect. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered,
+**not offered**.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
