@@ -24,3 +24,4 @@ old one stays, marked as superseded. Nothing is edited into agreement with the p
 | [0011](0011-rimefall-invasion-triggers-and-victory.md) | Rimefall: invasion triggers, the front's clock, and victory |
 | [0012](0012-a-ruleset-hook-for-gateway-destinations.md) | A ruleset hook for gateway destinations, amending 0010 |
 | [0013](0013-the-gateway-hook-sets-the-candidate-list.md) | The gateway hook sets the candidate list |
+| [0014](0014-a-refused-faction-does-not-abort-the-turn.md) | A refused faction does not abort the turn |
