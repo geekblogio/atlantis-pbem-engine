@@ -74,6 +74,25 @@ Template: long
 Battle: na
 ```
 
+`Faction: new` opens a block for a faction that does not exist yet, optionally followed by
+`noleader` and a starting `x y z`.
+
+**A ruleset may refuse a new faction, and refusal is not an error.** `rimefall` refuses one once
+every starting location in its world is held; `neworigins` refuses one after its end-game closes
+registration. When that happens the whole block is discarded — including its `Name:`, `Email:` and
+`Password:` lines, which do **not** attach themselves to the faction listed before it — and the
+engine reports it on stdout:
+
+```
+A new faction was refused by the ruleset and has been skipped. The turn continues without it.
+```
+
+The turn then runs normally for every other faction and the exit code is `0`, the same treatment a
+malformed game-master directive gets. **A caller that submits `Faction: new` must therefore scan
+stdout to learn whether the faction was created**; nothing else reports it, and the refused player
+receives no report file. Older builds abandoned the entire run instead, writing no `game.out` and
+exiting non-zero; see `docs/decisions/0014`.
+
 ### Directives
 
 Every line the reader understands. The ones past `Battle:` are **game-master directives**: they
