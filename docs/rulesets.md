@@ -270,8 +270,10 @@ Two traps are worth knowing before touching this:
   names use a comma.
 
 This is also the ruleset where a game master meets a **refused faction**: once every slot is held,
-`SetupFaction` returns 0 and the engine aborts the whole turn without writing anything. See
-[GAMEMASTER.md](../GAMEMASTER.md) section 3.3.
+`SetupFaction` returns 0, the newcomer is skipped and the turn runs normally for everyone else. See
+[GAMEMASTER.md](../GAMEMASTER.md) section 3.3, and
+[decisions/0014](decisions/0014-a-refused-faction-does-not-abort-the-turn.md) for why that is not
+an abort.
 
 Two fields carry `MUST stay 0` comments because flipping either leaves a ruleset that still
 builds, still runs, and is quietly no longer the game:

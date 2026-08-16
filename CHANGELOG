@@ -17,6 +17,9 @@ Changes in 5.2.5, in this fork
       used to be a neworigins privilege, then havilah's as well; now a
       report.<n>.json accompanies every report.<n>
    -- Added the neworigins8 ruleset, a variant of neworigins
+   -- Added the rimefall ruleset: one continent tapering from a frozen north
+      to a dry south, with starting locations spread across five latitude
+      bands rather than chosen by terrain
 
  Bug fixes:
    -- Stopped storing pointers into freed memory in the data tables, which
@@ -39,6 +42,12 @@ Changes in 5.2.5, in this fork
       -O2, and a CMake numeric comparison applied to a compiler id
    -- Stopped .gitignore from swallowing the fixtures of a newly recorded
       snapshot turn, and pinned LF on the byte-compared trees
+   -- Stopped a faction the ruleset refuses from abandoning the whole turn.
+      A "Faction: new" block that SetupFaction declines is now skipped and
+      the turn runs for everybody else; it used to end the run writing no
+      game.out and no reports, so one rejected signup cost every other
+      player their turn until a human removed the line.  Affects neworigins,
+      whose end-game registration close had the same effect
 
 
 Changes from 5.1.0 -> 5.2.0

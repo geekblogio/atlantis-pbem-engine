@@ -663,9 +663,30 @@ bool Game::ReadPlayers()
 
                     fac = AddFaction(noleader, reg);
                     if (!fac) {
-                        logger::write("Failed to add a new faction!");
-                        return_code = false;
-                        break;
+                        // A ruleset refused this faction through SetupFaction. That is a decision,
+                        // not a failure, so the turn goes on without it: abandoning the run here
+                        // would cost every other player their turn over one rejected signup, and
+                        // this program is driven as a subprocess where a non-zero exit means the
+                        // turn did not happen. See docs/decisions/0014.
+                        //
+                        // fac is nullptr, and it MUST be left that way. The loop below feeds every
+                        // following line to `fac` while one is set, so carrying on with the
+                        // previous faction still in there would write this rejected newcomer's
+                        // name, address and password over a real player's registration.
+                        //
+                        // The ruleset logs why immediately before this; say which, and say
+                        // plainly that the turn was not abandoned. A refusal used to be
+                        // impossible to miss because everything stopped, so this line is now the
+                        // only trace of it.
+                        std::string detail =
+                            (save.find_first_not_of(" \t") == std::string::npos) ? "" : " (" + save + ")";
+                        logger::write(
+                            "A new faction" + detail + " was refused by the ruleset and has been "
+                            "skipped. The turn continues without it."
+                        );
+                        lastWasNew = false;
+                        f >> parser;
+                        continue;
                     }
 
                     lastWasNew = true;

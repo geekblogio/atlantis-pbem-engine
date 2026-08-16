@@ -465,6 +465,31 @@ first, whose registration close has the same defect. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered,
 **not offered**.
 
+### `#43` — a refused faction no longer abandons the turn
+
+`game.cpp`, `GAMEMASTER.md`, `docs/interface/file-formats.md`, `docs/rulesets.md`, `CHANGELOG`.
+The engine half of [0014](../decisions/0014-a-refused-faction-does-not-abort-the-turn.md), and the
+**second and last** engine change 0012's boundary has been opened for.
+
+`Game::ReadPlayers` set `return_code = false` when `AddFaction` returned null, so a faction a
+ruleset declined ended the whole run: no `game.out`, no reports, non-zero exit, and every other
+player's turn lost until someone edited `players.in` by hand. It now logs the refusal and carries
+on.
+
+The change is four lines and one of them is the point: `fac` is left null and `lastWasNew` cleared,
+so the refused block's `Name:`, `Email:` and `Password:` fall through the `else if (fac)` guard
+instead of being written over the previously read faction's registration. **Verified by filling a
+`rimefall` world, adding a twenty-first faction, and confirming the twentieth kept its own name,
+address and password and that the newcomer's details appear nowhere in `game.out` or
+`players.out`.** Exit code 0, all reports written, snapshots and unit tests unmoved.
+
+**Behaviour change for `neworigins` as well**, deliberately: its annihilation registration close
+had the same defect.
+
+**Upstream-worthy, not offered.** Nothing about the fix is conditional on a ruleset and it helps
+`neworigins` first. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is
+prepared and registered, **not offered**.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

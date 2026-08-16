@@ -465,26 +465,33 @@ worked out fresh every turn from who is actually standing there, so if a faction
 simply walks away, its gateway opens again and the land can be claimed by someone new. Object
 numbers never change, so `[13]` is the same location for the life of the game.
 
-**What happens when you add a faction to a full world, and why it stops the turn.**
+**What happens when you add a faction to a full world.**
 
-If you leave a `Faction: new` line in `players.in` when no starting location is free, the engine
-logs
+If you leave a `Faction: new` line in `players.in` when no starting location is free, the faction
+is **refused and skipped, and the turn runs normally for everybody else**. The engine logs two
+lines — the ruleset's reason, then what it did about it:
 
 ```
 Rimefall: every start location is held; the world is full. Faction not created.
-Failed to add a new faction!
-Couldn't run the game!
+A new faction was refused by the ruleset and has been skipped. The turn continues without it.
 ```
 
-and **the whole turn is not processed**. Nothing is written: no `game.out`, no reports, and your
-`game.in` is untouched. Remove the `Faction: new` line and run the turn again, and everything
-proceeds normally.
+`game.out`, the reports and the `times` files are all written as usual, and the exit status is
+success, because nothing failed: a full world turning away a newcomer is the rule working.
 
-This abort is engine behaviour and not specific to `rimefall` — `neworigins` does the same when its
-end-game closes registration — but `rimefall` is the ruleset where you should expect to meet it,
-because a full world is an ordinary thing for it to become rather than an end-game state. If you
-take signups through a script, cap them at the number of free gateways and you will never see it.
-The cap is a convenience, not a requirement: the engine refuses the faction correctly either way.
+**Watch the log, because this is quiet.** The refused player gets no report and no acknowledgement
+of any kind — the only trace is that line. Nobody will chase you about it except the player. If you
+take signups through a script, cap them at the number of unsealed gateways and the situation never
+arises; the cap is a convenience rather than a requirement.
+
+**The rejected `Faction: new` block is discarded in full**, including its `Name:`, `Email:` and
+`Password:` lines. It does not attach itself to the faction listed before it in `players.in`.
+
+Older builds behaved differently here: a refused faction used to abort the whole run with
+`Couldn't run the game!`, writing nothing at all, so every other player lost their turn until
+someone removed the line by hand. That was engine behaviour rather than anything specific to
+`rimefall`, and it applied to `neworigins` too once its end-game closed registration. See
+`docs/decisions/0014` for why it changed.
 
 ## 5. Altering game rules
 
