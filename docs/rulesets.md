@@ -206,10 +206,10 @@ the `neworigins` one in exactly four lines — the stylesheet reference and the 
 ## `rimefall`, and what it is not yet
 
 `rimefall/` is the second fork-local ruleset. It builds its own continent — one landmass tapering
-from a wide, frozen north to a narrow, dry south — and starts its factions across five latitude
-bands. What is still `neworigins` underneath: there are no invasion fronts, no starting alliances
-and no victory condition of its own, and `extra.cpp` still carries the quest and annihilation
-machinery it was copied from until stage 6 replaces it.
+from a wide, frozen north to a narrow, dry south — starts its factions across five latitude bands,
+and has neighbours begin as allies. What is still `neworigins` underneath: there are no invasion
+fronts and no victory condition of its own, and `extra.cpp` still carries the quest and
+annihilation machinery it was copied from until stage 6 replaces it.
 
 Unlike `neworigins8`, its `RULESET_NAME` and `RULESET_VERSION` are **deliberately distinct**. Its
 world is incompatible with every existing one, so `Game::OpenGame` refusing another variant's
@@ -268,6 +268,35 @@ Two traps are worth knowing before touching this:
   `filter::strip_number` cuts everything from the last `(` when a save file is read back, so a
   parenthesised suffix survives world creation and is then truncated on the next load. The gateway
   names use a comma.
+
+### Starting alliances, and why they read the event rather than the state
+
+Neighbours begin at `ALLY`, written on both sides, to the holders of every other start slot within
+`RIMEFALL_ALLY_RADIUS` — by **proximity, not band**, because the middle band holds by far the most
+slots and a band-wide alliance would turn the most contested zone into one bloc.
+
+**`ALLY` is deliberately the heavy attitude.** It permits `GIVE UNIT`, it defeats theft and
+assassination attempts against a partner while an ally is watching, and it bypasses guard
+restrictions. That weight is what makes the alliance worth something and therefore worth betraying,
+and because attitudes are one-directional a faction can drop to neutral while its partner still
+extends `ALLY` — a silent, asymmetric betrayal rather than a declared one. **It is a starting
+default and not a pact**, and the rulebook has to say so or a player who assumes otherwise learns
+expensively.
+
+The alliance is applied **once, on arrival**, and the mechanism is the point. Nothing can be
+stored to remember it has been done, so the obvious approach is to test whether a faction *looks*
+unallied — and that cannot tell a newcomer from someone who has renounced every alliance. A faction
+that quit its bloc would be dragged back into it next turn, which would make the alliance
+compulsory and contradict the whole design.
+
+So it reads the **event** instead: a gateway still named `Gateway to …` whose land is now held can
+only mean its holder arrived since the last turn, and the rename to `Sealed gateway to …` in the
+same pass makes it unrepeatable. The seal is persisted in `game.out`, so the memory survives a save
+cycle without any new state. A renunciation is therefore permanent, which is verified by test.
+
+An existing attitude is never overwritten — a faction that has already declared something about a
+neighbour has said what it means. A faction that arrives with nobody inside the radius is told so
+rather than being congratulated on neighbours it does not have.
 
 This is also the ruleset where a game master meets a **refused faction**: once every slot is held,
 `SetupFaction` returns 0, the newcomer is skipped and the turn runs normally for everyone else. See

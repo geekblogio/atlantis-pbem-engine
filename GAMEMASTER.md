@@ -487,6 +487,14 @@ arises; the cap is a convenience rather than a requirement.
 **The rejected `Faction: new` block is discarded in full**, including its `Name:`, `Email:` and
 `Password:` lines. It does not attach itself to the faction listed before it in `players.in`.
 
+**Expect a question about starting allies.** A `rimefall` faction that arrives near others is
+declared their mutual ally on the spot, so a player's very first report shows them allied to
+strangers. That is the rule, not a bug, and it is worth saying so in your welcome mail: the
+alliance is a **default, not a pact**. It carries the full weight of `ALLY` — turn-one `GIVE UNIT`
+between strangers is legal, and theft or assassination against a partner fails while an ally is
+watching — and either side may end it with `DECLARE` at any time, one-sidedly and without warning.
+A faction that renounces its alliances keeps them renounced; nothing puts them back.
+
 Older builds behaved differently here: a refused faction used to abort the whole run with
 `Couldn't run the game!`, writing nothing at all, so every other player lost their turn until
 someone removed the line by hand. That was engine behaviour rather than anything specific to

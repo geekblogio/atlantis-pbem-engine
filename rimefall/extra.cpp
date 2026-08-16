@@ -38,6 +38,19 @@ static bool rimefall_slot_taken(ARegion *reg)
     return false;
 }
 
+// Which player faction holds this region, if any. The first one found: a start slot with two
+// player factions standing in it is already contested, and for the starting alliance the one that
+// took it is the one that matters.
+static Faction *rimefall_slot_holder(ARegion *reg)
+{
+    for (const auto o : reg->objects) {
+        for (const auto u : o->units) {
+            if (u->faction && !u->faction->is_npc) return u->faction;
+        }
+    }
+    return nullptr;
+}
+
 // Every gateway object in the nexus, paired with the region it leads to.
 static std::vector<std::pair<Object *, ARegion *>> rimefall_slots(ARegionList& regions)
 {
@@ -90,23 +103,112 @@ static int rimefall_free_slot_count(ARegionList& regions)
 // and recreating them would move object numbers around in reports and in the JSON, which 0010's
 // consequences single out as visible downstream and easy to get wrong. Renaming also shows players
 // the world filling up rather than silently shortening the list.
-static void rimefall_rebuild_gateways(ARegionList& regions)
+//
+// It also reports which slots were claimed since the last rebuild, and THAT IS THE ARRIVAL EVENT.
+//
+// Starting alliances have to be applied exactly once, when a faction first takes its land, and
+// nothing can be stored to remember that it has been done: rulesetSpecificData is not persisted,
+// and the game.in format is a published interface. But the seal is itself persisted memory. A
+// gateway still reading "Gateway to …" whose land is now held can only mean its holder arrived
+// since the last time this ran, and the rename immediately below makes it unrepeatable.
+//
+// This is why the alliance is NOT applied by testing whether a faction looks unallied. That test
+// cannot tell a newcomer from someone who has renounced every alliance, so a faction that quit its
+// bloc would be forced back into it next turn — and 0010 section 8 is explicit that this is a
+// starting default and not a pact. Reading the event instead of the state keeps a renunciation
+// permanent, which is the whole point of making the attitude a heavy one.
+//
+static std::vector<std::pair<Faction *, ARegion *>> rimefall_rebuild_gateways(ARegionList& regions)
 {
+    std::vector<std::pair<Faction *, ARegion *>> arrived;
+
     for (const auto& slot : rimefall_slots(regions)) {
         Object *o = slot.first;
         ARegion *dest = slot.second;
         std::string band = rimefall_band_name(rimefall_band_of(dest, regions));
         std::string terrain = TerrainDefs[dest->type].name;
 
+        bool taken = rimefall_slot_taken(dest);
+        bool was_sealed = o->name.rfind("Sealed gateway to ", 0) == 0;
+
+        if (taken && !was_sealed) {
+            Faction *holder = rimefall_slot_holder(dest);
+            if (holder) arrived.push_back({ holder, dest });
+        }
+
         // Comma rather than brackets, for the reason given where these are first named in
         // rimefall/map.cpp: '(' does not survive the name filters.
-        std::string wanted = rimefall_slot_taken(dest)
+        std::string wanted = taken
             ? "Sealed gateway to " + band + ", " + terrain
             : "Gateway to " + band + ", " + terrain;
 
         // set_name appends the object number, so compare on the prefix rather than the whole
         // string or every gateway would be renamed every single turn.
         if (o->name.rfind(wanted, 0) != 0) o->set_name(wanted);
+    }
+
+    return arrived;
+}
+
+//
+// Neighbours begin as allies. Applied when a faction first takes its start location, to the
+// holders of every other start location within RIMEFALL_ALLY_RADIUS.
+//
+// WRITTEN ON BOTH SIDES, DELIBERATELY. set_attitude records only one faction's view of another
+// (faction.h), so a single-sided write would give one party the obligations of an alliance and the
+// other none, with nothing reporting the asymmetry. That same one-directionality is what later
+// lets a faction defect quietly, which 0010 section 8 wants; it must not be how the alliance
+// STARTS.
+//
+// An existing attitude is never overwritten. A faction that has already declared something about a
+// neighbour has said what it means, and a newcomer's arrival is not a reason to overrule it.
+//
+static void rimefall_settle_alliances(ARegionList& regions,
+    const std::vector<std::pair<Faction *, ARegion *>>& arrived)
+{
+    if (arrived.empty()) return;
+
+    // Everyone currently holding a start location, so a newcomer can be related to those already
+    // present and they to it in the same pass — 0010 section 8 requires both directions at once.
+    std::vector<std::pair<Faction *, ARegion *>> settled;
+    for (const auto& slot : rimefall_slots(regions)) {
+        Faction *holder = rimefall_slot_holder(slot.second);
+        if (holder) settled.push_back({ holder, slot.second });
+    }
+
+    for (const auto& newcomer : arrived) {
+        int made = 0;
+        for (const auto& other : settled) {
+            if (other.first == newcomer.first) continue;
+            if (regions.GetPlanarDistance(newcomer.second, other.second, 0) > RIMEFALL_ALLY_RADIUS) continue;
+
+            if (newcomer.first->get_attitude(other.first->num) == AttitudeType::NEUTRAL) {
+                newcomer.first->set_attitude(other.first->num, AttitudeType::ALLY);
+                made++;
+            }
+            if (other.first->get_attitude(newcomer.first->num) == AttitudeType::NEUTRAL)
+                other.first->set_attitude(newcomer.first->num, AttitudeType::ALLY);
+        }
+
+        std::string band = rimefall_band_name(rimefall_band_of(newcomer.second, regions));
+
+        // Only claim neighbours when there are some. Slots are spaced, so a faction can easily
+        // arrive with nobody inside the alliance radius, and telling it otherwise would read as a
+        // bug the first time it checked its attitudes and found them empty.
+        if (made > 0) {
+            newcomer.first->event(
+                "Your neighbours in " + band + " greet you as an ally. This is a custom of the "
+                "land, not a pact: it binds no one, and either side may end it with DECLARE at any "
+                "time.",
+                "arrival"
+            );
+        } else {
+            newcomer.first->event(
+                "You have settled " + band + " with no neighbour close enough to greet you. "
+                "Nobody here is bound to you, and you are bound to nobody.",
+                "arrival"
+            );
+        }
     }
 }
 
@@ -645,7 +747,10 @@ Faction *Game::CheckVictory()
     // the engine offers, and runorders.cpp calls it only while OPEN_ENDED is 0 — which is why
     // rimefall/rules.cpp pins that field with a comment. It runs inside RunOrders before
     // WriteReport (game.cpp), so a player's report shows the true state of the nexus.
-    rimefall_rebuild_gateways(regions);
+    // The rebuild reports who claimed a start location since it last ran, and the alliances are
+    // applied to exactly those. Order matters: the rebuild reads the old seals to find the event
+    // and then writes the new ones, so this must happen before anything else touches them.
+    rimefall_settle_alliances(regions, rimefall_rebuild_gateways(regions));
 
     for(const auto& q: quests) {
         if (q->type != Quest::VISIT) continue;
