@@ -427,13 +427,14 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
         }
 
         if (token == "p") {
-            auto removes = remove_if(
-                pReg->products.begin(),
-                pReg->products.end(),
-                [](Production *p) { return p->itemtype != I_SILVER; }
-            );
-            for_each (removes, pReg->products.end(), [](Production *p) mutable { delete p; });
-            pReg->products.erase(removes, pReg->products.end());
+            // Not remove_if(): it leaves copies of the surviving pointers in the tail it hands back, so
+            // deleting that tail frees productions the region is still holding on to.
+            std::vector<Production *> keep;
+            for (const auto p : pReg->products) {
+                if (p->itemtype == I_SILVER) keep.push_back(p);
+                else delete p;
+            }
+            pReg->products = keep;
             pReg->SetupProds(1);
             continue;
         }
@@ -754,15 +755,20 @@ void Game::EditGameRegionMarkets(ARegion *pReg)
                 continue;
             }
 
-            // remove all duplicate market items of the same type.
-            std::unordered_set<int> s;
-            auto dupes = std::remove_if(
-                pReg->markets.begin(),
-                pReg->markets.end(),
-                [&s, mitem](const Market *m) { return m->item == mitem && !s.insert(m->item).second; }
-            );
-            std::for_each(dupes, pReg->markets.end(), [](Market *m) { delete m; });
-            pReg->markets.erase(dupes, pReg->markets.end());
+            // remove all duplicate market items of the same type. Written out rather than done with
+            // remove_if() for the same reason as the product regeneration above: the tail remove_if()
+            // hands back can hold pointers the region still uses, and deleting those corrupts the heap.
+            bool seen = false;
+            std::vector<Market *> keep;
+            for (const auto m : pReg->markets) {
+                if (m->item != mitem || !seen) {
+                    if (m->item == mitem) seen = true;
+                    keep.push_back(m);
+                    continue;
+                }
+                delete m;
+            }
+            pReg->markets = keep;
 
             auto m = std::find_if(
                 pReg->markets.begin(),
