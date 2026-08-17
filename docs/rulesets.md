@@ -269,6 +269,39 @@ Two traps are worth knowing before touching this:
   parenthesised suffix survives world creation and is then truncated on the next load. The gateway
   names use a comma.
 
+### The two powers, and renaming without touching `gamedata.cpp`
+
+Six existing monsters are reskinned through `ModifyItemName` and a direct write to `MonDefs`. **No
+entry is added to `gamedata.cpp`** — that table is the union of every variant's needs and is shared
+with upstream, so adding to it buys a permanent merge conflict for flavour a rename gives free.
+
+| code | was | is |
+| --- | --- | --- |
+| `ICEW` | ice wurm | rimeworm |
+| `IDRA` | ice dragon | hoarwyrm |
+| `SKEL` | skeleton | frostbound |
+| `UNDE` | undead | thawless |
+| `LICH` | lich | winterwright |
+| `DRAG` | dragon | saltdrake |
+
+The north takes frost words and the east takes salt, because they have to read as two powers rather
+than one monster pool with two doors — the same reason ice dragons are kept off the eastern front.
+
+**Both tables have to be renamed, and it is easy to get half right.** `ModifyItemName` covers
+`ItemDefs`, which is what a player sees in an item list. But a monster *unit* is named from
+`MonDefs` — `Game::MakeLMon` passes `monster.name` straight to `MakeWMon` — so renaming only the
+item leaves every creature in the world still called an ice wurm. There is no
+`modify_monster_name()` among the `modify_monster_*` helpers and none is needed: `find_monster()`
+is declared in `items.h` and returns a mutable reference, which is what those helpers use
+internally.
+
+One label stays out of reach. `MakeLMon` names a crypt's stack with the hard-coded literal
+`"Undead"`, as it does for `"Demons"` and `"Evil Mages"`, so a crypt still reports a unit called
+Undead whose contents are frostbound, thawless and winterwrights. Reaching it would mean a third
+engine change, which [0012](decisions/0012-a-ruleset-hook-for-gateway-destinations.md) does not
+allow without its own record, and it is a group label on ordinary lair furniture rather than
+anything to do with the invasion fronts.
+
 ### Starting alliances, and why they read the event rather than the state
 
 Neighbours begin at `ALLY`, written on both sides, to the holders of every other start slot within
