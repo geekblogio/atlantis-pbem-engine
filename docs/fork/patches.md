@@ -571,6 +571,35 @@ the first is the only choice that moves no yield anywhere.
 **Fork-local, permanently**, like everything under `docs/decisions/`. The fix it governs is
 upstream-worthy and registered separately.
 
+### `#48` — a region no longer produces the same item twice
+
+`aregion.cpp`, `aregion.h`, `economy.cpp`, `unittest/produce_test.cpp`, `docs/interface/json-report.md`,
+`CHANGELOG`. The engine half of [0015](../decisions/0015-one-production-per-item-and-skill.md).
+
+`ARegion::products` could hold two entries for one item, and the second was permanently
+unharvestable, because `RunAProduction` deletes the month order of every unit that worked the
+production it was handed. `ModifyTerrainItems` puts mithril in a second slot of the `fracas` desert
+where the shared table already has it, both slots roll separately, and the report then promises a
+deposit nobody can mine. `remove_duplicate_products()` drops the repeat, from `SetupProds` for a new
+world and from `Readin` for one already in play.
+
+**The detail that keeps it cheap:** the repeat is discarded *after* the slot has been rolled and the
+`Production` constructed, so the sequence of random draws does not move and neither does any other
+region. Measured rather than assumed — a seeded 64×64 `fracas` world regenerates byte-identical
+apart from the removed entries, and the same world generated *before* the fix and then loaded *with*
+it lands on a byte-identical `game.out`.
+
+**Neither half of this could have been caught by the snapshot suite**, whose two blind spots —
+world generation, and `fracas` beyond its rulebook — are exactly where the bug lived. See
+[../interface/compatibility.md](../interface/compatibility.md).
+
+`markets` was checked for the same shape and cannot reach it; the scan that established this used a
+temporary probe which is deliberately not in the tree.
+
+**Upstream-worthy, not offered.** The engine, the shared terrain table and `fracas` are all
+upstream's; nothing here is fork-specific. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
