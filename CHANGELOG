@@ -43,6 +43,12 @@ Changes in 5.2.5, in this fork
       -O2, and a CMake numeric comparison applied to a compiler id
    -- Stopped .gitignore from swallowing the fixtures of a newly recorded
       snapshot turn, and pinned LF on the byte-compared trees
+   -- Made the makefile track header dependencies.  It compared only a .cpp
+      against its .o, so editing any header - game.h included - rebuilt
+      nothing and left the tree stale, which showed up as link errors and as
+      binaries silently holding the old value of a constant.  The ruleset
+      shims were affected twice over, since a change to neworigins/extra.cpp
+      did not rebuild the neworigins8 object that includes it
    -- Stopped a faction the ruleset refuses from abandoning the whole turn.
       A "Faction: new" block that SetupFaction declines is now skipped and
       the turn runs for everybody else; it used to end the run writing no

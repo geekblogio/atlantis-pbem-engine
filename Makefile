@@ -4,6 +4,20 @@ CPLUS ?= g++
 CC ?= gcc
 CFLAGS = -O2 -g -I. -I.. -Wextra -Wall -Werror -std=c++20 -pedantic -Wno-psabi
 
+# Header dependency tracking. Without it this makefile only ever compared a .cpp against its .o,
+# so editing ANY header rebuilt nothing and left the tree quietly stale — including game.h, and
+# including the ruleset shims, where a change to neworigins/extra.cpp did not rebuild the
+# neworigins8 and rimefall objects that #include it. CI never showed it because CI always builds
+# from scratch; locally it produced link errors against a header that had already changed, and
+# worse, binaries that silently still held the old value of a constant.
+#
+# -MMD writes the list the compiler already knows next to each object; -MP adds a phony target per
+# header so that deleting one does not break the build with "No rule to make target".
+#
+# Kept out of CFLAGS deliberately: CFLAGS is also passed to the link steps, where these would
+# emit a stray dependency file named after the executable.
+DEPFLAGS = -MMD -MP
+
 RULESET_OBJECTS = extra.o map.o monsters.o rules.o world.o
 
 ENGINE_OBJECTS = aregion.o army.o battle.o economy.o \
@@ -137,10 +151,10 @@ objdir:
 
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+	$(CPLUS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+	$(CPLUS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 # genrules.cpp is one enormous function that gcc's optimiser scales badly on.
 # -O0 is appended rather than -O2 removed, so this stays unoptimised even when
@@ -152,9 +166,15 @@ $(patsubst %.o,obj/%.o,$(ENGINE_OBJECTS)): obj/%.o: %.cpp
 # twice per sub-make.
 obj/genrules.o: CFLAGS += -O0
 
-# If the boost.hpp file is updated, we need to rebuild the unit test files that include it.
-$(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp external/boost/ut.hpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+# The explicit dependency on external/boost/ut.hpp that used to be spelled out here is now
+# generated along with every other header, so it is no longer written by hand.
+$(UNITTEST_OBJECTS): unittest/obj/%.o: unittest/%.cpp
+	$(CPLUS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
+
+# Pull in the generated dependency lists. The leading '-' keeps a clean tree quiet, where none of
+# them exist yet.
+-include $(OBJECTS:.o=.d)
+-include $(UNITTEST_OBJECTS:.o=.d)
 
 # Some utility tasks to keep the external header libraries up to date if needed.
 EXTERNAL_DIR := external
