@@ -759,7 +759,7 @@ void ARegion::SetupProds(double weight)
                         p = new Production(I_FISH, typer->economy);
                     break;
             }
-            products.push_back(p);
+            if (p) products.push_back(p);
         }
     }
 
@@ -775,6 +775,13 @@ void ARegion::SetupProds(double weight)
             }
         }
     }
+
+    // A ruleset can point two slots of one terrain at the same item -- fracas does that with mithril in
+    // the desert -- and then both slots roll separately, so a few regions draw the item twice. Only the
+    // first entry is ever harvestable, so drop the rest here rather than let them sit in the region and
+    // advertise a resource nobody can mine. This runs after the rolls above so that the sequence of
+    // random draws, and with it every other region of the world, stays exactly as it was.
+    remove_duplicate_products();
 }
 
 /* Create a town randomly */

@@ -111,6 +111,9 @@ Notes that cost time if you learn them from a crash instead:
 - **`structures` is `null`, not `[]`,** when a region has none.
 - `exits[].region` is a *reduced* region object — coordinates, terrain, province — not a full one.
 - `present` is the faction's own presence in the region.
+- **`products[]` names each resource at most once.** It used not to: a region could hold two
+  productions of one item, of which only the first was ever harvestable, so the array carried the
+  same `tag` twice with different amounts. Keying the array by `tag` is safe.
 - `population`, `tax` and `entertainment` appear according to what the faction may observe. The
   GM report's regions carry a `description` instead. **Do not assume a fixed key set.**
 
