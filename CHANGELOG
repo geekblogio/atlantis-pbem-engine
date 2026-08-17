@@ -57,6 +57,14 @@ Changes in 5.2.5, in this fork
       game.out and no reports, so one rejected signup cost every other
       player their turn until a human removed the line.  Affects neworigins,
       whose end-game registration close had the same effect
+   -- Stopped a region from listing the same resource twice.  A ruleset can
+      name one item in two slots of a terrain - fracas does, with mithril in
+      the desert - and both slots roll separately, so a few deserts drew
+      mithril twice.  Only the first entry was ever harvestable, because the
+      production phase takes the month order away from every unit that worked
+      it, so the report promised a deposit nobody could mine.  New worlds no
+      longer set one up, and an existing world is repaired as it loads, which
+      leaves what the region yields unchanged
 
 
 Changes from 5.1.0 -> 5.2.0

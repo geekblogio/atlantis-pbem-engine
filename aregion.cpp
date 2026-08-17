@@ -112,6 +112,34 @@ Production *ARegion::get_production_for_skill(int item, int skill) {
     return (p != products.end()) ? *p : nullptr;
 }
 
+/* A region can only ever harvest the first production of any given (item, skill) pair. RunAProduction()
+ * deletes the month order of every unit that worked the production, so by the time a later entry for the
+ * same pair is run there is no unit left with a matching order; RunUnitProduce() and
+ * get_production_for_skill() stop at the first match as well. A repeated entry is therefore permanently
+ * unharvestable, while the report still lists it and promises the player a resource they cannot mine.
+ * Returns the number of entries dropped, keeping the first of each pair -- the one the region has been
+ * harvesting all along. */
+int ARegion::remove_duplicate_products()
+{
+    std::vector<Production *> kept;
+    kept.reserve(products.size());
+
+    for (const auto p : products) {
+        auto duplicate = find_if(kept.begin(), kept.end(), [p](Production *k) {
+            return k->itemtype == p->itemtype && k->skill == p->skill;
+        });
+        if (duplicate == kept.end()) {
+            kept.push_back(p);
+            continue;
+        }
+        delete p;
+    }
+
+    int removed = static_cast<int>(products.size() - kept.size());
+    products = kept;
+    return removed;
+}
+
 int ARegion::IsNativeRace(int item)
 {
     TerrainType *typer = &(TerrainDefs[type]);
@@ -962,6 +990,17 @@ void ARegion::Readin(std::istream &f, std::list<Faction *>& facs)
         Production *p = new Production();
         p->read_in(f);
         products.push_back(p);
+    }
+
+    // Worlds created before SetupProds() guarded against it can carry a second, permanently
+    // unharvestable production of an item the region already produces. Repair them on load.
+    int duplicates = remove_duplicate_products();
+    if (duplicates) {
+        logger::write(
+            "Region " + std::to_string(num) + " (" + std::to_string(xloc) + "," + std::to_string(yloc) + "," +
+            std::to_string(zloc) + ") listed " + std::to_string(duplicates) +
+            " production(s) it could never harvest; removed."
+        );
     }
 
     f >> n;

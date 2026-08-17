@@ -327,6 +327,8 @@ class ARegion
         // find a production for a certain skill.
         Production *get_production_for_skill(int item, int skill);
         int produces_item(int item);
+        // drop every production which repeats an (item, skill) pair an earlier one already covers.
+        int remove_duplicate_products();
 
         // Editing functions
         void UpdateEditRegion();
