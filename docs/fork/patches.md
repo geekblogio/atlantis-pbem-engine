@@ -674,6 +674,32 @@ the obvious fix — clearing the list — takes recruiting away from every start
 **Fork-local, permanently**, like everything under `docs/decisions/`. The fix it governs is
 upstream-worthy and registered separately.
 
+### `#52` — a starting city no longer carries two market blocks
+
+`economy.cpp`, `aregion.h`, all seven rulesets' `world.cpp` plus the `unittest` one,
+`unittest/starting_city_test.cpp`, `docs/interface/json-report.md`, `CHANGELOG`. The engine half of
+[0016](../decisions/0016-a-town-owns-its-markets-the-region-owns-recruiting.md).
+
+`MakeStartingCity` replaces a town, `add_town` appends a market block rather than replacing one, and
+the clearing pass sits below the `START_CITIES_EXIST` early return. A region that already had a town
+carried two complete blocks, of which only the first was tradeable.
+
+**The fix is one line of intent and one of trap.** Clearing the market list before `add_town` — the
+obvious version, and the one first written here — takes the recruiting markets with it, and nothing
+on that path rebuilds them: measured on a `kingdoms` 64×64 world, all six start cities came out
+unable to buy men or leaders. `remove_town_markets()` keeps `IT_MAN` markets for that reason.
+
+Reachable in `kingdoms`, `havilah`, `neworigins` and `rimefall`. **Not** in `fracas`, whose flag
+suggests otherwise: its `SetACNeighbors` call sits behind `if (Globals->NEXUS_EXISTS)`, which is 0,
+so it builds no starting city at all.
+
+**Existing worlds are deliberately not repaired**, unlike `#48`. Nothing in a save file records
+which markets belonged to which town, so a repair would be a guess, and the stale block is inert.
+
+**Upstream-worthy, not offered.** `MakeStartingCity`, `add_town` and `SetupCityMarket` are all
+upstream's and the fix is not conditional on a ruleset. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

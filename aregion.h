@@ -329,6 +329,8 @@ class ARegion
         int produces_item(int item);
         // drop every production which repeats an (item, skill) pair an earlier one already covers.
         int remove_duplicate_products();
+        // drop the markets a town brought with it, keeping the ones the region owns in its own right.
+        void remove_town_markets();
 
         // Editing functions
         void UpdateEditRegion();

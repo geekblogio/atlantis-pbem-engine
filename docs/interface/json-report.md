@@ -114,6 +114,11 @@ Notes that cost time if you learn them from a crash instead:
 - **`products[]` names each resource at most once.** It used not to: a region could hold two
   productions of one item, of which only the first was ever harvestable, so the array carried the
   same `tag` twice with different amounts. Keying the array by `tag` is safe.
+- **`markets` is not guaranteed the same**, in a world generated before that was fixed. A starting
+  city built over an existing town kept both towns' market blocks, so `wanted[]` or `for_sale[]` can
+  name one `tag` twice with different prices; only the first was ever tradeable. New worlds carry one
+  block, but old save files are not repaired, so do not key these arrays by `tag` without deciding
+  what a repeat means to you.
 - `population`, `tax` and `entertainment` appear according to what the faction may observe. The
   GM report's regions carry a `description` instead. **Do not assume a fixed key set.**
 
