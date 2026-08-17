@@ -700,6 +700,30 @@ which markets belonged to which town, so a repair would be a guess, and the stal
 upstream's and the fix is not conditional on a ruleset. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#53` — the starting-city fix reaches only `kingdoms`
+
+`docs/decisions/0016-…`, `CHANGELOG`. A correction to the entry for `#52` above, and to 0016.
+
+Both name `kingdoms`, `havilah`, `neworigins` and `rimefall` as affected. **Only `kingdoms` is.**
+`ARegionList::SetACNeighbors` is per-ruleset like `MakeStartingCity`, and six of the seven copies
+wrap their starting-city loop in a third guard on `START_CITIES_EXIST`, laying nexus portals on
+terrain types in the `else` branch instead. `kingdoms` has no such guard; `fracas` has none either
+but never reaches the function at all.
+
+Measured this time rather than derived: logging every `MakeStartingCity` call, `kingdoms` 64×64
+builds six start cities per world, of which 0, 2 and 1 landed on an existing town across three
+seeds. `havilah` builds none on three seeds, `neworigins` and `rimefall` none.
+
+**Twice in a row now, a reachability claim in this register has been wrong in the same way** — first
+0015's about markets, now 0016's about which rulesets. Both came from reading flags rather than the
+call path, and both had a clean measurement standing behind them that could not have found anything.
+The one habit worth carrying out of it: when a count comes back zero, measure the step *before* the
+one being counted, because a structural zero and a rare zero look identical.
+
+The fix in `#52` is unaffected and stays as it is.
+
+**Fork-local, permanently**, like everything under `docs/decisions/` and this file.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
