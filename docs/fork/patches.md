@@ -513,6 +513,28 @@ world filled to all twenty slots, then 7 confirmed across three seeds. The table
 
 **Fork-local, permanently.**
 
+### `#45` — the makefile tracks header dependencies
+
+`Makefile`, `docs/build-and-test.md`, `CHANGELOG`. Not a `rimefall` change at all: a plain build
+bug that `rimefall` happened to expose.
+
+The makefile compared a `.cpp` against its `.o` and nothing else, so editing **any** header
+rebuilt nothing. `game.h` included. The ruleset shims were hit twice over, because a change to
+`neworigins/extra.cpp` did not rebuild the `neworigins8` and `rimefall` objects that `#include`
+it — the pattern [0006](../decisions/0006-neworigins8-as-its-own-ruleset.md) is built on.
+
+Fixed with `-MMD -MP` and `-include` of the generated lists. `DEPFLAGS` is deliberately separate
+from `CFLAGS`, which is also passed to the link steps where it would emit a stray dependency file
+named after the executable. The hand-written dependency on `external/boost/ut.hpp` is now generated
+like everything else and was removed.
+
+Found the hard way: a tuning constant was changed in a header six times and measured six times,
+and every measurement was of the same unchanged binary. CI never showed any of it, because CI
+always builds from scratch.
+
+**Upstream-worthy, not offered.** Nothing here is fork-specific. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

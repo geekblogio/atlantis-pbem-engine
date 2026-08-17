@@ -33,6 +33,17 @@ make all-clean
 the compiles. The build will fail or, worse, link stale objects. Parallelism belongs to the
 CMake path.
 
+Header changes **do** trigger rebuilds. The compiler writes a `.d` file beside every object
+(`-MMD -MP`) and the makefile reads them back, so editing `game.h` rebuilds what includes it, and
+editing a header a ruleset shim reaches through — `neworigins8/extra.cpp` is one line including
+`neworigins/extra.cpp` — rebuilds the shim's object too. `make all-clean` removes the `.d` files
+with the objects.
+
+This was not always so. Until then the makefile compared only a `.cpp` against its `.o`, so a
+header edit rebuilt nothing and left the tree stale. It surfaced as link errors against a header
+that had already changed and, worse, as binaries that silently still held the old value of a
+constant. CI never showed it, because CI always builds from scratch.
+
 ### CMake — output `build/<game>` and `build/unittest`
 
 ```bash
@@ -135,3 +146,4 @@ that target monthly and opens a pull request when something moved.
 | `unused variable` under CMake but not under `make` | `RelWithDebInfo` adds `-DNDEBUG`, which compiles `assert()` away; a variable that exists only for an assertion needs `[[maybe_unused]]` |
 | a warning you did not introduce | a newer compiler; check whether `Platforms` is already red |
 | stale or half-linked objects after an interrupted `make` | `make all-clean`; and check you did not use `-j` |
+| a constant you just changed in a header has no effect | should no longer happen — `.d` files track headers. If it does, check the object has a `.d` beside it; `make all-clean` restores the invariant |
