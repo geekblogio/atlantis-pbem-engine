@@ -75,9 +75,9 @@ Changes in 5.2.5, in this fork
       over a region that already had a town kept the old town's markets and
       appended a second full set with different amounts and prices; only the
       first could be traded with, so the rest sat in the report doing nothing.
-      Affects the rulesets whose start cities are not rebuilt from scratch -
-      kingdoms, havilah, neworigins and rimefall.  The region's recruiting
-      markets are deliberately kept, since nothing on that path rebuilds them
+      Affects kingdoms, the one ruleset that builds a starting city without
+      first checking START_CITIES_EXIST.  The region's recruiting markets are
+      deliberately kept, since nothing on that path rebuilds them
 
 
 Changes from 5.1.0 -> 5.2.0

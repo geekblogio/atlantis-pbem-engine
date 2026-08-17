@@ -109,3 +109,54 @@ that can reach it are the two where it is rare. `kingdoms`, where it is common, 
 - **Upstream-worthy, and not offered.** `MakeStartingCity`, `add_town` and `SetupCityMarket` are all
   upstream's, and the fix is not conditional on any ruleset. Per
   [0008](0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
+## Correction, 2026-08-17: only `kingdoms` ever reaches this
+
+Appended rather than edited in, per the rule at the head of this directory.
+
+The table under *Which rulesets this can reach* names `kingdoms`, `havilah`, `neworigins` and
+`rimefall`. **Only `kingdoms` is affected.** The other three never build a starting city at all, so
+`MakeStartingCity` does not run in them and there is nothing to duplicate.
+
+The error is the same one this record charges 0015 with, made one layer further down. The set was
+derived from two globals — `NEXUS_EXISTS` and `START_CITIES_EXIST` — rather than measured along the
+call path. `ARegionList::SetACNeighbors` is per-ruleset in the same way `MakeStartingCity` is, and
+**six of the seven copies wrap their starting-city loop in a third guard**:
+
+```cpp
+if (Globals->START_CITIES_EXIST) {          // havilah/map.cpp:942, and four others
+    …
+    pReg->MakeStartingCity();
+} else {
+    // portals from the nexus to a variety of terrain types instead
+```
+
+`kingdoms` has no such guard and calls `MakeStartingCity` unconditionally. `fracas` has none either
+but never reaches the function, because its call to `SetACNeighbors` sits behind `NEXUS_EXISTS`.
+
+Measured by logging every `MakeStartingCity` call and whether the region already had a town:
+
+| Ruleset | World | Starting cities built | On an existing town |
+| --- | --- | --- | --- |
+| `kingdoms` | 64×64, seeds 1 / 2 / 3 | 6 / 6 / 6 | 0 / 2 / 1 |
+| `havilah` | 64×64, seeds 1 / 2 / 3 | 0 / 0 / 0 | — |
+| `neworigins` | 32×32 | 0 | — |
+| `rimefall` | 32×32 | 0 | — |
+
+The full picture, with the guard that was missed:
+
+| Ruleset | `SetACNeighbors` guard | `NEXUS_EXISTS` | `START_CITIES_EXIST` | Start cities | Affected |
+| --- | --- | --- | --- | --- | --- |
+| `kingdoms` | none | 1 | 0 | yes | **yes** |
+| `havilah`, `neworigins`, `rimefall` | on `START_CITIES_EXIST` | 1 | 0 | none | no |
+| `standard`, `basic` | on `START_CITIES_EXIST` | 1 | 1 | yes | no — the clear below runs |
+| `fracas` | none | 0 | 0 | none | no |
+
+**The decision is unaffected**, and so is the fix: `remove_town_markets()` is correct where it runs
+and inert where `MakeStartingCity` does not, and the regression tests exercise the mechanism through
+the `unittest` ruleset rather than through any shipped one.
+
+What this cost was seven `havilah` worlds reported as *"happened not to place a start city on an
+existing town"*. They were not a matter of odds. **A zero that a hypothesis predicts to be rare
+looks exactly like a zero that is structural**, and the way to tell them apart is to measure the
+step before the one being counted — here, whether the function was called at all.
