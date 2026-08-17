@@ -81,6 +81,84 @@ static std::vector<std::pair<Object *, ARegion *>> rimefall_slots(ARegionList& r
 #define QUEST_SPAWN_CHANCE 70
 #define MAX_DESTINATIONS 5
 
+//
+// ---------------------------------------------------------------------------------------------
+// The two invasion fronts
+// ---------------------------------------------------------------------------------------------
+//
+
+// How far south the northern front has reached, as a row on the surface. A pure function of the
+// turn number, which is the only form that survives a save cycle with no accumulator available —
+// and it has the side benefit of being legible: players can see winter coming and plan against it.
+// The origin is the SOURCE'S OWN ROW, not row zero. MakeLand never seeds the rows beside the pole,
+// so a front starting at zero spends its first twenty-odd turns crossing empty water and does
+// nothing — which looked like a working grace period and was really just geography. Starting at the
+// Rimewell also reads correctly: the cold comes from the source and creeps away from it.
+static int rimefall_front_row(int turn, int origin_row, ARegionArray *surface)
+{
+    int row = origin_row + (turn * RIMEFALL_FRONT_ROWS_PER_10_TURNS) / 10;
+    if (row < 0) row = 0;
+    if (row > surface->y) row = surface->y;
+    return row;
+}
+
+// Find a source object by the name it was given at world creation. Names are the handle because
+// object numbers come from buildingseq and are not predictable, and nothing else about a source is
+// distinguishable from an ordinary lair of the same type.
+static Object *rimefall_find_source(ARegionList& regions, const std::string& name, ARegion **where)
+{
+    ARegionArray *surface = regions.GetRegionArray(1);
+    if (!surface) return nullptr;
+    for (int x = 0; x < surface->x; x++) {
+        for (int y = 0; y < surface->y; y++) {
+            ARegion *reg = surface->GetRegion(x, y);
+            if (!reg) continue;
+            for (const auto o : reg->objects) {
+                if (o->name.rfind(name, 0) == 0) {
+                    if (where) *where = reg;
+                    return o;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+// A front is defeated when a player faction holds its source — a unit standing inside the object,
+// not merely in the region. Derived from the world, so no flag is stored and none can drift.
+static bool rimefall_source_held(Object *source)
+{
+    if (!source) return false;
+    for (const auto u : source->units) {
+        if (u->faction && !u->faction->is_npc) return true;
+    }
+    return false;
+}
+
+// Player-versus-player battles fought this turn, BY EXCLUSION: one referenced by neither the
+// monster faction nor the guard faction was necessarily between players.
+//
+// Battle does not record its sides usably, and Faction::battles also collects mere bystanders —
+// battle.cpp adds a battle to every faction merely Present in the region. So a player fight that a
+// wandering monster happened to be standing next to is counted as a monster fight and dropped.
+//
+// THE FILTER ERRS CONSERVATIVELY ON PURPOSE. It under-counts, never over-counts, and that
+// direction is what stops the discord term from driving a feedback loop where a large wave
+// produces many battles and therefore a larger wave (0011 section 3).
+static int rimefall_pvp_battles(std::vector<Battle *>& battles, Faction *mon, Faction *guard)
+{
+    int count = 0;
+    for (const auto b : battles) {
+        bool npc_involved = false;
+        if (mon && std::find(mon->battles.begin(), mon->battles.end(), b) != mon->battles.end())
+            npc_involved = true;
+        if (guard && std::find(guard->battles.begin(), guard->battles.end(), b) != guard->battles.end())
+            npc_involved = true;
+        if (!npc_involved) count++;
+    }
+    return count;
+}
+
 // How many start slots are still free, over the whole world. Used to decide whether a new faction
 // can be admitted at all.
 //
@@ -118,7 +196,8 @@ static int rimefall_free_slot_count(ARegionList& regions)
 // starting default and not a pact. Reading the event instead of the state keeps a renunciation
 // permanent, which is the whole point of making the attitude a heavy one.
 //
-static std::vector<std::pair<Faction *, ARegion *>> rimefall_rebuild_gateways(ARegionList& regions)
+static std::vector<std::pair<Faction *, ARegion *>> rimefall_rebuild_gateways(ARegionList& regions,
+    int front_row)
 {
     std::vector<std::pair<Faction *, ARegion *>> arrived;
 
@@ -138,9 +217,21 @@ static std::vector<std::pair<Faction *, ARegion *>> rimefall_rebuild_gateways(AR
 
         // Comma rather than brackets, for the reason given where these are first named in
         // rimefall/map.cpp: '(' does not survive the name filters.
+        // A slot the northern front has reached stops being offered. Otherwise the game sends
+        // newcomers into ground that is already lost, and registration would go on inviting people
+        // to a world that is being eaten. It also makes registration close itself as the world
+        // falls, which 0011's consequences ask to be deliberate rather than accidental.
+        //
+        // The state is carried in the NAME because ARegion::movement_forbidden_by_ruleset has no
+        // way to compute it: that hook gets no Game, so it cannot read the turn number. The name
+        // is persisted and the rebuild refreshes it every turn, exactly as the seal already works.
+        bool overrun = !taken && dest->yloc <= front_row;
+
         std::string wanted = taken
             ? "Sealed gateway to " + band + ", " + terrain
-            : "Gateway to " + band + ", " + terrain;
+            : overrun
+                ? "Lost gateway to " + band + ", " + terrain
+                : "Gateway to " + band + ", " + terrain;
 
         // set_name appends the object number, so compare on the prefix rather than the whole
         // string or every gateway would be renamed every single turn.
@@ -211,6 +302,7 @@ static void rimefall_settle_alliances(ARegionList& regions,
         }
     }
 }
+
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -747,10 +839,178 @@ Faction *Game::CheckVictory()
     // the engine offers, and runorders.cpp calls it only while OPEN_ENDED is 0 — which is why
     // rimefall/rules.cpp pins that field with a comment. It runs inside RunOrders before
     // WriteReport (game.cpp), so a player's report shows the true state of the nexus.
+    //
+    // How far south the northern front has reached, computed once and used by both the gateway
+    // rebuild and the fronts below. It has to be worked out here rather than inside either,
+    // because TurnNumber() is a Game method and neither of them is one.
+    //
+    ARegion *front_origin = nullptr;
+    rimefall_find_source(regions, RIMEFALL_NORTH_SOURCE_NAME, &front_origin);
+    ARegionArray *front_surface = regions.GetRegionArray(1);
+    int front_row = front_surface
+        ? rimefall_front_row(TurnNumber(), front_origin ? front_origin->yloc : 0, front_surface)
+        : 0;
+
     // The rebuild reports who claimed a start location since it last ran, and the alliances are
     // applied to exactly those. Order matters: the rebuild reads the old seals to find the event
     // and then writes the new ones, so this must happen before anything else touches them.
-    rimefall_settle_alliances(regions, rimefall_rebuild_gateways(regions));
+    rimefall_settle_alliances(regions, rimefall_rebuild_gateways(regions, front_row));
+
+    //
+    // Both fronts, run once a turn.
+    //
+    // THIS IS SPELLED OUT HERE RATHER THAN IN ITS OWN FUNCTION. Everything it touches — MakeLMon,
+    // write_times_article, factions, battles, monfaction — is private to Game, and Game's only
+    // ruleset-defined members are the four hooks in game.h. Declaring one more would be a third
+    // engine change, which docs/decisions/0012 does not allow without its own record. Kept as a
+    // clearly bounded section of CheckVictory instead.
+    //
+    // POSITION AND STRENGTH ARE SEPARATE MECHANISMS (0011 section 2). The spawn band's position is a
+    // pure function of the turn and nothing players do slows it; the threat score decides only whether
+    // it attacks this turn and how hard. Killing the source is the one thing that stops a front, and
+    // it stops it completely.
+    //
+    // Scoped so an early exit skips the fronts without abandoning the rest of CheckVictory.
+    do {
+        ARegionArray *surface = front_surface;
+        if (!surface) break;
+
+        ARegion *north_where = front_origin, *east_where = nullptr;
+        Object *north = rimefall_find_source(regions, RIMEFALL_NORTH_SOURCE_NAME, &north_where);
+        Object *east  = rimefall_find_source(regions, RIMEFALL_EAST_SOURCE_NAME,  &east_where);
+
+        bool north_dead = rimefall_source_held(north);
+        bool east_dead  = rimefall_source_held(east);
+
+        int turn = TurnNumber();
+
+        Faction *monfac = GetFaction(factions, monfaction);
+        Faction *guardfac = GetFaction(factions, guardfaction);
+        if (!monfac) break;
+
+        // Garrison a source that is standing empty and unclaimed. This is where the guard is placed
+        // at all, because CreateWorld runs before the monster faction exists.
+        //
+        // NOT REFILLED WHILE A PLAYER IS IN THE REGION. Entry to an occupied object is forbidden
+        // while its monsters hold it, so taking a source means clearing it one turn and entering
+        // the next. Refilling on the turn it was cleared closed that window and made both sources
+        // permanently unwinnable — which the first attempt did, and which is exactly the sort of
+        // thing that only shows up by playing it out.
+        //
+        // Refilling once the attacker has gone is still right: it means a front must be taken and
+        // KEPT rather than merely raided.
+        struct { Object *obj; ARegion *where; } garrisons[] = { { north, north_where }, { east, east_where } };
+        for (const auto& g : garrisons) {
+            if (!g.obj || !g.where) continue;
+            if (!g.obj->units.empty()) continue;
+            if (rimefall_slot_taken(g.where)) continue;   // someone is standing over it
+            MakeLMon(g.obj);
+        }
+
+        // The threat score, recomputed from scratch, never accumulated.
+        int reach_top = front_row - RIMEFALL_FRONT_BAND_DEPTH;
+        long population = 0;
+        for (int x = 0; x < surface->x; x++) {
+            for (int y = 0; y < surface->y; y++) {
+                ARegion *reg = surface->GetRegion(x, y);
+                if (!reg) continue;
+                if (reg->yloc > front_row) continue;          // ahead of the front: out of reach
+                if (reg->yloc < reach_top - 6) continue;      // long behind it: already consumed
+                population += reg->population;
+            }
+        }
+
+        int discord = rimefall_pvp_battles(battles, monfac, guardfac);
+        int score = turn * RIMEFALL_THREAT_PER_TURN
+                  + (int)(population / 10000) * RIMEFALL_THREAT_PER_10KPOP
+                  + discord * RIMEFALL_THREAT_PER_BATTLE;
+
+        // One line per turn in the engine log, not in any player's report. A game master tuning a
+        // live game needs to see which term is driving the front, and the three are impossible to
+        // separate from the outside.
+        logger::write(
+            "Rimefall front: turn " + std::to_string(turn) + " row " + std::to_string(front_row) +
+            " | threat " + std::to_string(score) +
+            " = time " + std::to_string(turn * RIMEFALL_THREAT_PER_TURN) +
+            " + prosperity " + std::to_string((int)(population / 10000) * RIMEFALL_THREAT_PER_10KPOP) +
+            " + discord " + std::to_string(discord * RIMEFALL_THREAT_PER_BATTLE)
+        );
+
+        int stacks = 0;
+        if (score >= RIMEFALL_THREAT_THRESHOLD) {
+            stacks = 1 + (score - RIMEFALL_THREAT_THRESHOLD) / RIMEFALL_THREAT_PER_EXTRA_STACK;
+            if (stacks > RIMEFALL_WAVE_MAX_STACKS) stacks = RIMEFALL_WAVE_MAX_STACKS;
+        }
+
+        // The northern front: a slow, broad wall of attrition across the full width of its band.
+        if (!north_dead && stacks > 0) {
+            static const int northern[] = { I_IWURM, I_ICEDRAGON, I_SKELETON, I_UNDEAD, I_LICH };
+            int placed = 0;
+            for (int attempt = 0; attempt < stacks * 20 && placed < stacks; attempt++) {
+                int y = reach_top + rng::get_random(RIMEFALL_FRONT_BAND_DEPTH + 1);
+                if (y < 0 || y >= surface->y) continue;
+                int x = rng::get_random(surface->x);
+                ARegion *reg = surface->GetRegion(x, y);
+                if (!reg) continue;
+                if (TerrainDefs[reg->type].similar_type == R_OCEAN) continue;
+
+                int type = northern[rng::get_random(sizeof(northern) / sizeof(northern[0]))];
+                auto monster = find_monster(ItemDefs[type].abr, (ItemDefs[type].type & IT_ILLUSION));
+                if (!monster) continue;
+                Unit *mon = GetNewUnit(monfac, 0);
+                mon->MakeWMon(monster->get().name.c_str(), type,
+                    (monster->get().number + rng::get_random(monster->get().number) + 1) / 2);
+                mon->MoveUnit(reg->GetDummy());
+                placed++;
+            }
+            if (placed) {
+                write_times_article(
+                    "The cold deepens in the north. " + std::to_string(placed) +
+                    " more of the rime-borne have been seen abroad, further south than last season."
+                );
+            }
+        }
+
+        // The eastern front wakes when the northern band has passed a set depth, OR immediately when
+        // the northern source is taken — whichever comes first. Without the second condition, killing
+        // the north early would stop the front before it reached the wake depth and the dragons would
+        // never come, letting a fast group skip half the game. With it, success in the north brings
+        // the second act forward instead of cancelling it (0011 section 4).
+        bool dragons_awake = north_dead ||
+            (front_row * 10 >= surface->y * RIMEFALL_DRAGON_WAKE_TENTHS);
+
+        if (!east_dead && dragons_awake && stacks > 0) {
+            int want = stacks > RIMEFALL_DRAGON_STACKS_MAX ? RIMEFALL_DRAGON_STACKS_MAX : stacks;
+            int placed = 0;
+            for (int attempt = 0; attempt < want * 40 && placed < want; attempt++) {
+                // Southern half only, and the coast it strikes from is found relative to the
+                // continent, never from x near the array width — there is no eastern edge.
+                int y = surface->y / 2 + rng::get_random(surface->y / 2);
+                int offset = rng::get_random(surface->x / 2);
+                ARegion *reg = surface->GetRegion((surface->x / 2 + offset) % surface->x, y);
+                if (!reg) continue;
+                if (TerrainDefs[reg->type].similar_type == R_OCEAN) continue;
+
+                auto monster = find_monster(ItemDefs[I_DRAGON].abr, (ItemDefs[I_DRAGON].type & IT_ILLUSION));
+                if (!monster) continue;
+                Unit *mon = GetNewUnit(monfac, 0);
+                mon->MakeWMon(monster->get().name.c_str(), I_DRAGON,
+                    (monster->get().number + rng::get_random(monster->get().number) + 1) / 2);
+                mon->MoveUnit(reg->GetDummy());
+                placed++;
+            }
+            if (placed) {
+                write_times_article(
+                    "Wings out of the eastern sea. " + std::to_string(placed) +
+                    " saltdrakes have come inland against the south."
+                );
+            }
+        }
+
+        if (north_dead && east_dead) {
+            write_times_article("Both hordes are ended. The land is quiet, and has no king.");
+        }
+    } while (false);
 
     for(const auto& q: quests) {
         if (q->type != Quest::VISIT) continue;
@@ -1853,11 +2113,21 @@ const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, 
         // exactly the case where the band had no room left, so this is the backstop that turns
         // that fallback into a readable refusal instead of a silent misplacement.
         bool is_slot = false;
+        bool lost = false;
         for (const auto& slot : rimefall_slots(regions)) {
-            if (slot.second == this) { is_slot = true; break; }
+            if (slot.second != this) continue;
+            is_slot = true;
+            // The overrun state is read off the gateway's name, which CheckVictory refreshes every
+            // turn. This hook receives no Game, so it cannot work out where the front is; the name
+            // is persisted world state and is the only channel available.
+            lost = slot.first->name.rfind("Lost gateway to ", 0) == 0;
+            break;
         }
         if (!is_slot) {
             return "That gateway leads nowhere that is still open";
+        }
+        if (lost) {
+            return "The cold has already taken that land";
         }
         if (rimefall_slot_taken(this)) {
             // Two ways here: the gateway has read "Sealed" for turns and someone tried it anyway,
@@ -1932,6 +2202,13 @@ void Game::filter_gateway_destinations(Object *gateway, ARegion *nominal, std::v
     // longer list it, since a region's production can drift over a long game. Losing a start
     // location silently, years in, would be the worse failure.
     candidates.clear();
-    if (!rimefall_slot_taken(nominal)) candidates.push_back(nominal);
+    if (rimefall_slot_taken(nominal)) return;
+
+    // Overrun slots are not offered. Read from the gateway's own name for the same reason
+    // movement_forbidden_by_ruleset reads it: the state is refreshed once a turn by CheckVictory
+    // and persisted in between.
+    if (gateway->name.rfind("Lost gateway to ", 0) == 0) return;
+
+    candidates.push_back(nominal);
 }
 

@@ -302,6 +302,51 @@ engine change, which [0012](decisions/0012-a-ruleset-hook-for-gateway-destinatio
 allow without its own record, and it is a group label on ordinary lair furniture rather than
 anything to do with the invasion fronts.
 
+### The two invasion fronts
+
+**Position and strength are separate mechanisms.** The northern front's spawn band creeps south as
+a pure function of the turn number — nothing players do slows it — while a *threat score*
+recomputed from scratch each turn decides whether it attacks and how hard. Killing a front's source
+is the only thing that stops it, and it stops it completely.
+
+The front creeps from **its own source's row**, not from row 0. `MakeLand` never seeds the rows
+beside the pole, so a front starting at zero spends twenty-odd turns crossing empty water doing
+nothing — which looks like a working grace period and is really just geography.
+
+The threat score is three terms, and the weights exist to stop any one of them deciding it alone.
+The first attempt had prosperity at 747 against time at 90 over 45 turns, an eight-to-one split
+that made the other two decoration; prosperity is now counted per ten thousand people rather than
+per thousand, and at turn 45 the two sit at 104 and 90. **There is deliberately no separate grace
+period** — the time term starts near zero and that is the grace, with the threshold first crossed
+around turn twelve.
+
+Discord counts only **player-versus-player** battles, identified by exclusion: a battle referenced
+by neither the monster faction nor the guard faction was necessarily between players. The filter
+under-counts — `Faction::battles` collects mere bystanders, so a player fight a wandering monster
+stood next to is dropped — and that direction is the point. It cannot drive a feedback loop where a
+large wave produces battles and therefore a larger wave.
+
+`CheckVictory` writes one line per turn to the engine log giving the score and its three terms
+separately. A game master tuning a live game cannot otherwise tell which term is driving the front.
+
+**The sources have to be enterable, and this is easy to get wrong.** A front is defeated when a
+player unit holds its source object. `O_ICECAVE` was the obvious choice for the north and is a
+trap: it carries no `CANENTER` flag, so a player unit can never set foot in one — the report says
+*"closed to player units"* — and the game would have been unwinnable. The north uses `O_ATEMPLE`
+instead, whose garrison is the northern front's own creatures, and the east `O_DCLIFFS`, which is
+enterable already.
+
+A source that stands empty is re-garrisoned, **unless a player is in its region**. Entry to an
+occupied object is refused while its monsters hold it, so taking a source means clearing it one
+turn and entering the next; refilling on the turn it was cleared closes that window and makes both
+sources permanently untakeable. Refilling once the attacker has *gone* is still right, and is what
+makes a front something to be taken and kept rather than raided.
+
+Bands the front has overrun stop offering start slots. That state is carried in the gateway's
+**name** — `Lost gateway to …` — because `ARegion::movement_forbidden_by_ruleset` receives no
+`Game` and so cannot work out where the front is; the name is persisted and `CheckVictory`
+refreshes it. It also means registration closes itself as the world falls.
+
 ### Starting alliances, and why they read the event rather than the state
 
 Neighbours begin at `ALLY`, written on both sides, to the holders of every other start slot within

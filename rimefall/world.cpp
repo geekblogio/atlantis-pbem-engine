@@ -394,7 +394,48 @@ void Game::CreateWorld()
 
     regions.FinalSetupGates();
 
-    // do final modifications to add in the victory objects (the ritual altars and the deactivated monolith)
+    // The two horde sources, one per invasion front. They exist from world creation and both must
+    // be taken to end the game (0011 sections 4 and 6), so they are part of the world rather than
+    // something a front creates when it wakes — the eastern one stands there from turn one whether
+    // or not its dragons have stirred.
+    //
+    // A front is DEFEATED WHEN A PLAYER UNIT HOLDS ITS SOURCE. That is persisted world state and
+    // needs no flag, and it demands actually taking the place rather than briefly clearing it.
+    {
+        ARegionArray *surface = regions.GetRegionArray(1);
+        struct { ARegion *site; int type; const char *name; } sources[] = {
+            // O_ATEMPLE, not O_ICECAVE. An ice cave has no CANENTER flag, so a player unit can
+            // never set foot in one — the report says "closed to player units" — and a source that
+            // cannot be entered can never be taken, which would leave the game unwinnable. That is
+            // how this was caught. The ancient temple is enterable and its garrison is the
+            // northern front's own creatures: MakeLMon's I_SKELETON case stocks it with frostbound,
+            // thawless and winterwrights together.
+            { rimefall_north_source_site(surface), O_ATEMPLE, RIMEFALL_NORTH_SOURCE_NAME },
+            { rimefall_east_source_site(surface),  O_DCLIFFS, RIMEFALL_EAST_SOURCE_NAME  },
+        };
+        for (const auto& s : sources) {
+            if (!s.site) {
+                logger::write(std::string("Rimefall: could not place ") + s.name +
+                    "; this world cannot be won and should be regenerated.");
+                continue;
+            }
+            Object *o = new Object(s.site);
+            o->num = s.site->buildingseq++;
+            // Type before name: set_name refuses to rename an O_DUMMY, which is what the
+            // constructor leaves it as.
+            o->type = s.type;
+            o->set_name(s.name);
+            o->incomplete = 0;
+            s.site->objects.push_back(o);
+
+            // NOT garrisoned here. Game::NewGame calls CreateWorld before CreateNPCFactions, so
+            // monfaction is still 0 at this point and MakeLMon would dereference a null faction —
+            // it segfaults, which is how this was found. The garrison is placed from CheckVictory
+            // instead, which also makes it self-repairing: a source that is cleared but not held
+            // is re-garrisoned, so a front has to be taken and kept rather than merely raided.
+            logger::write(std::string("Rimefall: ") + s.name + " stands in " + s.site->short_print());
+        }
+    }
 
     regions.CalcDensities();
 

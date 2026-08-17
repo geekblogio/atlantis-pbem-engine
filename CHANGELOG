@@ -19,8 +19,10 @@ Changes in 5.2.5, in this fork
    -- Added the neworigins8 ruleset, a variant of neworigins
    -- Added the rimefall ruleset: one continent tapering from a frozen north
       to a dry south, with starting locations spread across five latitude
-      bands rather than chosen by terrain, and neighbouring factions
-      starting as mutual allies
+      bands rather than chosen by terrain, neighbouring factions starting
+      as mutual allies, and two invasion fronts - ice-bound undead
+      creeping south on a clock nothing slows, and dragons striking
+      inland from the eastern sea - each ended only by taking its source
 
  Bug fixes:
    -- Stopped storing pointers into freed memory in the data tables, which
