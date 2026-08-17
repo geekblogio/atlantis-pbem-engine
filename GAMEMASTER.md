@@ -487,6 +487,27 @@ arises; the cap is a convenience rather than a requirement.
 **The rejected `Faction: new` block is discarded in full**, including its `Name:`, `Email:` and
 `Password:` lines. It does not attach itself to the faction listed before it in `players.in`.
 
+**The game has a clock, and you can watch it.** Two invasion fronts run against the players: ice
+out of the north, creeping south a little further every turn and stopping for nothing, and dragons
+striking inland from the eastern sea against the southern half once the north is far enough gone.
+Each ends only when a faction takes and holds its source — `The Rimewell` in the far north and
+`The Saltspire` on the eastern coast. Until both fall, nobody can win.
+
+Every turn the engine log carries one line for you, not for the players:
+
+```
+Rimefall front: turn 34 row 25 | threat 154 = time 70 + prosperity 84 + discord 0
+```
+
+`row` is how far south the ice has reached. `threat` decides whether it attacks this turn and with
+how many stacks, and the three terms are shown separately because you cannot otherwise tell which
+one is driving it: **time** rises on its own, **prosperity** counts the people living in the
+front's reach, and **discord** counts player-versus-player battles fought that turn. A quiet,
+poor turn is a quiet front; a rich province in its path, or a war between neighbours, is not.
+
+Watch `row` against the map. Once it passes a band, that band's start locations stop being offered
+and read `Lost gateway to …` — the world closes registration on itself as it falls.
+
 **Expect a question about starting allies.** A `rimefall` faction that arrives near others is
 declared their mutual ally on the spot, so a player's very first report shows them allied to
 strangers. That is the rule, not a bug, and it is worth saying so in your welcome mail: the

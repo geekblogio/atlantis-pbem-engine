@@ -1965,6 +1965,58 @@ int rimefall_band_of(ARegion *reg, ARegionList& regions)
     return rimefall_band_of_row(regions.GetRegionArray(reg->zloc), reg->yloc);
 }
 
+// Is this a land hex with at least one ocean neighbour?
+static bool rimefall_is_coastal(ARegion *reg)
+{
+    if (!reg || TerrainDefs[reg->type].similar_type == R_OCEAN) return false;
+    for (int d = 0; d < NDIRS; d++) {
+        ARegion *n = reg->neighbors[d];
+        if (n && TerrainDefs[n->type].similar_type == R_OCEAN) return true;
+    }
+    return false;
+}
+
+ARegion *rimefall_north_source_site(ARegionArray *pRegs)
+{
+    // The deepest north the continent reaches. Where the cold comes from, so it should be behind
+    // the front rather than in front of it — the front starts on top of its own source and creeps
+    // away from it.
+    for (int y = 0; y < pRegs->y; y++) {
+        for (int x = 0; x < pRegs->x; x++) {
+            ARegion *reg = pRegs->GetRegion(x, y);
+            if (!reg) continue;
+            if (TerrainDefs[reg->type].similar_type == R_OCEAN) continue;
+            return reg;
+        }
+    }
+    return nullptr;
+}
+
+ARegion *rimefall_east_source_site(ARegionArray *pRegs)
+{
+    // The eastern flank of the southern half, measured from the continent's own centre line
+    // rather than from the array edge, which does not exist. Scanning x downward from the centre
+    // line's opposite side finds the outermost eastern coast; the first coastal hex found in the
+    // southern half wins.
+    int centre = pRegs->x / 2;
+    for (int y = pRegs->y / 2; y < pRegs->y; y++) {
+        for (int offset = pRegs->x / 2; offset > 0; offset--) {
+            ARegion *reg = pRegs->GetRegion((centre + offset) % pRegs->x, y);
+            if (rimefall_is_coastal(reg)) return reg;
+        }
+    }
+    // A world whose southern half has no eastern coast at all is not one this ruleset can place a
+    // dragon source in. Fall back to any southern coast rather than returning nothing, since the
+    // game needs both sources to be winnable.
+    for (int y = pRegs->y / 2; y < pRegs->y; y++) {
+        for (int x = 0; x < pRegs->x; x++) {
+            ARegion *reg = pRegs->GetRegion(x, y);
+            if (rimefall_is_coastal(reg)) return reg;
+        }
+    }
+    return nullptr;
+}
+
 int rimefall_taper_area(ARegionArray *pRegs)
 {
     int area = 0;
