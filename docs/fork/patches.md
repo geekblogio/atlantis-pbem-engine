@@ -553,7 +553,7 @@ boundary, and it is lair furniture rather than either invasion front.
 
 **Fork-local, permanently.**
 
-### `#47` — the two invasion fronts
+### `#49` — the two invasion fronts
 
 `rimefall/extra.cpp`, `rimefall/world.cpp`, `rimefall/map.cpp`, `rimefall/rimefall.h`, plus the
 documentation. Stage 5, and **wholly inside `rimefall/`** — no engine change.
