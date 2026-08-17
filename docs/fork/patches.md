@@ -600,6 +600,29 @@ temporary probe which is deliberately not in the tree.
 upstream's; nothing here is fork-specific. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#50` — the region editor frees pointers it keeps
+
+`edit.cpp`, `CHANGELOG`. Two double-frees, found while writing the regression tests for `#48`: the
+test helper reached for the same idiom and corrupted the heap with it.
+
+`std::remove_if` leaves the tail **unspecified**, and for a vector of raw pointers that means copies
+of pointers still live at the front. Deleting that tail frees objects the container is about to hand
+back. Regenerating a region's products keeps the two silver productions and deletes the rest — and
+because `SetupProds` runs before `SetupEconomy`, silver sits at the *end* of `products`, so the
+compaction moves it forward and the delete takes out the wages entry the region still uses. Flipping
+a market between buy and sell has the same shape.
+
+**Reproduced rather than argued.** Editing one desert of a generated `fracas` world and saving
+produced a `game.out` whose product list is raw heap bytes — 62 NUL bytes in a text file — and which
+segfaults while reading the regions. A gamemaster loses the world by editing one hex.
+
+**No unit test, deliberately.** The editor reads `std::cin` and `UnitTestHelper` has no way to feed
+it, which its own header records as future work. The reproduction is a seven-token stdin script and
+is in the commit message.
+
+**Upstream-worthy, not offered.** `edit.cpp` is upstream's and nothing here is fork-specific. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
