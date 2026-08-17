@@ -63,6 +63,12 @@ Changes in 5.2.5, in this fork
       it, so the report promised a deposit nobody could mine.  New worlds no
       longer set one up, and an existing world is repaired as it loads, which
       leaves what the region yields unchanged
+   -- Stopped the region editor from writing freed memory into the save file.
+      Regenerating a region's products, and flipping a market between buy and
+      sell, both deleted the tail that remove_if() hands back - which for a
+      vector of pointers still holds entries the region keeps.  Editing one
+      desert and saving produced a game.out whose product list was raw heap
+      bytes, and which no longer loads
 
 
 Changes from 5.1.0 -> 5.2.0
