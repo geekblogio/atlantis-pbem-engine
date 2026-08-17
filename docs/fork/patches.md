@@ -655,6 +655,25 @@ is in the commit message.
 **Upstream-worthy, not offered.** `edit.cpp` is upstream's and nothing here is fork-specific. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#51` — a town owns its markets, the region owns recruiting (0016)
+
+`docs/decisions/0016-…`, `docs/decisions/README.md`. The record settling how a replaced town's
+markets are disposed of, written before the fix as `#47` was before `#48`.
+
+**It amends 0015, and by extension the claim in `#48` above that markets cannot reach the same
+shape.** That claim rested on `SetupCityMarket` not producing a duplicate within one block, which is
+true and was checked. It says nothing about the function being called a second time on a region that
+already has a block, which is what `MakeStartingCity` does. The scan offered as evidence covered
+`fracas` (which builds no starting city at all), `standard` (which clears its markets) and the two
+rulesets where it is rare — not `kingdoms`, where it is common. A clean scan over the wrong four
+rulesets reads exactly like a clean scan, and this entry exists partly to say so.
+
+The decision itself is that a replaced town's markets go and the recruiting markets stay, because
+the obvious fix — clearing the list — takes recruiting away from every starting city in the game.
+
+**Fork-local, permanently**, like everything under `docs/decisions/`. The fix it governs is
+upstream-worthy and registered separately.
+
 ### `#52` — a starting city no longer carries two market blocks
 
 `economy.cpp`, `aregion.h`, all seven rulesets' `world.cpp` plus the `unittest` one,
