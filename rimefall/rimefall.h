@@ -107,4 +107,76 @@ extern const int rimefall_starts_per_band[RIMEFALL_BANDS];
 // one faction left without.
 #define RIMEFALL_ALLY_RADIUS 7
 
+//
+// ---------------------------------------------------------------------------------------------
+// The two invasion fronts
+// ---------------------------------------------------------------------------------------------
+//
+// Everything below is derived from TurnNumber() or read back out of the persisted world. There is
+// no accumulator anywhere and there cannot be one: rulesetSpecificData is not saved and the
+// game.in format is a published interface. See docs/decisions/0011.
+//
+
+// HOW FAST THE NORTHERN FRONT CREEPS SOUTH, in rows per ten turns. Expressed per ten so the speed
+// can be tuned below one row a turn without floating point.
+//
+// THIS IS THE SINGLE MOST IMPORTANT BALANCE CONSTANT IN THE RULESET (0011 section 1). The front
+// never stops and nothing players do slows it, so it is the game's hard clock: too fast and the
+// game is unwinnable, too slow and it is scenery. At 7, on a 64-row map, the front reaches the
+// middle band around turn 45 and the southern edge around turn 90.
+//
+// It is the first thing to revisit after a real game is played.
+#define RIMEFALL_FRONT_ROWS_PER_10_TURNS 7
+
+// How many rows deep the spawn band is. The front is a wall, not a line.
+#define RIMEFALL_FRONT_BAND_DEPTH 3
+
+//
+// The threat score: WHEN the front attacks and HOW HARD, recomputed from scratch every turn.
+// Position and strength are separate mechanisms (0011 section 2) — the creep above decides where
+// the front is, these decide what it does there.
+//
+// There is deliberately NO separate grace period. The time term starts near zero and that IS the
+// grace: at these weights nothing happens until roughly turn thirty.
+//
+// The three weights are set so that no single term can decide the score on its own. Measured over
+// 45 turns of a six-faction game, the first attempt had prosperity at 747 against time at 90 — an
+// eight-to-one split that made the other two terms decoration. Prosperity is now counted per ten
+// thousand people rather than per thousand, which brings it alongside time through the midgame.
+#define RIMEFALL_THREAT_PER_TURN      2   // time: rises steadily, and is the de-facto grace
+#define RIMEFALL_THREAT_PER_10KPOP    4   // prosperity: per 10000 people within the front's reach
+#define RIMEFALL_THREAT_PER_BATTLE   10   // discord: per player-versus-player battle this turn
+#define RIMEFALL_THREAT_THRESHOLD    60   // below this the front does not attack at all
+
+// Above the threshold, one more stack per this much excess. Keeps the front escalating rather
+// than firing one identical wave forever.
+#define RIMEFALL_THREAT_PER_EXTRA_STACK 40
+#define RIMEFALL_WAVE_MAX_STACKS 6
+
+// WHEN THE DRAGONS WAKE. The eastern front opens once the northern spawn band has passed this
+// fraction of the map, in tenths — or immediately when the northern source is taken, whichever
+// comes first (0011 section 4). The second condition is what stops a fast group from skipping half
+// the game by killing the north early: success in the north brings the second act forward rather
+// than cancelling it.
+#define RIMEFALL_DRAGON_WAKE_TENTHS 4
+
+// The eastern front is few and fast against the northern front's wall of attrition.
+#define RIMEFALL_DRAGON_STACKS_MAX 2
+
+// The two sources are named individually rather than by renaming their object types, because
+// O_ICECAVE and O_DCLIFFS also occur naturally as ordinary lairs and renaming the type would
+// rename every one of them.
+#define RIMEFALL_NORTH_SOURCE_NAME "The Rimewell"
+#define RIMEFALL_EAST_SOURCE_NAME "The Saltspire"
+
+// Where the two horde sources stand. Pure lookups: Game::CreateWorld builds the objects and
+// garrisons them, because MakeLMon is private to Game and only a Game member can reach it.
+//
+// The eastern site is found from the LANDMASS, never from x near the array width.
+// ARegionArray::GetRegion reduces both coordinates modulo the array size, so the surface has no
+// eastern edge and the eastern ocean is also the western one (0010 section 5). "East" is well
+// defined only relative to the continent.
+ARegion *rimefall_north_source_site(ARegionArray *pRegs);
+ARegion *rimefall_east_source_site(ARegionArray *pRegs);
+
 #endif

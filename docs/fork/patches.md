@@ -600,6 +600,38 @@ temporary probe which is deliberately not in the tree.
 upstream's; nothing here is fork-specific. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#49` — the two invasion fronts
+
+`rimefall/extra.cpp`, `rimefall/world.cpp`, `rimefall/map.cpp`, `rimefall/rimefall.h`, plus the
+documentation. Stage 5, and **wholly inside `rimefall/`** — no engine change.
+
+Both horde sources are placed at world creation and garrisoned from `CheckVictory`. The northern
+spawn band creeps south as a function of the turn from its own source's row; a threat score of
+time, prosperity and discord decides when it attacks and how hard. The eastern front wakes at a set
+depth or the moment the northern source falls. Overrun bands stop offering start slots.
+
+Three things were found by measuring rather than by reading:
+
+- **Prosperity outweighed time eight to one** (747 against 90 over 45 turns), leaving one term
+  deciding a score meant to have three. Counted per ten thousand people now, which brings them
+  level.
+- **The front started at row 0, where there is no land.** Its first twenty-odd turns crossed empty
+  polar water doing nothing, and the apparent grace period was geography rather than the time term.
+  It creeps from its source's row instead.
+- **`O_ICECAVE` has no `CANENTER` flag.** A source nobody can enter can never be taken, and the
+  game would have been unwinnable. The north uses `O_ATEMPLE`, whose garrison is the northern
+  front's own creatures.
+
+A fourth was found by playing it: re-garrisoning an empty source on the same turn it was cleared
+closed the only window in which it could be entered, making both sources permanently untakeable.
+The refill now waits until the region is empty of players.
+
+**Not done, deliberately:** the six creatures are renamed (`#46`) but their combat statistics are
+untouched. Retuning them without play data would be guessing, and the character difference between
+the fronts already lives in the spawn logic rather than in `MonDefs`.
+
+**Fork-local, permanently.**
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
