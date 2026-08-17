@@ -490,6 +490,29 @@ had the same defect.
 `neworigins` first. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is
 prepared and registered, **not offered**.
 
+### `#44` — starting alliances by proximity
+
+`rimefall/extra.cpp`, `rimefall/rimefall.h`, `docs/rulesets.md`, `GAMEMASTER.md`, `CHANGELOG`.
+Stage 4, and **wholly inside `rimefall/`** — no engine change, unlike `#41` and `#43`.
+
+Neighbours begin at `ALLY`, both sides, to the holders of every start slot within
+`RIMEFALL_ALLY_RADIUS`. By proximity rather than band, per 0011 section 5.
+
+The interesting part is how it fires exactly once without storing anything. Testing whether a
+faction *looks* unallied cannot distinguish a newcomer from one that has renounced every alliance,
+so that faction would be forced back into its bloc every turn — the opposite of 0010 section 8's
+"a starting default, not a pact". Instead it reads the **arrival event**: a gateway still named
+`Gateway to …` whose land is now held can only mean its holder arrived since the last turn, and the
+rename to `Sealed gateway to …` in the same pass makes it unrepeatable. The seal is already
+persisted in `game.out`, so no new state exists. Verified: a faction that renounces its only
+alliance still has none two turns later.
+
+The radius was chosen by measurement rather than taste — 16, 12, 9, 7, 5 and 3 on one fixed-seed
+world filled to all twenty slots, then 7 confirmed across three seeds. The table is in
+`rimefall.h` beside the constant.
+
+**Fork-local, permanently.**
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

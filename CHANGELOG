@@ -19,7 +19,8 @@ Changes in 5.2.5, in this fork
    -- Added the neworigins8 ruleset, a variant of neworigins
    -- Added the rimefall ruleset: one continent tapering from a frozen north
       to a dry south, with starting locations spread across five latitude
-      bands rather than chosen by terrain
+      bands rather than chosen by terrain, and neighbouring factions
+      starting as mutual allies
 
  Bug fixes:
    -- Stopped storing pointers into freed memory in the data tables, which

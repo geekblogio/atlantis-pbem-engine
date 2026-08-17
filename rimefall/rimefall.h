@@ -80,4 +80,31 @@ const std::string& rimefall_band_name(int band);
 // Expect to revisit this after the first real game; it is the parameter most likely to be wrong.
 extern const int rimefall_starts_per_band[RIMEFALL_BANDS];
 
+// How far apart two start locations may be and still count as neighbours for the starting
+// alliance, in planar distance.
+//
+// PROXIMITY, NOT BAND. 0010 section 8's heading says "same band" and its body says "clustered by
+// starting location"; 0011 section 5 settled that the body wins, because the middle band holds by
+// far the most start locations and a band-wide alliance would turn the most contested zone into a
+// single bloc — the opposite of what the density curve is for.
+//
+// It also has to stay well under what an election needs: 0011 section 6 wins the game by mutual
+// ALLY from a share of all living factions, and that only means anything if no starting cluster is
+// already big enough. Raise this and the endgame gets easier without anything saying so.
+//
+// Measured on a 64x64 world filled to all twenty start slots, allies per faction:
+//
+//   radius   mean   largest cluster   factions with no ally
+//     16      9.2        15                   0             a single bloc is three quarters of the game
+//     12      5.9         9                   0
+//      9      3.8         6                   0
+//      7      2.3         4                   1             <-- chosen
+//      5      1.1         4                   9             half the players never get the mechanic
+//      3      0           0                  20             nothing happens at all
+//
+// Seven keeps clusters small enough that the largest is a fifth of the field while almost everyone
+// still starts with someone. Stable across three seeds: mean 2.3 to 2.8, largest 4 to 6, at most
+// one faction left without.
+#define RIMEFALL_ALLY_RADIUS 7
+
 #endif
