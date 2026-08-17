@@ -553,6 +553,24 @@ boundary, and it is lair furniture rather than either invasion front.
 
 **Fork-local, permanently.**
 
+### `#47` — one production per item and skill (0015)
+
+`docs/decisions/0015-…`, `docs/decisions/README.md`. The record settling where the fix for a
+duplicated region production belongs, written before the fix as `#42` was before `#43`.
+
+A region's `products` can hold the same item twice: `ModifyTerrainItems` lets a ruleset write any
+item into any slot of a terrain, `fracas` points slot 5 of the desert at mithril where slot 4 of
+the shared table already holds it, and each slot rolls separately. Only the first entry is ever
+harvestable, because `RunAProduction` deletes the month order of every unit that worked it.
+
+**The record exists because the obvious repair is the wrong one.** Letting production fall through
+to the next deposit would have repaired existing worlds without touching their save files — and
+would have taken an affected desert from 3 mithril a month to 8. Dropping the repeat and keeping
+the first is the only choice that moves no yield anywhere.
+
+**Fork-local, permanently**, like everything under `docs/decisions/`. The fix it governs is
+upstream-worthy and registered separately.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
