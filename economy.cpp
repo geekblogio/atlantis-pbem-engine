@@ -784,6 +784,28 @@ void ARegion::SetupProds(double weight)
     remove_duplicate_products();
 }
 
+/* Drop the markets that came with the region's town, so that a replacement town can be given its own.
+ * SetupCityMarket() appends rather than replaces, so without this a region that already had a town ends
+ * up carrying two complete market blocks -- and only the first is tradeable, because DoBuy() and DoSell()
+ * consume every matching order at the first market of that type.
+ *
+ * The recruiting markets are kept. They belong to the region rather than to its town: SetupEconomy()
+ * creates them once from the local race, and none of the paths that replace a town would put them back.
+ * Telling the two apart needs no bookkeeping, because SetupCityMarket() never creates a market for a man
+ * item -- races carry IT_MAN without IT_NORMAL, which is the same distinction UpdateEditRegion() uses. */
+void ARegion::remove_town_markets()
+{
+    std::vector<Market *> keep;
+    keep.reserve(markets.size());
+
+    for (const auto m : markets) {
+        if (ItemDefs[m->item].type & IT_MAN) keep.push_back(m);
+        else delete m;
+    }
+
+    markets = keep;
+}
+
 /* Create a town randomly */
 void ARegion::add_town()
 {

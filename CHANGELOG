@@ -71,6 +71,13 @@ Changes in 5.2.5, in this fork
       vector of pointers still holds entries the region keeps.  Editing one
       desert and saving produced a game.out whose product list was raw heap
       bytes, and which no longer loads
+   -- Stopped a starting city from carrying two market blocks.  Building one
+      over a region that already had a town kept the old town's markets and
+      appended a second full set with different amounts and prices; only the
+      first could be traded with, so the rest sat in the report doing nothing.
+      Affects the rulesets whose start cities are not rebuilt from scratch -
+      kingdoms, havilah, neworigins and rimefall.  The region's recruiting
+      markets are deliberately kept, since nothing on that path rebuilds them
 
 
 Changes from 5.1.0 -> 5.2.0

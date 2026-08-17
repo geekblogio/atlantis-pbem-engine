@@ -2479,6 +2479,11 @@ void ARegion::MakeStartingCity()
 
     if (town) delete town;
 
+    // add_town() appends its market block rather than replacing one, so the old town's markets have to
+    // go first, or the region ends up carrying two of them. The clear further down does not cover this:
+    // it sits below the START_CITIES_EXIST return, and five of the rulesets set that to 0.
+    remove_town_markets();
+
     add_town(TOWN_CITY);
 
     if (!Globals->START_CITIES_EXIST) return;
