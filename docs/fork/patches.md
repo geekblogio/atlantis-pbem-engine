@@ -535,6 +535,24 @@ always builds from scratch.
 **Upstream-worthy, not offered.** Nothing here is fork-specific. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#46` — the two powers, renamed
+
+`rimefall/extra.cpp`, `docs/rulesets.md`. Six existing monsters reskinned: rimeworm, hoarwyrm,
+frostbound, thawless, winterwright for the north, saltdrake for the east. **No entry added to
+`gamedata.cpp`**, per 0010 section 4, and no engine change — wholly inside `rimefall/`.
+
+Renaming needs **both** tables and it is easy to get half right. `ModifyItemName` covers `ItemDefs`;
+a monster unit is named from `MonDefs`, which `Game::MakeLMon` reads directly. Written with only
+the first at first, and a generated world still said "Ice Wurms (158)". No `modify_monster_name()`
+helper exists and none was added: `find_monster()` is public in `items.h` and returns a mutable
+reference, which is what the other `modify_monster_*` helpers use internally.
+
+Recorded as out of reach: `MakeLMon` names a crypt's stack with the hard-coded literal `"Undead"`,
+so that one label survives the rename. Reaching it would be a third engine change under 0012's
+boundary, and it is lair furniture rather than either invasion front.
+
+**Fork-local, permanently.**
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

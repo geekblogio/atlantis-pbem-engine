@@ -1299,6 +1299,61 @@ void Game::ModifyTablesPerRuleset(void)
         ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
     }
 
+    //
+    // The two powers, renamed. Six existing gamedata.cpp entries reskinned through
+    // ModifyItemName; NO ENTRY IS ADDED TO gamedata.cpp, per 0010 section 4. That table is the
+    // union of every variant's needs and is shared with upstream, so adding to it would buy a
+    // permanent merge conflict in exchange for flavour a rename gives for free.
+    //
+    // The names divide on purpose. The north takes frost words — rime, hoar, frost, thaw, winter —
+    // and the east takes salt, because the eastern front strikes inland from the sea against the
+    // dry half of the map. They have to read as two powers rather than one monster pool with two
+    // doors, which is what 0010 section 5 keeps ice dragons off the eastern front for.
+    //
+    // All coined from genre vocabulary, which 0010 section 6 frees for use. No proper noun from
+    // any existing work appears here, and none should be added later: "wintersmith" was rejected
+    // for being someone's book title.
+    //
+    // BOTH TABLES HAVE TO BE RENAMED, and this is easy to get half right. ModifyItemName covers
+    // ItemDefs, which is what a player sees in an item list or a battle report line. But a
+    // wandering monster UNIT is named from MonDefs — Game::MakeLMon passes monster.name straight
+    // to MakeWMon (npc.cpp) — so renaming only the item leaves every actual creature in the world
+    // still called an ice wurm. It was written that way first, and a generated world still said
+    // "Ice Wurms (158)".
+    //
+    // There is no modify_monster_name() among the modify_monster_* helpers, and adding one would
+    // be a third engine change that 0012's boundary does not allow. None is needed: find_monster()
+    // is declared in items.h and hands back a mutable reference, which is exactly what those
+    // helpers use internally. MonType::name is a std::string, so there is no dangling-pointer
+    // hazard of the kind intern() exists for in modify.cpp.
+    //
+    // Illusions are renamed alongside the real thing. An illusion of a saltdrake that announced
+    // itself as a dragon would give the trick away for free.
+    //
+    // ONE LABEL STAYS BEYOND REACH, and it is not worth a third engine change. Game::MakeLMon
+    // names a crypt's stack with the hard-coded literal "Undead" (npc.cpp) rather than reading
+    // MonDefs, exactly as it does for "Demons", "Evil Mages" and "Dark Mages". So a crypt still
+    // reports a unit called Undead, whose contents are frostbound, thawless and winterwrights.
+    // That is a group label on ordinary lair furniture, not part of either invasion front — the
+    // fronts spawn their own units from CheckVictory and are named entirely by this ruleset.
+    struct rimefall_rename { int item; const char *abbr; const char *one; const char *many; };
+    static const rimefall_rename renames[] = {
+        { I_IWURM,     "ICEW", "rimeworm",     "rimeworms"     }, // burrows beneath the ice
+        { I_ICEDRAGON, "IDRA", "hoarwyrm",     "hoarwyrms"     }, // hoar, as in hoarfrost
+        { I_SKELETON,  "SKEL", "frostbound",   "frostbound"    }, // bones the ice holds together
+        { I_UNDEAD,    "UNDE", "thawless",     "thawless"      }, // the dead that will not go
+        { I_LICH,      "LICH", "winterwright", "winterwrights" }, // the one that makes the cold
+        { I_DRAGON,    "DRAG", "saltdrake",    "saltdrakes"    }, // comes out of the eastern sea
+    };
+
+    for (const auto& r : renames) {
+        ModifyItemName(r.item, r.one, r.many);
+        for (int illusion = 0; illusion <= 1; illusion++) {
+            auto monster = find_monster(r.abbr, illusion);
+            if (monster) monster->get().name = r.one;
+        }
+    }
+
     // set up game specific tracked data
     rulesetSpecificData.clear();
 
