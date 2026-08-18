@@ -724,6 +724,35 @@ The fix in `#52` is unaffected and stays as it is.
 
 **Fork-local, permanently**, like everything under `docs/decisions/` and this file.
 
+### `#54` — the same seed builds the same world on every processor
+
+`standard`, `basic`, `fracas`, `kingdoms`, `havilah`, `neworigins` and `rimefall` `extra.cpp`,
+`runorders.cpp`, `economy.cpp`, `spells.cpp`, `scripts/check-rng-draw-order.py`, `ci.yml`,
+`CHANGELOG`. The engine half of
+[0017](../decisions/0017-x86-64-is-the-reference-for-draw-order.md).
+
+`GetRegion(rng::get_random(x), rng::get_random(y))` puts two draws in one argument list, where C++
+leaves the evaluation order unspecified and GCC picks a different one per architecture. The same
+seed therefore built a different world on x86-64 than on aarch64 — measured on three seeded `fracas`
+worlds, one of which came out a city on one platform and a village on the other.
+
+**The interesting half is the choice, not the fix.** Both draw orders are equally correct C++, so
+what decides is that the servers are x86-64 and every recorded seed reproduces its world under that
+order. Pinning x86-64's order — the rightmost draw first, which reads like a slip and is commented
+as deliberate at all twelve sites — means nothing moves where games are played, and `aarch64` moves
+instead. Verified both ways, including 28 recorded turns replayed identically inside an x86-64
+container.
+
+Twelve sites, not the nine first surveyed: `rimefall` did not exist then, and `ARegion::Pillage`
+came from the second patch. A **CI job** now refuses the shape, validated in both directions —
+twelve findings before, none after — after a first version that reported 24 sites of which 23 were
+noise and was rewritten rather than exempted.
+
+**Upstream-worthy, not offered.** Unspecified evaluation order is upstream's bug in upstream's code.
+The *choice* of x86-64 as the reference is ours, and upstream may reasonably prefer the other one —
+which is a good reason to offer the record alongside the patch if it is ever offered at all. Per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

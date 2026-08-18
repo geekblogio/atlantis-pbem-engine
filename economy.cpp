@@ -1269,7 +1269,14 @@ void ARegion::Pillage()
     if (Globals->DYNAMIC_POPULATION) {
         // Don't do population damage if population can't recover
         int popdensity = Globals->CITY_POP / 2000;
-        AdjustPop(- damage * rng::get_random(popdensity) - rng::get_random(5 * popdensity));
+        // Sequenced deliberately, and the wider draw comes FIRST. The two operands of a
+        // subtraction are unsequenced, and the two draws have different ranges, so which
+        // one runs first decides both values -- get_random() re-parametrises its
+        // distribution per range. x86-64 evaluated right to left and drew 5 * popdensity
+        // first; that is the order the servers have always run, so it is pinned here.
+        const int wide = rng::get_random(5 * popdensity);
+        const int narrow = rng::get_random(popdensity);
+        AdjustPop(- damage * narrow - wide);
     }
     /* Stabilise at minimal development levels */
     while (Wages() < Globals->MAINTENANCE_COST / 20) development += rng::get_random(5);

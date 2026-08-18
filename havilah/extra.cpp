@@ -64,7 +64,14 @@ int Game::SetupFaction( Faction *pFac )
     } else {
         ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
         while(!reg) {
-            reg = pArr->GetRegion(rng::get_random(pArr->x), rng::get_random(pArr->y));
+            // Sequenced deliberately, and y is drawn BEFORE x. As two arguments of one call the
+            // evaluation order is unspecified, and GCC differs by architecture: x86-64 evaluates
+            // right to left, aarch64 left to right, so one seed gave two different worlds. x86-64
+            // is what the servers run and what every recorded seed reproduces, so its order is the
+            // one pinned here. Do not swap these two lines, and do not fold them back into the call.
+            const int ry = rng::get_random(pArr->y);
+            const int rx = rng::get_random(pArr->x);
+            reg = pArr->GetRegion(rx, ry);
         }
     }
     temp2->MoveUnit(reg->GetDummy());

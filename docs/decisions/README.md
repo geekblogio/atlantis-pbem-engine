@@ -27,3 +27,4 @@ old one stays, marked as superseded. Nothing is edited into agreement with the p
 | [0014](0014-a-refused-faction-does-not-abort-the-turn.md) | A refused faction does not abort the turn |
 | [0015](0015-one-production-per-item-and-skill.md) | One production per item and skill, in a region |
 | [0016](0016-a-town-owns-its-markets-the-region-owns-recruiting.md) | A town owns its markets; the region owns recruiting, amending 0015 |
+| [0017](0017-x86-64-is-the-reference-for-draw-order.md) | x86-64 is the reference architecture for RNG draw order |

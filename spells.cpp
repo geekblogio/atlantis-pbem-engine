@@ -878,7 +878,15 @@ int Game::RunConstructGate(ARegion *r,Unit *u, int spell)
     }
     if (Globals->GATES_NOT_PERENNIAL) {
         int dm = Globals->GATES_NOT_PERENNIAL / 2;
-        int gm = month + 1 - rng::get_random(dm) - rng::get_random(dm) - rng::get_random(Globals->GATES_NOT_PERENNIAL % 2);
+        // Sequenced deliberately, right to left, matching what x86-64 did. Unreachable in
+        // every ruleset shipped here -- all seven set GATES_NOT_PERENNIAL to 0, and the
+        // enclosing if never fires -- so this changes nothing today. It is written out so
+        // that a ruleset which does set the value gets a defined draw order rather than
+        // one that depends on the compiler.
+        const int parity = rng::get_random(Globals->GATES_NOT_PERENNIAL % 2);
+        const int d2 = rng::get_random(dm);
+        const int d1 = rng::get_random(dm);
+        int gm = month + 1 - d1 - d2 - parity;
         while(gm < 0) gm += 12;
         r->gatemonth = gm;
     }
