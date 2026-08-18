@@ -221,10 +221,25 @@ jobs:
   # tolerated; `failure` and `cancelled` are not. Checking the results explicitly rather
   # than relying on `if: success()` matters: that would pass when a need was skipped and
   # would also let a genuine failure through in some skip combinations.
+  draworder:
+    name: RNG Draw Order
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Two RNG draws in one argument list are evaluated in an order C++ leaves unspecified, and
+      # GCC picks a different one per architecture -- which is how one seed built two different
+      # worlds. The snapshot suite cannot see this: it replays recorded turns on one architecture,
+      # and world generation is outside it entirely. See docs/decisions/0017.
+      - name: Refuse unsequenced RNG draws
+        run: python3 scripts/check-rng-draw-order.py .
+
   gate:
     name: CI
     if: always()
-    needs: [changes, cmake, make, viewer, hygiene, register]
+    needs: [changes, cmake, make, viewer, hygiene, register, draworder]
     runs-on: ubuntu-24.04
     steps:
       - name: Aggregate job results

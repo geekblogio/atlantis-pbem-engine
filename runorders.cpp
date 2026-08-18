@@ -3235,7 +3235,14 @@ void Game::RunAnnihilateOrders() {
                     int tries = 0;
                     while(!target) {
                         if (tries++ > 25) break; // don't loop forever
-                        target = level->GetRegion(rng::get_random(level->x), rng::get_random(level->y));
+                        // Sequenced deliberately, and y is drawn BEFORE x. As two arguments of one call the
+                        // evaluation order is unspecified, and GCC differs by architecture: x86-64 evaluates
+                        // right to left, aarch64 left to right, so one seed gave two different worlds. x86-64
+                        // is what the servers run and what every recorded seed reproduces, so its order is the
+                        // one pinned here. Do not swap these two lines, and do not fold them back into the call.
+                        const int ry = rng::get_random(level->y);
+                        const int rx = rng::get_random(level->x);
+                        target = level->GetRegion(rx, ry);
                         if (!target) continue; // no region there
                         if (target == r) { target = nullptr; continue; } // don't pick our own region
                         if (TerrainDefs[target->type].flags & TerrainType::ANNIHILATED) {

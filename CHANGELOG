@@ -78,6 +78,14 @@ Changes in 5.2.5, in this fork
       Affects kingdoms, the one ruleset that builds a starting city without
       first checking START_CITIES_EXIST.  The region's recruiting markets are
       deliberately kept, since nothing on that path rebuilds them
+   -- Stopped the same seed from building different worlds on different
+      processors.  Two RNG draws sat in one argument list, where C++ leaves
+      the evaluation order unspecified and GCC picks a different one per
+      architecture, so x and y came out swapped between x86-64 and aarch64.
+      Twelve sites, sequenced into locals.  The order pinned is the one
+      x86-64 already produced, since that is what the servers run and what
+      every recorded seed reproduces: nothing changes there, and aarch64
+      now agrees with it instead of disagreeing
 
 
 Changes from 5.1.0 -> 5.2.0
