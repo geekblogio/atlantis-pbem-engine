@@ -753,6 +753,26 @@ The *choice* of x86-64 as the reference is ours, and upstream may reasonably pre
 which is a good reason to offer the record alongside the patch if it is ever offered at all. Per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#55` — kingdoms keeps its lakeless coastline (0018)
+
+`docs/decisions/0018-…`, `docs/decisions/README.md`. **A decision not to diverge**, which is why it
+sits here without a patch behind it.
+
+Six of the seven rulesets roll on `Globals->LAKES` in `CleanUpWater` before turning enclosed water
+into land; `kingdoms` does not. Its `LAKES` is 20, the highest in the tree, and four generated 64×64
+worlds contained no lakes at all against `havilah`'s 11 to 13 at `LAKES = 1`. Both the code and the
+value are byte-identical to `upstream/master`.
+
+Left alone deliberately: nothing is dead and nothing is misreported, so it is a discrepancy in the
+data rather than misbehaviour, and any repair rewrites every future `kingdoms` world — a game change
+rather than maintenance. The record also notes why the obvious repair is wrong: `LAKES` is scaled
+differently by the two code paths, so handing `CleanUpWater` the same 20 would make a fifth of all
+enclosed water into lakes.
+
+**Fork-local, permanently**, like everything under `docs/decisions/`. **No divergence is created**,
+and nothing is offered upstream — a preference about another project's world generation is not a bug
+report.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
