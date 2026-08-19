@@ -59,7 +59,7 @@ in_fork_clone() {
 
 case "$tool" in
   Write|Edit|NotebookEdit)
-    path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // ""')
+    path=$(printf '%s' "$input" | jq -r '[.tool_input.file_path, .tool_input.notebook_path] | map(select(.)) | join(" ")')
     if printf '%s' "$path" | grep -Eq "$GUARD_RE"; then
       deny "BLOCKED: $path is the upstream guard itself. Agents may not modify it by any means. To change or lift it, a human edits the file by hand."
     fi
