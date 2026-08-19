@@ -1,5 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "deny": [
+      "Edit(./.claude/**)",
+      "Write(./.claude/**)",
+      "NotebookEdit(./.claude/**)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -7,7 +14,15 @@
         "hooks": [{ "type": "command", "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/upstream-guard.sh\"", "timeout": 10, "statusMessage": "Checking upstream guard" }]
       },
       {
-        "matcher": "Write|Edit|NotebookEdit",
+        "matcher": "Write",
+        "hooks": [{ "type": "command", "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/upstream-guard.sh\"", "timeout": 10 }]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [{ "type": "command", "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/upstream-guard.sh\"", "timeout": 10 }]
+      },
+      {
+        "matcher": "NotebookEdit",
         "hooks": [{ "type": "command", "command": "\"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/upstream-guard.sh\"", "timeout": 10 }]
       }
     ]

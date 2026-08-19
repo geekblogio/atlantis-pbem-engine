@@ -773,6 +773,39 @@ enclosed water into lakes.
 and nothing is offered upstream — a preference about another project's world generation is not a bug
 report.
 
+### `#56` — the guard's file half moves to `permissions`
+
+`.claude/settings.json`, `.claude/hooks/upstream-guard.sh`. `#37` protected its own files with a
+`PreToolUse` hook matching `Write|Edit|NotebookEdit`. **That branch never ran once.**
+
+Measured on 2026-08-18: in the environment this fork is developed in, `PreToolUse` hooks fire for
+`Bash` and for nothing else. An agent's `Edit` of the guard script reached the tool untouched and
+failed only on the editor's own string match. Restarting did not change it; splitting the
+alternation into three separate matchers did not change it; and a second, independent copy of the
+guard registered at user level since 2026-08-14 — with the same branch, written by hand, never
+exercised — had been failing silently the whole time. Two correct implementations, neither of
+them called.
+
+The file half is carried by `permissions.deny` instead, which does hold. All four paths are now
+refused with `denied by your permission settings`: both guard scripts and both `settings.json`.
+The hook keeps its branch as a fallback for environments where hooks do fire, and that branch also
+gained `notebook_path` — `NotebookEdit` supplies the path under a different key, so the one field
+the branch read was empty for that tool even where the hook works.
+
+**The probe belongs in the register, because the failure was silent for four days.** An `Edit`
+whose `old_string` cannot occur in the file changes nothing and separates the two outcomes exactly:
+`denied by your permission settings` means the guard holds, `String to replace not found` means it
+does not. A guard nobody tests is a guard nobody has.
+
+Two scope limits, both deliberate. The deny list names `settings*.json` and `hooks/**` rather than
+`.claude/**` at user level, because the agent's own memory directory lives under `~/.claude/` and a
+wider rule would sever it. And the user-level copy cannot be registered here at all — it is one
+machine's configuration, outside the repository, and it is the reason `#37` put the guard in the
+repository in the first place.
+
+**Fork-local, permanently.** For `#37`'s reason: upstream is not a fork and has no parent to
+default to.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
