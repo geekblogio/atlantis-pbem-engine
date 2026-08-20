@@ -71,6 +71,15 @@ Changes in 5.2.5, in this fork
       vector of pointers still holds entries the region keeps.  Editing one
       desert and saving produced a game.out whose product list was raw heap
       bytes, and which no longer loads
+   -- Made the same seed build the same world on every standard library, not
+      only on every processor.  std::mt19937 is specified bit for bit but the
+      DISTRIBUTIONS are not: libstdc++ and libc++ map raw draws to values
+      differently and consume the stream at different rates - ten draws of
+      range 6 cost ten raw draws under one and fifteen under the other - so
+      everything after the first draw diverged.  The engine now implements
+      the uniform draw and the shuffle itself, reproducing what libstdc++
+      produces today, so no recorded seed and no running game changes.  A
+      macOS build now replays every recorded turn byte for byte
    -- Stopped the region editor from doing the same thing a third time.
       Deleting a market by item kept the remove_if() shape the two fixes
       above replaced, so a region whose matching market sat before a

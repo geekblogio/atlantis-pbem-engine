@@ -29,3 +29,4 @@ old one stays, marked as superseded. Nothing is edited into agreement with the p
 | [0016](0016-a-town-owns-its-markets-the-region-owns-recruiting.md) | A town owns its markets; the region owns recruiting, amending 0015 |
 | [0017](0017-x86-64-is-the-reference-for-draw-order.md) | x86-64 is the reference architecture for RNG draw order |
 | [0018](0018-kingdoms-keeps-its-lakeless-coastline.md) | `kingdoms` keeps its lakeless coastline |
+| [0019](0019-the-engine-owns-its-random-distributions.md) | The engine owns its random distributions, extending 0017 |

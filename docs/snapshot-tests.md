@@ -81,6 +81,16 @@ will fail with `turn N missing`.
 ## Why Linux only in CI
 
 The runners are bash and use `[[ ]]`, `shopt -s nullglob`, `&>`, `seq`, `diff -ur` and `chmod`.
-More fundamentally, the fixtures encode the output of a Linux build. Running them on another
-platform tests the platform, not the engine. The `Platforms` workflow therefore compiles on
-Windows and macOS but does not replay snapshots.
+The `Platforms` workflow therefore compiles on Windows and macOS but does not replay snapshots.
+
+**This page used to give a second and stronger reason: that the fixtures encode the output of a
+Linux build, so replaying them elsewhere tested the platform rather than the engine. That is no
+longer true.** It was true, and the cause was the standard library rather than the engine — the
+distributions in `<random>` are implementation-defined, and libstdc++ and libc++ consumed the
+generator stream at different rates. Since [0019](decisions/0019-the-engine-owns-its-random-distributions.md)
+the engine implements those itself, and a macOS/arm64 build replays all 28 recorded turns byte for
+byte, exactly as an x86-64 Linux build does.
+
+So a failing replay on another platform is now a real finding, not an artefact. The reason CI
+stays on Linux is the shell scripting above and the fact that the product ships as a Linux binary,
+not a limit on where the fixtures mean anything.

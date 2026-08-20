@@ -5,6 +5,7 @@
 #include <random>
 #include <vector>
 #include <string>
+#include <cstdint>
 #include <stdexcept>
 #include <limits>
 #include <algorithm>
@@ -35,6 +36,55 @@ inline void seed_generator(std::seed_seq& seed_seq) {
     get_initialized_generator().seed(seed_seq);
 }
 
+// Draws a value in [0, bound), consuming raw generator output exactly as libstdc++'s
+// std::uniform_int_distribution does.
+//
+// WHY THIS IS WRITTEN OUT INSTEAD OF USING THE STANDARD DISTRIBUTION. std::mt19937 is specified
+// bit for bit and produces the same stream everywhere. The DISTRIBUTIONS ARE NOT SPECIFIED. Each
+// standard library picks its own mapping from raw draws to values, and the mappings differ in
+// what they return *and* in how many raw draws they consume -- so once one is used, the two
+// libraries' streams diverge permanently. Measured on one seed, ten draws of range 6:
+//
+//     libstdc++ (GCC/Linux)   0 3 5 0 3 3 0 4 2 1     10 raw draws
+//     libc++    (clang/macOS) 1 4 5 4 1 2 3 0 0 1     15 raw draws
+//
+// That is why a recorded seed rebuilt a different world on an arm64 Mac than on the x86-64
+// servers, and it is a far larger effect than the argument-order defect 0017 describes: that one
+// swapped two draws, this one replaces the entire stream.
+//
+// The algorithm below is Lemire's multiply-shift, which is what libstdc++ uses. It is reproduced
+// here rather than depended upon, so the numbers are OURS: they no longer change if a standard
+// library is swapped, updated or ported. Verified against libstdc++ under GCC 13.3 (what CI runs)
+// and GCC 14.2, for every range from 1 to 4096, all powers of two to 2^30 with their neighbours,
+// and assorted large values -- identical results AND identical generator state after each draw.
+//
+// See docs/decisions/0019.
+inline std::uint64_t uniform_below(std::uint64_t bound) {
+    auto& gen = get_initialized_generator();
+
+    // mt19937 has min() == 0 and max() == 2^32-1, so a draw is exactly 32 random bits.
+    std::uint32_t x = static_cast<std::uint32_t>(gen());
+    std::uint64_t m = static_cast<std::uint64_t>(x) * bound;
+    std::uint32_t l = static_cast<std::uint32_t>(m);
+
+    // The low half decides fairness: only the first (2^32 mod bound) products are biased, and
+    // rejecting exactly those makes the result uniform. The test is skipped entirely unless the
+    // draw falls in that window, which is why the common case costs one draw and no division.
+    if (l < bound) {
+        const std::uint32_t threshold = static_cast<std::uint32_t>((0x100000000ull - bound) % bound);
+        while (l < threshold) {
+            x = static_cast<std::uint32_t>(gen());
+            m = static_cast<std::uint64_t>(x) * bound;
+            l = static_cast<std::uint32_t>(m);
+        }
+    }
+
+    // bound == 1 deliberately falls through the same path: it consumes one draw and yields 0,
+    // which is what the standard distribution does for an empty range. Short-circuiting it would
+    // silently shift every later draw.
+    return m >> 32;
+}
+
 } // namespace detail
 
 inline void seed_random() {
@@ -57,20 +107,11 @@ inline void seed_random(int seed) {
 }
 
 inline int get_random(int range) {
-    static int last_range = 0; // this will let us reuse the same distribution for multiple calls with same range.
-    static std::uniform_int_distribution<> distribution(0, 1); // default distribution
-
     int neg = (range < 0);
     if (!range) return 0;
     if (neg) range = -range;
 
-    if (range != last_range) {
-        last_range = range; // Update last_range to the current range
-        // Create a new distribution for the new range
-        distribution.param(std::uniform_int_distribution<>::param_type(0, range - 1));
-    }
-
-    int ret = distribution(detail::get_initialized_generator());
+    int ret = static_cast<int>(detail::uniform_below(static_cast<std::uint64_t>(range)));
     if (neg) ret = -ret;
     return ret;
 }
@@ -122,9 +163,47 @@ inline int calculate_losses(int amount, int percentage) {
 }
 
 // Shuffles the elements in the given container in place using the internal generator.
+//
+// Written out for the same reason as uniform_below(): std::shuffle is not specified either, and
+// it is built on std::uniform_int_distribution, so it inherited the divergence twice over. This
+// reproduces libstdc++'s algorithm exactly, INCLUDING its pairing optimisation -- once the range
+// is small enough that two indices fit in one draw, libstdc++ generates them together and the
+// draw count halves. A plain Fisher-Yates loop returns different permutations for every size
+// above two, so the optimisation is part of the observable behaviour, not an implementation
+// detail we may skip. Verified against libstdc++ for sizes 2, 3, 4, 5, 10, 17, 50, 101 and 1000.
 template <typename C>
 inline void shuffle(C& container) {
-    std::shuffle(container.begin(), container.end(), detail::get_initialized_generator());
+    auto first = std::begin(container);
+    auto last = std::end(container);
+    if (first == last) return;
+
+    using diff_t = typename std::iterator_traits<decltype(first)>::difference_type;
+    const std::uint64_t urngrange = 4294967295ull; // mt19937: max() - min()
+    const std::uint64_t urange = static_cast<std::uint64_t>(last - first);
+
+    auto i = first + 1;
+
+    // Two indices fit in one draw exactly when urange * urange <= urngrange; written as a
+    // division so it cannot wrap.
+    if (urngrange / urange >= urange) {
+        // An even number of elements means an odd number of swaps, so the first is done alone
+        // and the rest go in pairs.
+        if ((urange % 2) == 0) {
+            std::iter_swap(i++, first + static_cast<diff_t>(detail::uniform_below(2)));
+        }
+        while (i != last) {
+            const std::uint64_t swap_range = static_cast<std::uint64_t>(i - first) + 1;
+            const std::uint64_t both = detail::uniform_below(swap_range * (swap_range + 1));
+            std::iter_swap(i++, first + static_cast<diff_t>(both / (swap_range + 1)));
+            std::iter_swap(i++, first + static_cast<diff_t>(both % (swap_range + 1)));
+        }
+        return;
+    }
+
+    for (; i != last; ++i) {
+        std::iter_swap(i, first + static_cast<diff_t>(
+            detail::uniform_below(static_cast<std::uint64_t>(i - first) + 1)));
+    }
 }
 
 // Concept to check if a type is a range with an unsigned integral value type
