@@ -838,6 +838,34 @@ being believed; twelve false alarms spend that faster than any missed draw pair 
 
 **Fork-local, permanently.** The script is this fork's, added by `#54`.
 
+### `#59` — a failed expectation stops killing the suite
+
+`unittest/testhelper.cpp` and five test files. boost.ut records a failed `expect()` and continues
+to the next line, and the next line is usually an index into the container whose size the failed
+expectation just asserted. `operator[]`, `.front()` and `.back()` check nothing, so a red run does
+not merely report — it reads out of bounds and dies.
+
+32 preconditions become `expect(...) << fatal`, by one rule: an expectation earns it when an
+unchecked access to the same container follows immediately. `activate_spell()` gains three null
+checks, because it calls the `Run<Spell>` functions directly while their real caller in
+`runorders.cpp` reaches them only once it has found an order — `RunTeleport` dereferences
+`u->teleportorders` unguarded, and a test whose order text parsed into nothing segfaults inside
+the engine.
+
+**`fatal` fires only on a failing expectation, so a green run is untouched** — which is why this
+changes nothing in CI and everything on a machine where the suite is red.
+
+Found while chasing a sporadic snapshot crash that turned out not to reproduce. On this fork's
+macOS/arm64 workstation the suite exited 139 after a heap-buffer-overflow read past a
+`vector<FactionEvent>`; it now exits 1 with ten suites green, ten red and all of them reported.
+**Those failures are a separate defect** — the generated world differs on this platform, and `#54`
+fixed one cause of that but evidently not every one. A suite that dies at the first failure cannot
+be compared against anything, so this is the precondition for that investigation rather than a
+part of it.
+
+**Upstream-worthy, not offered.** `unittest/` is upstream's and the fragility is theirs, but per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
