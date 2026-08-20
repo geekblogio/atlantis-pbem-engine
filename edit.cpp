@@ -800,23 +800,26 @@ void Game::EditGameRegionMarkets(ARegion *pReg)
                 continue;
             }
 
-            auto m = std::find_if(
-                pReg->markets.begin(),
-                pReg->markets.end(),
-                [mitem](const Market *m) { return m->item == mitem; }
-            );
-
-            if (m != pReg->markets.end()) {
-                auto dupes = std::remove_if(
-                    pReg->markets.begin(),
-                    pReg->markets.end(),
-                    [mitem](const Market *m) { return m->item == mitem; }
-                );
-                std::for_each(dupes, pReg->markets.end(), [](Market *m) { delete m; });
-                pReg->markets.erase(dupes, pReg->markets.end());
-            } else {
-                logger::write("No such market");
+            // Written out rather than done with remove_if() for the same reason as the two sites
+            // above: the tail remove_if() hands back can hold pointers the region still uses, and
+            // deleting those frees markets the region is about to go on using.
+            bool found = false;
+            std::vector<Market *> keep;
+            for (const auto m : pReg->markets) {
+                if (m->item != mitem) {
+                    keep.push_back(m);
+                    continue;
+                }
+                found = true;
+                delete m;
             }
+
+            if (!found) {
+                logger::write("No such market");
+                continue;
+            }
+
+            pReg->markets = keep;
             continue;
         }
     } while(1);

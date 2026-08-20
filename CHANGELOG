@@ -71,6 +71,11 @@ Changes in 5.2.5, in this fork
       vector of pointers still holds entries the region keeps.  Editing one
       desert and saving produced a game.out whose product list was raw heap
       bytes, and which no longer loads
+   -- Stopped the region editor from doing the same thing a third time.
+      Deleting a market by item kept the remove_if() shape the two fixes
+      above replaced, so a region whose matching market sat before a
+      surviving one freed the survivor and leaked the market actually
+      removed
    -- Stopped a starting city from carrying two market blocks.  Building one
       over a region that already had a town kept the old town's markets and
       appended a second full set with different amounts and prices; only the
