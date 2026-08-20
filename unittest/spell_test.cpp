@@ -188,7 +188,7 @@ ut::suite<"Spells"> spell_suite = []
 
     // Check the events to ensure the teleportation was successful
     auto events = json_report["events"];
-    expect(events.size() == 1_ul); // Expect a single event for the teleportation
+    expect(events.size() == 1_ul) << fatal; // Expect a single event for the teleportation
     json event = events[0];
     expect(event["message"] == "Teleports to lake (1,1) in Testing Wilds."); // Check the message for correctness
     expect(event["unit"]["number"] == 2_i); // Check the unit number in the even
@@ -265,7 +265,7 @@ ut::suite<"Spells"> spell_suite = []
     helper.parse_orders(faction->num, ss, nullptr);
 
     // Verify that the specific error message was generated
-    expect(faction->errors.size() == 1);
+    expect(faction->errors.size() == 1) << fatal;
     expect(faction->errors[0].message == "CAST 'transmutation': You must specify what you wish to create.");
 
     // Verify no items were changed

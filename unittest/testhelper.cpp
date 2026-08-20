@@ -156,14 +156,22 @@ void UnitTestHelper::activate_spell(int spell, SpellTestHelper helper) {
     // is that you add the spell you want to test here as you need it by adding a case statement to call the appropriate
     // Run<Spell> function based on the skill associated with the spell.  This assumes that orders for the unit have
     // already been set up so that the unit is ready to cast the spell.
+    // Every Run<Spell> function below reads the cast order straight off the unit, because the real
+    // caller in runorders.cpp only reaches them once it has found one. Here the order comes from
+    // whatever parse_orders() made of the test's order text, and if that produced nothing the
+    // dereference is a segfault that takes the whole suite down with it -- one unmet expectation
+    // and no further test runs. Skip instead: the test's own expectations then fail and say so.
     switch(spell) {
         case S_CREATE_PHANTASMAL_BEASTS:
+            if (!helper.unit->castorders) return;
             game.RunPhanBeasts(helper.region, helper.unit);
             break;
         case S_TELEPORTATION:
+            if (!helper.unit->teleportorders) return;
             game.RunTeleport(helper.region, helper.unit);
             break;
         case S_TRANSMUTATION:
+            if (!helper.unit->castorders) return;
             game.RunTransmutation(helper.region, helper.unit);
             break;
     }

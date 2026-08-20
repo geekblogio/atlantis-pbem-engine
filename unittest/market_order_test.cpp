@@ -68,7 +68,7 @@ ut::suite<"Market Orders"> market_order_suite = []
     expect(unit2->items.GetNum(item_id) == (max_amount / 2));
 
     expect(faction->errors.size() == 0_ul);
-    expect(faction->events.size() == 4_ul);
+    expect(faction->events.size() == 4_ul) << fatal;
     std::string amt_string = item_string(item_id, max_amount / 4);
     expect(faction->events[0].message == "Buys " + amt_string + " at $" + std::to_string(price) + " each.");
     expect(faction->events[0].unit == unit);
@@ -80,8 +80,8 @@ ut::suite<"Market Orders"> market_order_suite = []
     expect(faction->events[3].unit == unit2);
 
     // Check the unit recurring orders.  There should be max_amount/2 recurring buy orders for each.
-    expect(unit->oldorders.size() == static_cast<size_t>(max_amount));
-    expect(unit2->oldorders.size() == 1_ul);
+    expect(unit->oldorders.size() == static_cast<size_t>(max_amount)) << fatal;
+    expect(unit2->oldorders.size() == 1_ul) << fatal;
     // And make sure the orders are buy orders.
     expect(unit->oldorders.front() == "@buy 1 " + std::string(ItemDefs[item_id].abr));
     expect(unit->oldorders.back() == "@buy 1 " + std::string(ItemDefs[item_id].abr));
@@ -146,7 +146,7 @@ ut::suite<"Market Orders"> market_order_suite = []
     expect(unit2->items.GetNum(I_SILVER) == (max_amount / 2) * price);
 
     expect(faction->errors.size() == 0_ul);
-    expect(faction->events.size() == 4_ul);
+    expect(faction->events.size() == 4_ul) << fatal;
     std::string amt_string = item_string(item_id, max_amount / 4);
     expect(faction->events[0].message == "Sells " + amt_string + " at $" + std::to_string(price) + " each.");
     expect(faction->events[0].unit == unit);
@@ -158,8 +158,8 @@ ut::suite<"Market Orders"> market_order_suite = []
     expect(faction->events[3].unit == unit2);
 
     // Check the unit recurring orders.  There should be max_amount/2 recurring buy orders for each.
-    expect(unit->oldorders.size() == static_cast<size_t>(max_amount));
-    expect(unit2->oldorders.size() == 1_ul);
+    expect(unit->oldorders.size() == static_cast<size_t>(max_amount)) << fatal;
+    expect(unit2->oldorders.size() == 1_ul) << fatal;
     // And make sure the orders are buy orders.
     expect(unit->oldorders.front() == "@sell 1 " + std::string(ItemDefs[item_id].abr));
     expect(unit->oldorders.back() == "@sell 1 " + std::string(ItemDefs[item_id].abr));

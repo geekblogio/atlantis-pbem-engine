@@ -96,7 +96,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // verify that we got two events and that they are the expected events.
     auto count = json_report["events"].size();
-    expect(count == 1_ul);
+    expect(count == 1_ul) << fatal;
     json event = json_report["events"][0];
     expect(event["message"] == "Sacrifices 5 leaders [LEAD].");
     expect(event["unit"]["number"] == 3_i);
@@ -143,7 +143,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get an error message in the report.
     auto count = json_report["errors"].size();
-    expect(count == 1_ul);
+    expect(count == 1_ul) << fatal;
     json error = json_report["errors"][0];
     expect(error["message"] == "MOVE: A mystical barrier prevents movement in that direction.");
     expect(error["unit"]["number"] == 2_i);
@@ -189,7 +189,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get an error message in the report.
     auto count = json_report["errors"].size();
-    expect(count == 1_ul);
+    expect(count == 1_ul) << fatal;
     json error = json_report["errors"][0];
     expect(error["message"] == "CAST: A mystical barrier prevents teleporting to that location.");
     expect(error["unit"]["number"] == 2_i);
@@ -318,7 +318,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get a maintenance event in the report.
     json events = json_report["events"];
-    expect(events.size() == 2_ul);
+    expect(events.size() == 2_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to mountain (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -368,7 +368,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get a maintenance event in the report.
     json events = json_report["events"];
-    expect(events.size() == 2_ul);
+    expect(events.size() == 2_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to mountain (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -412,7 +412,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get a maintenance event in the report.
     json errors = json_report["errors"];
-    expect(errors.size() == 1_ul);
+    expect(errors.size() == 1_ul) << fatal;
     json error = errors[0];
     expect(error["message"] == "ANNIHILATE: Unit does not have access to the annihilate skill.");
     expect(error["unit"]["number"] == 2_i);
@@ -454,7 +454,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Expect that we get a maintenance event in the report.
     json errors = json_report["errors"];
-    expect(errors.size() == 1_ul);
+    expect(errors.size() == 1_ul) << fatal;
     json error = errors[0];
     expect(error["message"] == "ANNIHILATE: Target region is already annihilated.");
     expect(error["unit"]["number"] == 2_i);
@@ -532,7 +532,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
     json region_rep = gm_report["regions"][0];
     expect(region_rep["terrain"] == "barren");
-    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"].size() == 2_ul) << fatal;
     expect(region_rep["structures"][0]["type"] == "Shaft");
     expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
     // verify that markets, products and all units are gone.
@@ -598,7 +598,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
-    expect(events.size() == 6_ul);
+    expect(events.size() == 6_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -627,7 +627,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
     json region_rep = gm_report["regions"][0];
     expect(region_rep["terrain"] == "barren");
-    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"].size() == 2_ul) << fatal;
     expect(region_rep["structures"][0]["type"] == "Shaft");
     expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
     // verify that markets, products and all units are gone.
@@ -691,7 +691,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
-    expect(events.size() == 6_ul);
+    expect(events.size() == 6_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -721,7 +721,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
     json region_rep = gm_report["regions"][0];
     expect(region_rep["terrain"] == "barren");
-    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"].size() == 2_ul) << fatal;
     expect(region_rep["structures"][0]["type"] == "Shaft");
     expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
     // verify that markets, products and all units are gone.
@@ -786,7 +786,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
-    expect(events.size() == 6_ul);
+    expect(events.size() == 6_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -815,7 +815,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
     json region_rep = gm_report["regions"][0];
     expect(region_rep["terrain"] == "barren");
-    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"].size() == 2_ul) << fatal;
     expect(region_rep["structures"][0]["type"] == "Shaft");
     expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
     // verify that markets, products and all units are gone.
@@ -882,14 +882,14 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
 
     // We should get an error about the second annihilation
     json errors = json_report["errors"];
-    expect(errors.size() == 1_ul);
+    expect(errors.size() == 1_ul) << fatal;
     json error = errors[0];
     expect(error["message"] == "ANNIHILATE: Target region is already annihilated.");
     expect(error["unit"]["number"] == 2_i);
 
     // Validate we get the messages we expect for the faction
     json events = json_report["events"];
-    expect(events.size() == 6_ul);
+    expect(events.size() == 6_ul) << fatal;
     json event = events[0];
     expect(event["message"] == "Walks from plain (0,0) in Testing Wilds to barren (1,1) in Testing Wilds.");
     expect(event["unit"]["number"] == 2_i);
@@ -918,7 +918,7 @@ ut::suite<"NO7 Victory Conditions"> no7victory_suite = []
     // Verify that everything in region 0,0,0 is gone except the shaft and the anomaly.
     json region_rep = gm_report["regions"][0];
     expect(region_rep["terrain"] == "barren");
-    expect(region_rep["structures"].size() == 2_ul);
+    expect(region_rep["structures"].size() == 2_ul) << fatal;
     expect(region_rep["structures"][0]["type"] == "Shaft");
     expect(region_rep["structures"][1]["type"] == "Mystical Anomaly");
     // verify that markets, products and all units are gone.
