@@ -28,7 +28,7 @@ from pathlib import Path
 CALL = re.compile(r"\b([A-Za-z_]\w*)\s*\(")
 DRAW = re.compile(r"\brng::[a-z_]+\s*\(")
 KEYWORDS = {"if", "for", "while", "switch", "return", "sizeof", "catch"}
-SKIP_DIRS = {".git", "external", "build", "obj", "node_modules"}
+SKIP_DIRS = {".git", ".claude", "external", "build", "obj", "node_modules"}
 
 
 def strip_comments(text: str) -> str:

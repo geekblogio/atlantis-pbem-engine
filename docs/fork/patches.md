@@ -825,6 +825,19 @@ deletes what it removes.
 **Upstream-worthy, not offered**, on `#50`'s reasoning and
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#58` — the draw-order check stops scanning worktrees
+
+`scripts/check-rng-draw-order.py`, one line: `.claude` joins `SKIP_DIRS`. Agent sessions keep git
+worktrees under `.claude/worktrees/`, each a full copy of the sources at whatever commit it was cut
+from, so the checker `#54` added was reading `#54`'s own findings back out of a worktree cut before
+the fix and reporting twelve failures against a tree that has none.
+
+**CI never saw it** — a fresh checkout has no worktrees — so the defect appeared only for whoever
+ran the script by hand, which is the worst place for it. The value of that check is entirely in
+being believed; twelve false alarms spend that faster than any missed draw pair would.
+
+**Fork-local, permanently.** The script is this fork's, added by `#54`.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
