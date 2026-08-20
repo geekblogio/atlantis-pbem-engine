@@ -806,6 +806,25 @@ repository in the first place.
 **Fork-local, permanently.** For `#37`'s reason: upstream is not a fork and has no parent to
 default to.
 
+### `#57` — the region editor's third `remove_if`
+
+`edit.cpp`, `CHANGELOG`. `#50` fixed two sites that deleted the tail `std::remove_if()` hands
+back and left explanatory comments on both. **A third site in the same function kept the shape**,
+and kept it without the comment — which is how it survived the cleanup that was written to end it.
+
+Deleting a market by item. `remove_if()` moves survivors forward and leaves the tail unspecified;
+moving a raw pointer copies it. On `[B(item=Y), A(item=X)]` with `Y` as the target the tail holds
+`A`, so the delete frees the market the region keeps and `B`, the one actually removed, leaks.
+Written out as a loop like its two neighbours; the preceding `find_if()` goes away because it only
+asked what the loop answers anyway.
+
+Found while tracing an unrelated crash, by reading every remaining `remove_if()` in the tree after
+`#50` named the shape. The other two survivors — `economy.cpp` and `faction.cpp` — are safe: neither
+deletes what it removes.
+
+**Upstream-worthy, not offered**, on `#50`'s reasoning and
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
