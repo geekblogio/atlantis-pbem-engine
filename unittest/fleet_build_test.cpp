@@ -47,11 +47,11 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         ss << "build balloon\n"; // this should create a new fleet with a balloon and move the unit into it.
         helper.parse_orders(faction->num, ss, nullptr);
 
-        expect(leader->object->region->objects.size() == 4_ul); // dummy + shaft + 2 fleets
+        expect(leader->object->region->objects.size() == 4_ul) << fatal; // dummy + shaft + 2 fleets
 
         helper.run_month_orders();
 
-        expect(leader->object->region->objects.size() == 6_ul); // dummy + shaft + 4 fleets.
+        expect(leader->object->region->objects.size() == 6_ul) << fatal; // dummy + shaft + 4 fleets.
 
         // Check the messages too
         expect(faction->errors.size() == 0_ul); // No errors should be reported
@@ -97,11 +97,11 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         ss << "build balloon\n"; // this should create join the existing fleet with a balloon.
         helper.parse_orders(faction->num, ss, nullptr);
 
-        expect(leader->object->region->objects.size() == 4_ul); // dummy + shaft + 2 fleets
+        expect(leader->object->region->objects.size() == 4_ul) << fatal; // dummy + shaft + 2 fleets
 
         helper.run_month_orders();
 
-        expect(leader->object->region->objects.size() == 5_ul); // dummy + shaft + 3 fleets.
+        expect(leader->object->region->objects.size() == 5_ul) << fatal; // dummy + shaft + 3 fleets.
 
         // Check the messages too
         expect(faction->errors.size() == 0_ul); // No errors should be reported
@@ -149,11 +149,11 @@ ut::suite<"Fleet Builds"> fleet_build_suite = [] {
         ss << "build balloon\n"; // this should join a balloon to the non-flying fleet.
         helper.parse_orders(faction->num, ss, nullptr);
 
-        expect(leader->object->region->objects.size() == 4_ul); // dummy + shaft + 2 fleets
+        expect(leader->object->region->objects.size() == 4_ul) << fatal; // dummy + shaft + 2 fleets
 
         helper.run_month_orders();
 
-        expect(leader->object->region->objects.size() == 4_ul); // dummy + shaft + 2 fleets.
+        expect(leader->object->region->objects.size() == 4_ul) << fatal; // dummy + shaft + 2 fleets.
 
         // Check the messages too
         expect(faction->errors.size() == 0_ul); // No errors should be reported

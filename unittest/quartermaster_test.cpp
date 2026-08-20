@@ -131,7 +131,7 @@ ut::suite<"Quartermaster"> quartermaster_suite = []
     expect(qm2->items.GetNum(I_STONE) == 0_i);
     expect(qm3->items.GetNum(I_STONE) == 0_i);
     expect(unit2->items.GetNum(I_STONE) == 0_i);
-    expect(faction->errors.size() == 1);
+    expect(faction->errors.size() == 1) << fatal;
     expect(faction->errors[0].message == "TRANSPORT: Unable to transport. Have 0 stone [STON].");
     expect(faction->errors[0].unit == qm2);
 
