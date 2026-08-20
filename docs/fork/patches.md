@@ -887,6 +887,29 @@ block scalar that `dorny/paths-filter` parses again.
 
 **Fork-local, permanently.** The workflow and the checker are both this fork's.
 
+### `#61` — the engine owns its random distributions (0019)
+
+`rng.hpp`, plus `docs/decisions/0019`, `docs/snapshot-tests.md` and the `CHANGELOG`. `#54` pinned
+the draw *order* and did not reach the larger cause: **`std::mt19937` is specified bit for bit, the
+distributions are not.** libstdc++ and libc++ map raw draws to values differently and consume the
+stream at different rates — ten draws of range 6 cost ten raw draws under one and fifteen under the
+other — so the two platforms sit at different points in the stream after the first distribution
+call.
+
+`rng.hpp` implements the uniform draw and the shuffle itself, reproducing libstdc++'s numbers, so
+no recorded seed and no running game changes. Verified against real libstdc++ in a `linux/amd64`
+container under GCC 13.3 and 14.2, values and generator state, over every range to 4096 and every
+power of two to 2^30. macOS/arm64 now builds a checksum-identical world and replays all 28 recorded
+turns byte for byte; Linux was re-measured in a clean container build and is unchanged.
+
+**This retires the claim in `docs/snapshot-tests.md` that the fixtures are Linux artefacts**, which
+is corrected in the same pull request rather than left to rot. Left alone deliberately:
+`std::binomial_distribution`, which cannot be frozen the same way because libstdc++'s uses libm —
+0019 gives the reasoning and the second reason, that replacing it would change running games.
+
+**Upstream-worthy, not offered.** `rng.hpp` is upstream's and so is the defect, but per
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
