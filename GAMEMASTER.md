@@ -516,6 +516,34 @@ between strangers is legal, and theft or assassination against a partner fails w
 watching — and either side may end it with `DECLARE` at any time, one-sidedly and without warning.
 A faction that renounces its alliances keeps them renounced; nothing puts them back.
 
+**How the game ends, and how to see it coming.** Every turn, every faction receives one line in
+their `times` file reporting the state of the throne. Before both sources fall it reads:
+
+```
+The Crown: Both The Rimewell and The Saltspire still stand. No throne can be claimed
+while a horde still has a home.
+```
+
+and once they have:
+
+```
+The Crown: both sources have fallen and the throne is open. Ravenmark (7) leads with
+4 of 9 factions in mutual alliance (44%, 50% needed).
+```
+
+That second line is the whole endgame in public view, and it is deliberately public: the players
+need to see who is close, or there is nothing to campaign against. **The count is of MUTUAL `ALLY`
+only** — a faction that declares `ALLY` at the leader without it being returned adds nothing, which
+is worth saying plainly when someone asks why their vote "didn't count".
+
+Two outcomes need no intervention from you. **A tie crowns nobody** and the game simply continues;
+the article says so. And if the fronts finish the continent before anyone is crowned, the factions
+die out and the engine ends the game with no winner at all — which is the normal result if the
+players treat the fronts as scenery.
+
+There is no way to end a `rimefall` game early by rule. If you need to stop one, you stop running
+turns.
+
 Older builds behaved differently here: a refused faction used to abort the whole run with
 `Couldn't run the game!`, writing nothing at all, so every other player lost their turn until
 someone removed the line by hand. That was engine behaviour rather than anything specific to

@@ -22,7 +22,7 @@ theme: of the 138 `GameDefs` fields, **97 hold different values in at least two 
 | `kingdoms/` | Kingdoms | 1.0.0 | + 1 underworld | none |
 | `neworigins/` | NewOrigins | 3.0.0 | + 1 underworld | quests, annihilation |
 | `neworigins8/` | NewOrigins | 3.0.0 | as `neworigins` | as `neworigins` |
-| `rimefall/` | Rimefall | 1.0.0 | nexus + surface | *not yet built* — see below |
+| `rimefall/` | Rimefall | 1.0.0 | nexus + surface | two horde sources, then an election |
 
 The first trap is in the table: **the directory named `standard` is not standard Atlantis.** It
 calls itself Wyreth, carries its own mythology, and holds the only real win condition in the
@@ -203,21 +203,31 @@ The consequence to keep in mind: nothing in a report or a game file distinguishe
 rulebook is the only visible difference, and the generated `neworigins8` baseline differs from
 the `neworigins` one in exactly four lines — the stylesheet reference and the meal price.
 
-## `rimefall`, and what it is not yet
+## `rimefall`
 
-`rimefall/` is the second fork-local ruleset. It builds its own continent — one landmass tapering
-from a wide, frozen north to a narrow, dry south — starts its factions across five latitude bands,
-and has neighbours begin as allies. What is still `neworigins` underneath: there are no invasion
-fronts and no victory condition of its own, and `extra.cpp` still carries the quest and
-annihilation machinery it was copied from until stage 6 replaces it.
+`rimefall/` is the second fork-local ruleset, and it is now complete. It builds its own continent
+— one landmass tapering from a wide, frozen north to a narrow, dry south — starts its factions
+across five latitude bands, has neighbours begin as allies, drives two invasion fronts, and is won
+by taking both horde sources and then being elected.
+
+What is still `neworigins` underneath: `monsters.cpp`, permanently, and the quest machinery in
+`extra.cpp`. **The annihilation ending is gone** — it was inherited live rather than dormant, with
+`victory_type` set and its altars, monoliths, entity cages and the ANNIHILATE skill all enabled,
+which offered a second and undesigned way to win. `rimefall` stores nothing in
+`rulesetSpecificData` at all now, because nothing put there survives a save.
 
 Unlike `neworigins8`, its `RULESET_NAME` and `RULESET_VERSION` are **deliberately distinct**. Its
 world is incompatible with every existing one, so `Game::OpenGame` refusing another variant's
 `game.in` is the wanted behaviour rather than an obstacle.
 
-What is real today: the world. `rules.cpp`, `world.cpp` and `map.cpp` are its own; `extra.cpp` is
-still a shim over `neworigins` and `monsters.cpp` stays one permanently. `rimefall_intro.html` is
-an explicit placeholder.
+`rules.cpp`, `world.cpp`, `map.cpp` and `extra.cpp` are its own. `rimefall_intro.html` is written:
+it is the ONLY channel for ruleset-specific rulebook prose, because `genrules` generates everything
+else from the data tables, so the bands, the gateways, the fronts, the election and above all the
+nature of the starting alliances are documented there or nowhere.
+
+Its recorded turns are in `snapshot-tests/rimefall_turns` — five turns, covering world load, a
+faction claiming a start location through a gateway and the seal that follows. **They do not reach
+the fronts or the election**, which need a long game; those were verified separately.
 
 `rimefall.h` holds the shape constants — the band count and the taper — because `world.cpp` and
 `map.cpp` both read them, and from stage 3 the bands also key the gateways and the start slots.

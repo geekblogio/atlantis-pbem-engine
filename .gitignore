@@ -49,11 +49,13 @@ map_viewer/dist
 # replay then fails with "turn N missing". Re-include the recorded trees.
 !/snapshot-tests/turns/**
 !/snapshot-tests/neworigins_turns/**
+!/snapshot-tests/rimefall_turns/**
 
 # ... but not the backups update-game-snapshots.sh leaves behind on a re-record.
 # They are invisible to `git status`; remove them with `git clean -xfd snapshot-tests`.
 /snapshot-tests/turns/turn_*.bak/
 /snapshot-tests/neworigins_turns/turn_*.bak/
+/snapshot-tests/rimefall_turns/turn_*.bak/
 
 # Engine binaries the snapshot runners copy into place, plus their scratch output.
 /snapshot-tests/basic
