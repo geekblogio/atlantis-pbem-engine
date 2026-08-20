@@ -866,6 +866,27 @@ part of it.
 **Upstream-worthy, not offered.** `unittest/` is upstream's and the fragility is theirs, but per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#60` — the draw-order job watches its own checker
+
+`.github/workflows/ci.yml`. `#58` changed `scripts/check-rng-draw-order.py` and the `RNG Draw
+Order` job was skipped on it: the `code` filter names sources, `Makefile`, `snapshot-tests/` and
+`ci.yml`, but never `scripts/`. **The only job that runs the checker fell silent on the one pull
+request that altered it.**
+
+A dedicated `scripts` filter, and `draworder` runs on `code` or `scripts`. Kept out of `code`
+deliberately — a checker is not the engine, and folding it in would run two full C++ builds to
+reach one `python3` invocation.
+
+Noticed while merging `#58`, from its own check list. Worth recording because it is the second
+instance in two pull requests of the same failure mode: a check that is quiet precisely where it
+matters, whose silence then reads as approval.
+
+**This one could not verify itself** — `ci.yml` is in `code`, so the job ran here through the old
+branch of the condition. Both YAML layers were parsed instead, the outer file and the `filters:`
+block scalar that `dorny/paths-filter` parses again.
+
+**Fork-local, permanently.** The workflow and the checker are both this fork's.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
