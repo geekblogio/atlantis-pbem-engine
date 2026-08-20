@@ -22,7 +22,15 @@ Changes in 5.2.5, in this fork
       bands rather than chosen by terrain, neighbouring factions starting
       as mutual allies, and two invasion fronts - ice-bound undead
       creeping south on a clock nothing slows, and dragons striking
-      inland from the eastern sea - each ended only by taking its source
+      inland from the eastern sea - each ended only by taking its source.
+      Once both sources are held the throne opens and is settled by
+      election: the crown goes to whoever holds mutual ALLY from at least
+      half the other surviving factions, and a tie crowns nobody.
+      NewOrigins' annihilation ending, which the ruleset had inherited
+      live rather than dormant, is gone with its altars, monoliths,
+      entity cages and the ANNIHILATE skill - it was a second and
+      undesigned way to win, and one that could end a game while a horde
+      still had a home
 
  Bug fixes:
    -- Stopped storing pointers into freed memory in the data tables, which

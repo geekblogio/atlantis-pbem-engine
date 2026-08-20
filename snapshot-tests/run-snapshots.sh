@@ -14,6 +14,12 @@ if [[ $? != 0 ]]; then
   failure=1
 fi
 
+echo "Running rimefall snapshots"
+./run-game-snapshots.sh rimefall
+if [[ $? != 0 ]]; then
+  failure=1
+fi
+
 echo "Running all rules snapshots"
 ./run-rules-snapshot.sh
 if [[ $? != 0 ]]; then

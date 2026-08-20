@@ -163,6 +163,27 @@ extern const int rimefall_starts_per_band[RIMEFALL_BANDS];
 // The eastern front is few and fast against the northern front's wall of attrition.
 #define RIMEFALL_DRAGON_STACKS_MAX 2
 
+//
+// ---------------------------------------------------------------------------------------------
+// The election
+// ---------------------------------------------------------------------------------------------
+//
+
+// WHAT SHARE OF THE LIVING FACTIONS A CANDIDATE MUST HOLD IN MUTUAL ALLY TO WIN, in percent.
+//
+// The election opens only once BOTH sources are held; while either stands there is no winner at
+// all (0011 section 6). This is the second gate, and it is what stops the game ending the moment
+// one alliance happens to be sitting on the two sources.
+//
+// Set against the starting alliances rather than picked round: RIMEFALL_ALLY_RADIUS was chosen so
+// the largest starting cluster is about a fifth of the field, so a majority cannot be inherited
+// from the opening position — a candidate has to win over factions outside their own cluster.
+// Raise the radius or lower this and that stops being true; the two numbers are one setting.
+//
+// Fifty is also what NewOrigins uses for the same mechanism, which is the closest thing to play
+// data that exists before the first real game.
+#define RIMEFALL_ELECTION_PERCENT 50
+
 // The two sources are named individually rather than by renaming their object types, because
 // O_ICECAVE and O_DCLIFFS also occur naturally as ordinary lairs and renaming the type would
 // rename every one of them.

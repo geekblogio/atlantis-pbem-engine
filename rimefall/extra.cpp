@@ -321,22 +321,10 @@ int Game::SetupFaction( Faction *pFac )
         return 0;
     }
 
-    // Check if a faction can be started due to end game conditions
-    if(rulesetSpecificData.value("victory_type", "") == "annihilation") {
-        ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-        ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
-
-        int count = 0;
-        for (int i = 0; i < 6; i++) {
-            ARegion *r = surface_center->neighbors[i];
-            // search that region for an altar
-            for(const auto o : r->objects) {
-                if (o->type == O_EMPOWERED_ALTAR) count++;
-            }
-        }
-        // if all altars to the center are empowered, then factions cannot be started
-        if (count == 6) return 0;
-    }
+    // NewOrigins closed registration a second way here, by counting empowered altars around the
+    // map centre. Rimefall has no altars and closes registration by its own means instead: bands
+    // the northern front has overrun stop offering slots, so the count above falls to zero on its
+    // own as the world is lost (0011 section 6). One gate, and it is the one this ruleset owns.
 
     pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 300;
 
@@ -670,160 +658,9 @@ static void CreateQuest(ARegionList& regions, int monfaction)
         quests.push_back(q);
 }
 
-// Just a quick function to count the number of empowered altars.
-int report_and_count_empowered_altars(ARegionList& regions, std::list<Faction *>& factions) {
-    ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-    ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
-
-    int count = 0;
-    for (int i = 0; i < 6; i++) {
-        ARegion *r = surface_center->neighbors[i];
-        // search that region for an altar
-        for(const auto o : r->objects) {
-            if (o->type == O_EMPOWERED_ALTAR) {
-                count++;
-                for(const auto f : factions) {
-                    if (f->is_npc) continue;
-                    f->event("The altar in " + r->short_print() + " is fully empowered.", "anomaly", r);
-                }
-            }
-        }
-    }
-    return count;
-}
-
-void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) {
-    ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-    ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
-
-    std::vector<Object *> unempowered_altars;
-    for (int i = 0; i < 6; i++) {
-        ARegion *r = surface_center->neighbors[i];
-        // search that region for an altar
-        for(const auto o : r->objects) {
-            if (o->type == O_RITUAL_ALTAR) unempowered_altars.push_back(o);
-        }
-    }
-    // pick a random altar to empower
-    int num = rng::get_random(unempowered_altars.size());
-    Object *o = unempowered_altars[num];
-    o->type = O_EMPOWERED_ALTAR;
-    o->set_name(ObjectDefs[O_EMPOWERED_ALTAR].name);
-    // notify all factions.
-    for(const auto f : factions) {
-        if (f->is_npc) continue;
-        f->event("The altar in " + o->region->short_print() + " is fully empowered.", "anomaly", o->region);
-    }
-
-    // find all current anomalies and entities
-    std::vector<Object *> anomalies;
-    std::vector<Unit *> entities;
-    for(const auto r : regions) {
-        for(const auto o : r->objects) {
-            if (o->type == O_ENTITY_CAGE) anomalies.push_back(o);
-
-            for(const auto u : o->units) {
-                int i = u->items.GetNum(I_IMPRISONED_ENTITY);
-                for(int j = 0; j < i; j++) {
-                    // put a unit in multiple times if it has multiple entities
-                    entities.push_back(u);
-                }
-            }
-        }
-    }
-    if (anomalies.size() + entities.size() < unempowered_altars.size()) {
-        // We have unspawend entities and anomalies, so just return without removing one.
-        return;
-    }
-    // If we have any anomalies, remove the one farthest from the center.
-    if (anomalies.size() > 0) {
-        int max_dist = 0;
-        Object *far_anomaly = nullptr;
-        for (auto& anomaly : anomalies) {
-            int dist = regions.find_distance_between_regions(anomaly->region, surface_center);
-            if (dist > max_dist) {
-                max_dist = dist;
-                far_anomaly = anomaly;
-            }
-        }
-        if (far_anomaly) {
-            // remove the farthest anomaly
-            // Just in case, move any units in the anomaly.
-            for(const auto u : far_anomaly->units) u->MoveUnit(far_anomaly->region->GetDummy());
-
-            // Take the region before the object is destroyed. Everything below used to reach
-            // it through far_anomaly->region, which reads freed memory once the object is
-            // gone; gcc flags all three under -Wuse-after-free.
-            ARegion *anomaly_region = far_anomaly->region;
-
-            std::erase(anomaly_region->objects, far_anomaly);
-            delete far_anomaly;
-
-            // Notify any factions in that region that the anomaly has been removed.
-            auto reg_faction = anomaly_region->PresentFactions();
-            for(const auto f : reg_faction) {
-                if (f->is_npc) continue;
-                f->event("The anomaly in " + anomaly_region->short_print() + " vanishes.", "anomaly", anomaly_region);
-            }
-            return;
-        }
-    }
-    // Ok, we couldn't remove any anomalies, so remove the farthest entity instead.
-    if (entities.size() > 0) {
-        int max_dist = 0;
-        Unit *far_entity = nullptr;
-        for (auto& entity : entities) {
-            int dist = regions.find_distance_between_regions(entity->object->region, surface_center);
-            if (dist > max_dist) {
-                max_dist = dist;
-                far_entity = entity;
-            }
-        }
-        if (far_entity) {
-            far_entity->items.SetNum(I_IMPRISONED_ENTITY, far_entity->items.GetNum(I_IMPRISONED_ENTITY) - 1);
-            far_entity->event(item_string(I_IMPRISONED_ENTITY, 1) + " vanishes suddenly.", "anomaly");
-            return;
-        }
-    }
-    // We somehow got here without removing anything, so just return.
-    return;
-}
-
-
-int report_and_count_anomalies(ARegionList& regions, std::list<Faction *>& factions) {
-    int count = 0;
-    for(const auto r : regions) {
-        for(const auto o : r->objects) {
-            if (o->type == O_ENTITY_CAGE) {
-                count++;
-                for(const auto f : factions) {
-                    if (f->is_npc) continue;
-                    f->event("A strange anomaly has been seen in " + r->short_print() + ".", "anomaly", r);
-                }
-            }
-        }
-    }
-    return count;
-}
-
-int report_and_count_entities(ARegionList& regions, std::list<Faction *>& factions) {
-    int count = 0;
-    for(const auto r : regions) {
-        for(const auto o : r->objects) {
-            for(const auto u : o->units) {
-                if (u->items.GetNum(I_IMPRISONED_ENTITY) > 0) {
-                    count += u->items.GetNum(I_IMPRISONED_ENTITY);
-                    for(const auto f : factions) {
-                        if (f->is_npc) continue;
-                        f->event("An imprisoned entity has been spotted in " + r->short_print() +
-                            " in the possession of " + u->get_name(0) + ".", "anomaly", r);
-                    }
-                }
-            }
-        }
-    }
-    return count;
-}
+// NewOrigins' four endgame helpers stood here -- counting empowered altars, empowering one at
+// random, and reporting entities and anomalies. They went with the ending they served; rimefall is
+// won by taking both sources and then being elected. See CheckVictory below and 0011 section 6.
 
 Faction *Game::CheckVictory()
 {
@@ -1296,248 +1133,107 @@ Faction *Game::CheckVictory()
     }
     for(const auto& q: questsWithProblems) quests.erase(q);
 
-    if(rulesetSpecificData.value("victory_type", "") == "city_vote") {
-        std::map <int, int> votes; // track votes per faction id
-        int total_cities = 0; // total cities possible for vote count
+    //
+    // THE ELECTION (0011 section 6).
+    //
+    // Two gates, and the order is the design. WHILE EITHER SOURCE STANDS THERE IS NO WINNER AT
+    // ALL -- not a provisional one, not a leading one. Only once both are held does the ballot
+    // open, and then the crown goes to whoever holds mutual ALLY from at least
+    // RIMEFALL_ELECTION_PERCENT of the other living factions.
+    //
+    // The losing condition needs no code here: if the fronts take the continent the factions die
+    // out and the engine ends the game on !livingFacs by itself (game.cpp).
+    //
+    // Replaces NewOrigins' annihilation ending, which this ruleset inherited wholesale from the
+    // stage 1 copy and which was live rather than dormant. Its objects are no longer enabled
+    // either -- see ModifyTablesPerRuleset.
+    {
+        ARegion *north_at = nullptr, *east_at = nullptr;
+        Object *north_source = rimefall_find_source(regions, RIMEFALL_NORTH_SOURCE_NAME, &north_at);
+        Object *east_source  = rimefall_find_source(regions, RIMEFALL_EAST_SOURCE_NAME,  &east_at);
 
-        for(const auto r : regions) {
-            // Ignore anything but the surface
-            if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
-            if (!r->town || (r->town->TownType() != TOWN_CITY)) continue;
+        // A source that cannot be found counts as STANDING, not as taken. The only way one goes
+        // missing is a world this ruleset did not build, and crowning someone because a lookup
+        // failed would be a worse outcome than never crowning anyone.
+        bool north_taken = rimefall_source_held(north_source);
+        bool east_taken  = rimefall_source_held(east_source);
 
-            total_cities++;
-
-            std::string name = r->town->name;
-            std::string possible_faction = name.substr(0, name.find_first_of(" \t\n"));
-            // The first word of the name was not all numeric, don't count for anyone
-            if (!std::all_of(
-                possible_faction.begin(),
-                possible_faction.end(),
-                [](unsigned char ch){ return std::isdigit(ch); }
-            )) continue;
-            // Now that we know it's all numeric, convert it to an int
-            int faction_id = std::stoi(possible_faction);
-
-            // Make sure it's a valid faction
-            Faction *f = GetFaction(factions, faction_id);
-            if (!f || f->is_npc) continue;
-
-            auto vote = votes.find(faction_id);
-            if (vote == votes.end()) {
-                votes[faction_id] = 1;
+        if (!north_taken || !east_taken) {
+            std::string standing;
+            if (!north_taken && !east_taken) {
+                standing = "Both " + std::string(RIMEFALL_NORTH_SOURCE_NAME) + " and " +
+                    RIMEFALL_EAST_SOURCE_NAME + " still stand.";
+            } else if (!north_taken) {
+                standing = std::string(RIMEFALL_NORTH_SOURCE_NAME) + " still stands.";
             } else {
-                vote->second++;
+                standing = std::string(RIMEFALL_EAST_SOURCE_NAME) + " still stands.";
             }
-        }
-
-        // Set up the voting result to be reported if we are far enough in
-        std::string message = "Voting results: \n";
-
-        int max_vote = -1;
-        bool tie = false;
-        Faction *maxFaction = nullptr;
-        for (const auto& vote : votes) {
-            Faction *f = GetFaction(factions, vote.first);
-            if (vote.second > max_vote) {
-                max_vote = vote.second;
-                maxFaction = f;
-                tie = false;
-            } else if (vote.second == max_vote) {
-                tie = true;
-                maxFaction = nullptr;
-            }
-            message += "Faction " + f->name + " has " + std::to_string(vote.second) + " votes.\n";
-        }
-
-        // See if we have enough votes to even report the info.  Since a win requires 50% + 1, we can start reporting
-        // once someone has more than 25% of the cities.
-        if (max_vote > (total_cities / 4)) {
-            // Now see if we have a winner at all
-            if (max_vote > ((total_cities / 2) + 1)) {
-                winner = maxFaction;
-                message += "\n" + winner->name + " has enough votes and has won the game!";
-            } else {
-                int percent = std::floor((max_vote * 100) / total_cities);
-                if (tie) {
-                    message += "\nThere is a tie for the most votes with multiple factions having ";
-                } else {
-                    message += "\nThe current leader is " + maxFaction->name + " with ";
-                }
-                message += std::to_string(max_vote) + "/" + std::to_string(total_cities) +
-                    " votes (" + std::to_string(percent) + "%).";
-            }
-            write_times_article(message);
-        }
-    }
-
-    // Check for victory conditions for the annihilation win
-    if(rulesetSpecificData.value("victory_type", "") == "annihilation") {
-        // before turn 50 none of the end game code will be active.
-        if (TurnNumber() < 50) return nullptr;
-
-        int empowered_altars = report_and_count_empowered_altars(regions, factions);
-        // If we have hit turn 70, rather than spawning a new anomaly, we will activate a random altar and if
-        // needed, destroy a randomly chosen entity.
-        if (TurnNumber() >= 70 && empowered_altars < 6) {
-            empower_random_altar(regions, factions);
-            empowered_altars++;
-        }
-
-        int entities = report_and_count_entities(regions, factions);
-        int anomalies = report_and_count_anomalies(regions, factions);
-
-        int completed_entities = empowered_altars + entities;
-
-        // This function will count the number of entities in the game + number of activated altars.
-        // If this number is < 6, then we have a chance of spawning a new anomaly.  This chance starts at 10%
-        // for the first anomaly after turn 50 and then increases by 12% for each entity or active altar already
-        // existing.
-        if (completed_entities < 6) {
-            int chance = 10 + (completed_entities * 12);
-            logger::write("Endgame: entities: " + std::to_string(completed_entities) + ", anomalies: " +
-                std::to_string(anomalies) + ", chance: " + std::to_string(chance) + "%");
-            if (rng::get_random(100) < chance) {
-                // Okay, let's see if we can spawn a new entity
-                // If we can, see if we already have those anomalies and report them to all factions if so.
-                if (anomalies + completed_entities >= 6) {
-                    // We have all the anomalies that we can have still, so cannot spawn any more.
-                    return nullptr;
-                }
-
-                // Ok, we can spawn a new anomaly.  Let's do it.
-                // We want a random land hex that is not a city and that does not have an anomaly and is not guarded.
-                ARegion *r = nullptr;
-                ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-                while (r == nullptr) {
-                    // Sequenced deliberately, and y is drawn BEFORE x. As two arguments of one call the
-                    // evaluation order is unspecified, and GCC differs by architecture: x86-64 evaluates
-                    // right to left, aarch64 left to right, so one seed gave two different worlds. x86-64
-                    // is what the servers run and what every recorded seed reproduces, so its order is the
-                    // one pinned here. Do not swap these two lines, and do not fold them back into the call.
-                    const int ry = rng::get_random(surface->y);
-                    const int rx = rng::get_random(surface->x);
-                    r = (ARegion *)surface->GetRegion(rx, ry);
-                    if (r == nullptr) continue;
-
-                    // An anomaly won't spawn in the ocean or in a barren region or in a city or a guarded region.
-                    TerrainType type = TerrainDefs[r->type];
-                    if (type.similar_type == R_OCEAN || type.similar_type == R_BARREN || r->town || r->IsGuarded()) {
-                        r = nullptr;
-                        continue;
-                    }
-                    // Make sure it doesn't already have an anomaly
-                    for(const auto o : r->objects) {
-                        if (o->type == O_ENTITY_CAGE) {
-                            r = nullptr;
-                            break;
-                        }
-                    }
-                    if(!r) continue;
-                }
-
-                // Okay, we have a new region to spawn an anomaly in.  Let's do it.
-                Object *o = new Object(r);
-                ObjectType ob = ObjectDefs[O_ENTITY_CAGE];
-                o->type = O_ENTITY_CAGE;
-                o->num = r->buildingseq++;
-                o->set_name(ob.name);
-                if (ob.flags & ObjectType::SACRIFICE) {
-                    o->incomplete = -(ob.sacrifice_amount);
-                }
-                r->objects.push_back(o);
-                // Now tell all the factions about it.
-                for(const auto f : factions) {
-                    if (f->is_npc) continue;
-                    f->event("A strange anomaly has appeared in " + r->short_print() + ".", "anomaly", r);
-                }
-                logger::write("Spawned new anomaly at " + r->short_print() + ".");
-            }
-
-            // If we haven't completed all the entities, then noone can win yet.
+            write_times_article("The Crown: " + standing + " No throne can be claimed while a "
+                "horde still has a home.");
             return nullptr;
         }
 
-        // We have all entities completed, but.. have all altars been empowered?  if not, nooone can win yet.
-        if (empowered_altars < 6) {
-            logger::write("Only " + std::to_string(empowered_altars) + " altars have been empowered, no winner yet.");
-            return nullptr;
-        }
-
-        // Ok we have completed all entities, so we can check for if a faction has won.
-        // the winner will be the owner of the world breaker monolith if and only if either
-        // 1) all living factions are allied with the owner of the monolith
-        // or
-        // 2) the entire surface has been annihilated.
-
-        // FInd the owner of the monolith.
-        ARegionArray *underworld = regions.GetRegionArray(ARegionArray::LEVEL_UNDERWORLD);
-        ARegion *center = underworld->GetRegion(underworld->x / 2, underworld->y / 2);
-        for(const auto o : center->objects) {
-            if (o->type == O_ACTIVE_MONOLITH) {
-                Unit *owner = o->GetOwner();
-                // If noone owns the monolith, then we have no possible winner yet.
-                if (owner) winner = owner->faction;
-                break;
-            }
-        }
-
-        // No one owns the monolith, so no one can win yet.
-        if (!winner) {
-            if (TurnNumber() < 100) {
-                // If it's before turn 100, we can't declare a winner yet
-                logger::write("No monolith owner found, no winner yet.");
-                return nullptr;
-            }
-            // If the monolith is unowned on turn 100 or later, the monsters win.
-            return GetFaction(factions, monfaction); // monsters win
-        }
-
-        logger::write("Checking for winner: " + winner->name);
-        // Ok, we have a possible winner, check for sufficient alive factions mutually allied to the monolith owner.
-        int allied_count = 0;
-        int total_factions = 0;
-        for(const auto f : factions) {
+        // Both sources are held: the ballot is open. Every faction is a candidate -- there is no
+        // office to hold first, unlike NewOrigins' monolith owner.
+        Faction *best = nullptr;
+        int best_allies = -1;
+        bool tied = false;
+        int living = 0;
+        for (const auto f : factions) {
             if (f->is_npc) continue;
-            if (f == winner) continue;
-            total_factions++;
-            // This faction is not allied to the monolith owner, so they don't count
-            if (f->get_attitude(winner->num) != AttitudeType::ALLY) continue;
-            // The winner is not allied to this faction, so they don't count;
-            if (winner->get_attitude(f->num) != AttitudeType::ALLY) continue;
-            allied_count++;
+            living++;
         }
 
-        int needed_percent = rulesetSpecificData.value("allied_percent", 100);
-        int current_percent = (allied_count * 100) / total_factions;
-        logger::write("Factions allied: " + std::to_string(allied_count) + "/" + std::to_string(total_factions) + " (" +
-            std::to_string(current_percent) + "% out of " + std::to_string(needed_percent) + "%)");
-        if (current_percent >= needed_percent) {
-            logger::write("Enough factions allied to the monolith owner, so they win.");
-            // We have enough factions allied to the monolith owner, so they win.
-            return winner;
+        for (const auto candidate : factions) {
+            if (candidate->is_npc) continue;
+
+            int allies = 0;
+            for (const auto f : factions) {
+                if (f->is_npc || f == candidate) continue;
+                // MUTUAL, both ways. A one-sided ALLY is a gift, not a vote.
+                if (f->get_attitude(candidate->num) != AttitudeType::ALLY) continue;
+                if (candidate->get_attitude(f->num) != AttitudeType::ALLY) continue;
+                allies++;
+            }
+
+            if (allies > best_allies) {
+                best_allies = allies;
+                best = candidate;
+                tied = false;
+            } else if (allies == best_allies) {
+                tied = true;
+            }
         }
 
-        // No winner yet, so check if the surface has been completely destroyed.
-        int total_surface = 0;
-        int total_annihilated = 0;
-        for(const auto r : regions) {
-            if (r->level->levelType != ARegionArray::LEVEL_SURFACE) continue;
-            total_surface++;
-            if (TerrainDefs[r->type].flags & TerrainType::ANNIHILATED) total_annihilated++;
+        if (!best) return nullptr;
+
+        // The last faction standing needs no electorate. Anything else would leave a game that
+        // cannot end.
+        int electorate = living - 1;
+        if (electorate <= 0) {
+            write_times_article("The Crown: " + best->name + " stands alone over a broken world, "
+                "and is crowned by default.");
+            return best;
         }
 
-        int needed_surface = rulesetSpecificData.value("annihilate_percent", 100);
-        int current_surface = (total_annihilated * 100) / total_surface;
-        logger::write("Surface annihilated: " + std::to_string(total_annihilated) + "/" + std::to_string(total_surface) +
-            " (" + std::to_string(current_surface) + "% out of " + std::to_string(needed_surface) + "%)");
-        if (current_surface >= needed_surface) {
-            logger::write("Sufficient surface annihilated, so the monolith owner wins.");
-            // The surface has been sufficiently destroyed, so the monolith owner wins.
-            return winner;
+        int percent = (best_allies * 100) / electorate;
+        write_times_article("The Crown: both sources have fallen and the throne is open. " +
+            best->name + " leads with " + std::to_string(best_allies) + " of " +
+            std::to_string(electorate) + " factions in mutual alliance (" +
+            std::to_string(percent) + "%, " + std::to_string(RIMEFALL_ELECTION_PERCENT) +
+            "% needed).");
+
+        if (percent < RIMEFALL_ELECTION_PERCENT) return nullptr;
+
+        // A DEAD HEAT CROWNS NOBODY. Two candidates on the same count is a hung throne, and the
+        // game continues until one of them wins somebody over. Breaking the tie by faction number
+        // would decide the game on registration order, which is not a thing players can play.
+        if (tied) {
+            write_times_article("The Crown: the vote is tied, and a tied throne stays empty.");
+            return nullptr;
         }
-        // No winner yet, so clear the potential winner and return null.
-        logger::write("No winner yet.");
-        winner = nullptr;
+
+        return best;
     }
 
     return winner;
@@ -1628,18 +1324,13 @@ void Game::ModifyTablesPerRuleset(void)
         }
     }
 
-    // set up game specific tracked data
+    // RIMEFALL STORES NOTHING HERE, AND THAT IS THE POINT. rulesetSpecificData is not persisted
+    // (0011 section 3), so anything put in it is silently lost the moment a turn is saved and
+    // reloaded — which is every turn. NewOrigins set five keys here for its annihilation ending;
+    // rimefall's tuning lives in rimefall/rimefall.h as constants, and its state is read back out
+    // of the persisted world. Cleared rather than filled, so nothing inherits a NewOrigins ending
+    // by accident.
     rulesetSpecificData.clear();
-
-    // this set is for the NO7 annihilation win condition, and is active for NO7
-    rulesetSpecificData["victory_type"] = "annihilation";
-    rulesetSpecificData["allowed_annihilates"] = 3;
-    rulesetSpecificData["allied_percent"] = 50;
-    rulesetSpecificData["annihilate_percent"] = 10;
-    rulesetSpecificData["random_annihilates"] = true;
-
-    // this set is for the city vote win condition, and was not active for NO7
-    // rulesetSpecificData["victory_type"] = "city_vote";
 
     EnableItem(I_CAMEL);
     EnableItem(I_MCROSSBOW);
@@ -2088,17 +1779,14 @@ void Game::ModifyTablesPerRuleset(void)
         if (Globals->EASIER_UNDERWORLD) modify_range_level_penalty("rng_transport", 4);
     }
 
-    // NO7 - Enable the various parts of the victory conditions
-    if (rulesetSpecificData["victory_type"] == "annihilation") {
-        EnableObject(O_RITUAL_ALTAR);
-        EnableObject(O_EMPOWERED_ALTAR);
-        EnableObject(O_ENTITY_CAGE);
-        EnableObject(O_DORMANT_MONOLITH);
-        EnableObject(O_ACTIVE_MONOLITH);
-        EnableItem(I_IMPRISONED_ENTITY);
-        EnableSkill(S_ANNIHILATION);
-        modify_range_flags("rng_annihilate", RangeType::RNG_SURFACE_ONLY | RangeType::RNG_CROSS_LEVELS);
-    }
+    // NEWORIGINS' ENDGAME OBJECTS ARE NOT ENABLED HERE, DELIBERATELY. Rimefall is won by taking
+    // both horde sources and then being elected (0011 section 6); ritual altars, entity cages,
+    // monoliths and the ANNIHILATE skill belong to a different ending and would offer a second,
+    // undesigned way to win — one that ends the game while a source still stands, which 0011
+    // section 6 says explicitly cannot happen.
+    //
+    // Leaving them enabled was the state inherited from the stage 1 copy of NewOrigins, and it was
+    // live rather than dormant: rulesetSpecificData carried victory_type = "annihilation".
 
     // Weapon BM example
 
@@ -2151,37 +1839,10 @@ const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, 
         }
     }
 
-    // If Empowered Altars are active, we should check for them.  This is only used for the NO7 victory condition.
-    if (!(ObjectDefs[O_EMPOWERED_ALTAR].flags & ObjectType::DISABLED)) {
-        ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
-        ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
+    // NewOrigins guarded its map centre with a barrier that lifted once six altars were
+    // empowered. Rimefall enables no altars, so the check could never fire; removed rather than
+    // left inert, because a dead guard reads like a live one.
 
-        // If we don't have a barrens in the center, then this is not an N07 ring map and thus we won't have altars.
-        if (surface_center->type != R_BARREN) {
-            return std::nullopt;
-        }
-
-        ARegionArray *this_level = this->level;
-        ARegion *this_center = this_level->GetRegion(this_level->x / 2, this_level->y / 2);
-
-        if (this == this_center || this == surface_center) {
-            // This is a center region.  You can only enter here if all the altars have been empowered.
-
-            int count = 0;
-            for (int i = 0; i < 6; i++) {
-                ARegion *r = surface_center->neighbors[i];
-                // search that region for an altar
-                for(const auto o : r->objects) {
-                    if (o->type == O_EMPOWERED_ALTAR) {
-                        count++;
-                    }
-                }
-            }
-            if (count < 6) {
-                return "A mystical barrier";
-            }
-        }
-    }
     return std::nullopt;
 }
 

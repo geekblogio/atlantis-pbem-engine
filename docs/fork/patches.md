@@ -910,6 +910,36 @@ is corrected in the same pull request rather than left to rot. Left alone delibe
 **Upstream-worthy, not offered.** `rng.hpp` is upstream's and so is the defect, but per
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is prepared and registered.
 
+### `#62` — `rimefall`'s election, rulebook and recorded turns
+
+`rimefall/extra.cpp`, `rimefall/rimefall.h`, `rimefall/rimefall_intro.html`,
+`snapshot-tests/rimefall_turns` (new), `snapshot-tests/run-snapshots.sh`,
+`snapshot-tests/update-all-game-snapshots.sh`, `.gitignore`, plus the documentation. Stage 6, the
+last, and the ruleset is complete.
+
+Once both horde sources are held the throne opens and the crown goes to whoever holds mutual
+`ALLY` from at least half the other living factions. Two gates in order — while either source
+stands there is no winner at all — and a tie crowns nobody, because breaking it by faction number
+would settle the game on registration order.
+
+**The larger part of the change is a removal, and it was not planned.** `rimefall` still carried
+NewOrigins' annihilation ending from the stage 1 copy, and carried it *live*: `victory_type` was
+set to `"annihilation"` and the altars, monoliths, entity cages, imprisoned entity and the
+`ANNIHILATE` skill were all enabled. A second, undesigned way to win — and one that can end a game
+while a horde still has a home, which 0011 section 6 rules out explicitly. 107 lines added, 446
+removed.
+
+Beyond `rimefall/` this touches the two snapshot scripts and `.gitignore`, which are shared files
+upstream also maintains — the same registration surface `#38` had to record, and the reason this
+entry exists rather than resting on 0010 section 0.
+
+**The fixtures were recorded on macOS/arm64 and replay byte for byte on `linux/amd64`.** That was
+impossible before `#61`, and it is the clearest evidence that fix holds. They were also re-recorded
+once: at 64×64 five turns cost 39 MB against 16 MB for `neworigins`' fourteen, so the world is
+24×24.
+
+**Fork-local, permanently.** A new game variant is this fork's own.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
