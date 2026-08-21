@@ -98,7 +98,28 @@ inline void seed_random() {
 }
 
 inline void seed_random(int seed) {
-    std::minstd_rand minstd_rand(seed); // Create a minimal standard random number generator with the provided seed
+    // REDUCE THE SEED HERE RATHER THAN LETTING minstd_rand DO IT.
+    //
+    // std::minstd_rand's result_type is uint_fast32_t, and that type is NOT the same width
+    // everywhere: 32 bits on arm64 macOS, 64 bits on x86-64 Linux. A negative int therefore
+    // reaches the engine as two different unsigned values -- truncated on one platform,
+    // sign-extended on the other -- and the two streams have nothing to do with each other:
+    //
+    //     seed 0xdeadbeef, i.e. int -559038737
+    //       arm64 macOS  -> 3735928559           -> mt19937 starts 4202512608 ...
+    //       x86-64 Linux -> 18446744073150512879 -> mt19937 starts 2983448434 ...
+    //
+    // Positive seeds are unaffected, which is why every seeded world and every recorded turn
+    // agreed while the unit tests -- the one caller passing a value too large for int -- did not.
+    //
+    // The reduction below is what linear_congruential_engine does internally (s mod m), performed
+    // on the sign-extended 64-bit value. That reproduces what x86-64 already produced, so nothing
+    // changes there; 0017 settles which platform is the reference when both are equally correct.
+    // Passing an already-reduced value is idempotent, so the engine's own reduction is a no-op.
+    const std::uint64_t widened = static_cast<std::uint64_t>(static_cast<std::int64_t>(seed));
+    const std::uint64_t reduced = widened % 2147483647ull; // minstd_rand's modulus
+
+    std::minstd_rand minstd_rand(static_cast<std::minstd_rand::result_type>(reduced));
     std::seed_seq seed_seq{
         minstd_rand(), minstd_rand(), minstd_rand(),
         minstd_rand(), minstd_rand(), minstd_rand()

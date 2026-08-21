@@ -88,6 +88,16 @@ Changes in 5.2.5, in this fork
       the uniform draw and the shuffle itself, reproducing what libstdc++
       produces today, so no recorded seed and no running game changes.  A
       macOS build now replays every recorded turn byte for byte
+   -- Reduced the seed before handing it to the generator, so a negative one
+      builds the same world everywhere.  std::minstd_rand's result_type is
+      uint_fast32_t, which is 32 bits on arm64 and 64 bits on x86-64, so a
+      negative int reached it truncated on one and sign-extended on the
+      other and the two streams then had nothing in common.  Positive seeds
+      were never affected, which is why every recorded turn agreed while the
+      unit tests - the one caller seeding with a value too large for int -
+      did not.  The reduction reproduces what x86-64 already produced, so
+      nothing changes there.  Also fixes a negative ATLANTIS_SEED, which
+      std::stoi accepts
    -- Stopped reading in front of the item table for a market that names no
       item.  A market with item -1 is a supported state - write_out() saves
       it as NO_ITEM and read_in() restores it, because lookup_item() returns
