@@ -940,6 +940,31 @@ once: at 64×64 five turns cost 39 MB against 16 MB for `neworigins`' fourteen, 
 
 **Fork-local, permanently.** A new game variant is this fork's own.
 
+### `#63` — a market with no item stops reading in front of the item table
+
+`market.h`, `market.cpp`, `economy.cpp`, `CHANGELOG`. The sporadic Bus error in the `neworigins`
+snapshot replay, and **not** the use-after-free the bare backtrace suggested: the pointer was
+sound, the index was not. AddressSanitizer named it in one run — the region being read is
+`ItemDefs` itself, and the read lands 124 bytes *in front of it*.
+
+`lookup_item()` answers -1 for a name the build does not know, and `read_in()` stores that. **A
+market with `item == -1` is a supported state**: `write_out()` persists it as `NO_ITEM` on purpose
+and `read_in()` restores it, so both ends of the save file have always agreed. Four readers had
+not — `post_turn`, `remove_town_markets`, `UpdateEditRegion` and `TownGrowth`. `Market::has_item()`
+states the condition once instead of repeating the comparison at each.
+
+**Why it hid for so long:** a read just before a static array almost always lands in other valid
+memory. It faults only when that address is unmapped, so the same recorded turn crashed in some
+runs and not others — and became reproducible the moment unrelated code shifted the layout, which
+is how it was finally caught.
+
+Measured as an A/B on `neworigins` turn 0 with an identical perturbation applied to both builds:
+five crashes in six runs before, none in six after; six turns under AddressSanitizer report no
+error. All 41 snapshots stay byte-identical, so no running game changes.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

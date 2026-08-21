@@ -88,6 +88,15 @@ Changes in 5.2.5, in this fork
       the uniform draw and the shuffle itself, reproducing what libstdc++
       produces today, so no recorded seed and no running game changes.  A
       macOS build now replays every recorded turn byte for byte
+   -- Stopped reading in front of the item table for a market that names no
+      item.  A market with item -1 is a supported state - write_out() saves
+      it as NO_ITEM and read_in() restores it, because lookup_item() returns
+      -1 for a name the build does not know - but four places asked
+      ItemDefs[item] about one anyway, indexing 124 bytes before the table.
+      Usually that reads other static data and passes unnoticed, which is
+      why it surfaced as a turn replay that crashed in some runs and not
+      others; the same recorded turn went from five crashes in six runs to
+      none.  No recorded output changes
    -- Stopped the region editor from doing the same thing a third time.
       Deleting a market by item kept the remove_if() shape the two fixes
       above replaced, so a region whose matching market sat before a

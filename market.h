@@ -59,6 +59,18 @@ public:
 	int baseprice;
 	int activity;
 
+	// Does this market name an item at all?
+	//
+	// A market with item == -1 is a SUPPORTED STATE, not corruption: write_out() persists it as
+	// NO_ITEM and read_in() restores it as -1, because lookup_item() returns -1 for a name the
+	// build does not know. Both ends of the save file have always agreed about it.
+	//
+	// What must never happen is ItemDefs[item] for one. The index lands in front of the table --
+	// on a 64-bit build, 124 bytes before it -- and reads whatever happens to be there. That is
+	// usually some other static data and passes unnoticed, which is exactly why it surfaced as a
+	// turn replay that crashed in some runs and not others.
+	bool has_item() const { return item >= 0; }
+
 	void post_turn(int population, int wages);
 	void write_out(std::ostream& f);
 	void read_in(std::istream& f);
