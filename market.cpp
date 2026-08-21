@@ -14,6 +14,9 @@ void Market::post_turn(int population, int wages)
     //
     if (amount == -1) return;
 
+    // Nothing to age for a market that names no item, and nothing safe to read either.
+    if (!has_item()) return;
+
     if (ItemDefs[item].type & IT_MAN) {
         float ratio = ItemDefs[item].baseprice / (10 * (float)Globals->BASE_MAN_COST);
         // hack: included new wage factor of ten in float assignment above

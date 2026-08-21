@@ -799,7 +799,8 @@ void ARegion::remove_town_markets()
     keep.reserve(markets.size());
 
     for (const auto m : markets) {
-        if (ItemDefs[m->item].type & IT_MAN) keep.push_back(m);
+        // A market naming no item is not a man market, and asking ItemDefs is not allowed.
+        if (m->has_item() && (ItemDefs[m->item].type & IT_MAN)) keep.push_back(m);
         else delete m;
     }
 
@@ -922,7 +923,8 @@ void ARegion::UpdateEditRegion()
 
     //Replace man selling
     markets.erase(
-        remove_if(markets.begin(), markets.end(), [](const Market * m) { return ItemDefs[m->item].type & IT_MAN; }),
+        remove_if(markets.begin(), markets.end(),
+            [](const Market *m) { return m->has_item() && (ItemDefs[m->item].type & IT_MAN); }),
         markets.end()
     );
 
@@ -1223,6 +1225,9 @@ int ARegion::TownGrowth()
         int amt = 0;
         int tot = 0;
         for (const auto& m : markets) {
+            // A market that names no item contributes nothing to town growth; every branch below
+            // asks ItemDefs about it, which for item == -1 reads in front of the table.
+            if (!m->has_item()) continue;
             if (Population() > m->minpop) {
                 if (m->type == Market::MarketType::M_BUY) {
                     if (ItemDefs[m->item].type & IT_TRADE) {
