@@ -965,6 +965,33 @@ error. All 41 snapshots stay byte-identical, so no running game changes.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#64` — a negative seed reaches the generator the same way everywhere
+
+`rng.hpp`, `CHANGELOG`. The third instance of the family `#54` and `#61` belong to, and the reason
+ten unit test suites failed on arm64 macOS while passing on x86-64 Linux.
+
+`std::minstd_rand`'s `result_type` is `uint_fast32_t` — **32 bits on arm64, 64 bits on x86-64** —
+so a negative `int` arrived truncated on one platform and sign-extended on the other, and the two
+streams had nothing in common from the first draw. Seed `0xdeadbeef` becomes `3735928559` on one
+and `18446744073150512879` on the other.
+
+**Positive seeds were never affected**, which is exactly why every seeded world and all 41 recorded
+snapshots agreed while the unit tests did not: `UnitTestHelper` is the only caller seeding with a
+value too large for `int`. The reduction now happens before the engine call, on the sign-extended
+64-bit value, reproducing what x86-64 already produced. A negative `ATLANTIS_SEED` is fixed with
+it — `std::stoi` rejects anything above `INT_MAX` but accepts negatives.
+
+**No new decision record**, deliberately: [0017](../decisions/0017-x86-64-is-the-reference-for-draw-order.md)
+settled which platform is the reference when two behaviours are equally correct, and this applies
+that decision rather than making another. The reasoning sits at the code.
+
+**Both platforms are now fully green** — 20 of 20 unit suites and 41 of 41 snapshots on each,
+which has not been true of this repository before. Linux was re-measured in a clean container
+build and is unchanged.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
