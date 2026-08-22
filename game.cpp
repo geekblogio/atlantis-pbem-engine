@@ -320,6 +320,12 @@ void Game::set_deterministic_seed(int seed)
     init_random_seed = [seed]() { rng::seed_random(seed); };
 }
 
+bool read_input_line(parser::string_parser& parser)
+{
+    std::cin >> parser;
+    return static_cast<bool>(std::cin);
+}
+
 int Game::NewGame()
 {
     factionseq = 1;
@@ -339,7 +345,10 @@ int Game::NewGame()
     // so that tests are repeatable.
     init_random_seed();
 
-    CreateWorld();
+    if (!CreateWorld()) {
+        logger::write("The world was not created: the input ended before its questions were answered.");
+        return 0;
+    }
     CreateNPCFactions();
 
     if (Globals->CITY_MONSTERS_EXIST)

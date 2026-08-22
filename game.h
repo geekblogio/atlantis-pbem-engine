@@ -13,6 +13,17 @@ class Game;
 #include "indenter.hpp"
 #include "string_parser.hpp"
 
+// Reads one line from standard input into `parser`. Returns FALSE WHEN THE INPUT HAS ENDED, and
+// the caller must then give up rather than ask again.
+//
+// Every prompt in this engine sits in a loop that treats an answer it cannot use as a reason to
+// ask once more. That is right for a human typing at a terminal and fatal for anything else: once
+// stdin is closed the read fails immediately and for ever, so `<game> new` with a short answers
+// file, or `<game> edit` driven by a script, spins at full speed printing the same question until
+// something kills it. Both Python projects drive this engine as a subprocess, where that is a hung
+// job rather than an error they can see.
+bool read_input_line(parser::string_parser& parser);
+
 #include "external/nlohmann/json.hpp"
 using json = nlohmann::json;
 
@@ -154,7 +165,9 @@ private:
     //
     // Game-specific creation functions (see world.cpp).
     //
-    void CreateWorld();
+    // CreateWorld() returns false when it ran out of input before it had its answers -- see
+    // read_input_line() at the top of this file.
+    bool CreateWorld();
     void CreateNPCFactions();
     void CreateCityMon(ARegion *pReg, int percent, int needmage);
     int MakeWMon(ARegion *pReg);

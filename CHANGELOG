@@ -127,6 +127,15 @@ Changes in 5.2.5, in this fork
       x86-64 already produced, since that is what the servers run and what
       every recorded seed reproduces: nothing changes there, and aarch64
       now agrees with it instead of disagreeing
+   -- Stopped `new` and `edit` from spinning against the end of their input.
+      Every prompt sits in a loop that asks again when it cannot use the
+      answer, and none of them looked at the state of the stream - so a
+      closed or exhausted stdin made them repeat the same question at full
+      speed until something killed the process.  A `new` with an answers
+      file one line short was a hung job rather than an error, which matters
+      because the engine is normally driven as a subprocess.  `new` now
+      fails and exits 1 without writing a game, and `edit` quits without
+      saving, leaving the game as it found it
    -- Made the same seed build the same kingdoms world on every standard
       library.  std::discrete_distribution is unspecified like every other
       distribution, and the two libraries part company at exactly one point:

@@ -1106,6 +1106,38 @@ drive the engine as a subprocess, where a short or closed stdin hangs instead of
 error. Fixing it touches six rulesets and changes engine behaviour, which does not belong in a
 test recording.
 
+### `#68` — the end of the input is not a reason to ask again
+
+`game.h`, `game.cpp`, `edit.cpp`, every ruleset's `world.cpp`, `unittest/input_test.cpp`,
+`docs/interface/cli.md`, `CHANGELOG`. Found while recording the world generation snapshots of
+`#67`, where a short answers file would have meant a CI job only the six hour limit could stop.
+
+Every prompt sits in a loop that asks again when it cannot use the answer, and **none looked at the
+state of the stream**. Once stdin is closed the read fails immediately and for ever, so the loop
+repeats the same question at full speed. `<game> new` with an answers file one line short was a
+hung job rather than an error — and the engine is normally driven as a subprocess, which is exactly
+where a hang is worst. `<game> edit` reprinted its whole menu each time round.
+
+`read_input_line()` reports the end of input; `CreateWorld()` returns `bool` and gives up
+(nineteen prompts across eight rulesets and the test ruleset); the editor quits **without saving**,
+leaving the game as it was found rather than committing a decision nobody made. Measured: `new`
+with empty or short input now exits 1 writing no `game.out`, `standard new` still succeeds because
+it asks nothing, and `standard edit` quits in seventeen lines.
+
+**Consumer-visible**, and called out as such. `docs/interface/cli.md` described the hang as a
+property of the tool — *"Run non-interactively it will spin against EOF rather than fail"* — and now
+gives the exit code and the message. For the two Python projects a process that never returns
+becomes a failure they can see.
+
+The unit tests pin one distinction worth keeping: the parser's `operator>>` begins with
+`>> std::ws`, so a blank line is stepped over rather than returned. At a terminal that is what a
+person expects, and a stream of nothing but whitespace has genuinely ended. **One of those tests
+began by asserting the opposite and failed**, which is how the distinction came to be written down
+instead of assumed.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
