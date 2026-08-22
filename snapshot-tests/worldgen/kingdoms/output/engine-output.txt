@@ -1,0 +1,122 @@
+Atlantis Engine Version: 5.2.5 (beta)
+Kingdoms, Version: 1.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+How wide should the map be? 
+How tall should the map be? 
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................
+Generating GeoMap - size: 64, xscale: 2, yscale: 5
+....
+
+Making land
+..........
+Rescaling fractal parameters...
+Converting Scattered Water
+..
+Set 30 land regions of 92 total.
+Set 22 land regions of 92 total.
+Growing Terrain...
+Severing land bridges
+.....
+Removing coastal 'lakes'
+...
+Naming Regions
+.......
+Regions 16
+Densities:
+ocean 204
+plain 10
+forest 20
+mountain 10
+desert 41
+tundra 3
+nexus 1
+
+Settlements: 21
+Villages: 4 (19%)
+Towns   : 5 (23%)
+Cities  : 12 (57%)
+
+
+Products:
+grain [GRAI] 1393
+livestock [LIVE] 673
+iron [IRON] 902
+wood [WOOD] 591
+stone [STON] 736
+fur [FUR] 328
+fish [FISH] 12630
+herb [HERB] 37
+horse [HORS] 315
+mithril [MITH] 47
+ironwood [IRWD] 62
+winged horse [WING] 10
+rootstone [ROOT] 135
+yew [YEW] 26
+giant turtle [TURT] 843
+
+Wanted:
+grain [GRAI] 1598
+livestock [LIVE] 1608
+fish [FISH] 1545
+horse [HORS] 27
+sword [SWOR] 20
+crossbow [XBOW] 20
+longbow [LBOW] 19
+chain armor [CARM] 17
+plate armor [PARM] 14
+winged horse [WING] 13
+ivory [IVOR] 46
+pearls [PEAR] 45
+jewelry [JEWE] 23
+wine [WINE] 49
+spices [SPIC] 27
+chocolate [CHOC] 61
+truffles [TRUF] 98
+vodka [VODK] 95
+perfume [PERF] 42
+silk [SILK] 75
+cotton [COTT] 76
+pick [PICK] 12
+spear [SPEA] 10
+axe [AXE] 31
+hammer [HAMM] 27
+magic crossbow [MXBO] 4
+net [NET] 70
+lasso [LASS] 41
+bag [BAG] 22
+spinning wheel [SPIN] 48
+leather armor [LARM] 6
+cloth armor [CLAR] 39
+lance [LANC] 51
+battle axe [BAXE] 9
+javelin [JAVE] 6
+pike [PIKE] 28
+giant turtle [TURT] 6
+
+For Sale:
+viking [VIKI] 1824
+nomad [NOMA] 4038
+wood elf [WELF] 105
+sea elf [SELF] 623
+high elf [HELF] 1370
+desert dwarf [DDWA] 1640
+wood [WOOD] 0
+stone [STON] 0
+horse [HORS] 0
+plate armor [PARM] 0
+ivory [IVOR] 100
+jewelry [JEWE] 38
+wine [WINE] 60
+spices [SPIC] 73
+chocolate [CHOC] 66
+truffles [TRUF] 19
+vodka [VODK] 45
+perfume [PERF] 22
+silk [SILK] 31
+cotton [COTT] 42
+leather armor [LARM] 0
+

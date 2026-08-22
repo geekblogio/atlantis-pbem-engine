@@ -3909,39 +3909,32 @@ void ARegionList::ResourcesStatistics() {
         }
     }
 
-    logger::write("");
-    logger::write("Products:");
-    for (auto kv : resources) {
-        if (kv.first == I_SILVER || kv.first <= -1) {
-            continue;
+    // Printed in item order rather than in hash order. std::unordered_map's iteration order is
+    // unspecified, and libstdc++ and libc++ really do differ: the same world listed its products,
+    // wants and wares in two different orders on the two platforms. Nothing about the world
+    // changed -- no draw is taken here -- but it made this output impossible to compare, which is
+    // what the world generation snapshot needs to do.
+    auto write_totals = [](const std::string& heading, const std::unordered_map<int, int>& totals) {
+        std::vector<int> items;
+        items.reserve(totals.size());
+        for (const auto& kv : totals) {
+            if (kv.first == I_SILVER || kv.first <= -1) continue;
+            items.push_back(kv.first);
         }
+        std::sort(items.begin(), items.end());
 
-        ItemType& item = ItemDefs[kv.first];
-        logger::write(item.name + " [" + item.abr + "] " + std::to_string(kv.second));
-    }
-    logger::write("");
-
-    logger::write("Wanted:");
-    for (auto kv : wanted) {
-        if (kv.first == I_SILVER || kv.first <= -1) {
-            continue;
+        logger::write(heading);
+        for (int i : items) {
+            ItemType& item = ItemDefs[i];
+            logger::write(item.name + " [" + item.abr + "] " + std::to_string(totals.at(i)));
         }
+        logger::write("");
+    };
 
-        ItemType& item = ItemDefs[kv.first];
-        logger::write(item.name + " [" + item.abr + "] " + std::to_string(kv.second));
-    }
     logger::write("");
-
-    logger::write("For Sale:");
-    for (auto kv : forSale) {
-        if (kv.first == I_SILVER || kv.first <= -1) {
-            continue;
-        }
-
-        ItemType& item = ItemDefs[kv.first];
-        logger::write(item.name + " [" + item.abr + "] " + std::to_string(kv.second));
-    }
-    logger::write("");
+    write_totals("Products:", resources);
+    write_totals("Wanted:", wanted);
+    write_totals("For Sale:", forSale);
 }
 
 const std::unordered_map<ARegion*, graphs::Node<ARegion*>> breadthFirstSearch(ARegion* start, const int maxDistance) {

@@ -50,6 +50,7 @@ map_viewer/dist
 !/snapshot-tests/turns/**
 !/snapshot-tests/neworigins_turns/**
 !/snapshot-tests/rimefall_turns/**
+!/snapshot-tests/worldgen/**
 
 # ... but not the backups update-game-snapshots.sh leaves behind on a re-record.
 # They are invisible to `git status`; remove them with `git clean -xfd snapshot-tests`.
@@ -71,6 +72,8 @@ map_viewer/dist
 /snapshot-tests/engine-output.txt
 /snapshot-tests/turn-difference.txt
 /snapshot-tests/rules-difference.txt
+/snapshot-tests/worldgen-difference.txt
+/snapshot-tests/worldgen-output/
 
 .gdb_history
 /out

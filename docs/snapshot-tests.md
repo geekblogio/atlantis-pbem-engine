@@ -12,9 +12,10 @@ byte of every output file** against what was recorded.
 
 | Suite | Covers |
 | --- | --- |
-| `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard` and `neworigins` only, 14 turns each |
+| `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard`, `neworigins` (14 turns each) and `rimefall` (5) |
 | `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for every ruleset |
-| `run-snapshots.sh` | both, for everything — 35 individual checks |
+| `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for `kingdoms` only |
+| `run-snapshots.sh` | all three, for everything |
 
 The comparison covers `game.*`, `players.*`, `orders.*`, `template.*`, `report.*`, `times.*`
 and the engine's own stdout. The rules comparison strips the `Last Change:` timestamp line
@@ -51,12 +52,24 @@ means engine output changed, and there are only three possibilities:
 **Never re-record to make CI green.** The fixtures are the only automated statement about what
 this engine does; overwriting them without reading the diff discards it silently.
 
+## What the turn replays do not cover
+
+**World creation.** The turn suites replay `<game> run` against a world that already exists, so
+terrain, towns, starting locations and city guards are exercised by nothing at all. That gap was
+not theoretical: `#66` fixed a defect that only ever showed there, and only in `kingdoms`.
+
+`run-worldgen-snapshot.sh` closes it for one ruleset. `worldgen/<game>/` holds the answers that
+ruleset's `new` asks for on stdin, the seed, and the files it wrote; a 24×24 `kingdoms` world is
+under 100 KB and takes a second, so extending it to another ruleset costs little. It compares the
+engine's stdout as well as `game.out` and `players.out`.
+
 ## Re-recording
 
 ```bash
 cd snapshot-tests
 ./update-all-game-snapshots.sh
 ./update-all-rule-snapshots.sh
+./update-worldgen-snapshot.sh kingdoms
 git clean -xfd snapshot-tests
 ```
 

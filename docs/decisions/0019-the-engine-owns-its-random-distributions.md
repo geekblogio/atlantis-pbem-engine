@@ -38,7 +38,7 @@ a version of a library nobody in this project chose or tracks.
 The numbers produced are the ones libstdc++ produces today, so no recorded seed and no running
 game changes.**
 
-Two are written out in `rng.hpp`:
+Three are written out in `rng.hpp` (the third added by `#66`):
 
 - `detail::uniform_below()` — Lemire's multiply-shift, which is what libstdc++ uses. Every other
   entry point (`get_random`, `make_roll`, `one_of`) funnels through it.
@@ -46,6 +46,10 @@ Two are written out in `rng.hpp`:
   fit in one draw it generates them together and halves the draw count. That is observable
   behaviour, not an implementation detail; a plain Fisher-Yates returns different permutations for
   every size above two.
+
+- `rng::get_weighted_index()` — libstdc++'s `discrete_distribution`, over a canonical double
+  reproduced from `std::generate_canonical<double, 53, std::mt19937>`, **including its silent
+  shortcut for a single weight**, which draws nothing at all. See the correction below.
 
 `bound == 1` deliberately takes the same path as any other: it consumes one draw and yields 0,
 because the standard distribution does, and short-circuiting it would shift every later draw.
@@ -90,13 +94,29 @@ for item decay. It is left alone on purpose, and neither reason is convenience:
    different outcomes in running games. That is a game change, not a bug fix, and needs its own
    decision.
 
-`std::discrete_distribution` (`rng::get_weighted_index`) was measured to agree between the two
-libraries and is left alone. That agreement is not guaranteed by anything; it is a fact about
-today's implementations, recorded here so nobody mistakes it for a promise.
+~~`std::discrete_distribution` (`rng::get_weighted_index`) was measured to agree between the two
+libraries and is left alone.~~ **Wrong, and corrected by `#66`: the engine owns this one too.**
 
-**The unit tests still fail on macOS/arm64** — ten suites — while passing on Linux. Whatever
-remains is not draw order: the turn snapshots exercise far more engine and now match byte for
-byte. It is a separate defect and wants its own investigation.
+The caveat this paragraph carried — that the agreement was a fact about today's implementations
+and not a promise — turned out to be too kind to the measurement. The two libraries agree from
+**two** weights up and part company at **one**: libstdc++'s `param_type` clears the probabilities
+below two entries and `operator()` then returns 0 *without touching the generator*, while libc++
+draws anyway. The original measurement never saw it, because it was taken where the function does
+not run.
+
+It runs in exactly one place — `MakeManUnit()`, reached only when `LEADERS_EXIST` is false, which
+is true of `kingdoms` alone — and half the picks during a `kingdoms` world creation offer a single
+candidate. So `kingdoms` was building a different world per platform from the same seed the whole
+time, unnoticed, because no fixture covered world creation. `#66` reproduces libstdc++'s algorithm
+in `rng.hpp` and adds `snapshot-tests/run-worldgen-snapshot.sh` so that the path is watched.
+
+Unlike the binomial above, this one **can** be frozen exactly: it is normalise, accumulate and
+`lower_bound` over a canonical double, and nothing in it calls libm.
+
+~~**The unit tests still fail on macOS/arm64** — ten suites — while passing on Linux.~~ Found and
+fixed in `#64`: `std::minstd_rand`'s `result_type` is `uint_fast32_t`, which is 32 bits on arm64
+and 64 bits on x86-64, so a *negative* seed reached the generator two different ways. Both
+platforms now pass the whole suite.
 
 ## Consequences
 

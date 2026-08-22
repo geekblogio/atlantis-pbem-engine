@@ -27,6 +27,8 @@ Makefile     text eol=lf
 # NOT affect `git diff` locally, which the failure-triage procedure depends on.
 snapshot-tests/turns/**             text eol=lf linguist-generated=true
 snapshot-tests/neworigins_turns/**  text eol=lf linguist-generated=true
+snapshot-tests/rimefall_turns/**    text eol=lf linguist-generated=true
+snapshot-tests/worldgen/**          text eol=lf linguist-generated=true
 snapshot-tests/rules/*.html         text eol=lf linguist-generated=true
 
 # Vendored single-file header libraries, refreshed wholesale by `make check-libraries`.

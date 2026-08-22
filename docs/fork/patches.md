@@ -1027,6 +1027,53 @@ diagnose.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#66` — the same seed builds the same `kingdoms` world on every standard library
+
+`rng.hpp`, `aregion.cpp`, `unittest/rng_test.cpp`, `snapshot-tests/`, `docs/`, `CHANGELOG`,
+`ci.yml`. The fourth instance of the family `#54`, `#61` and `#64` belong to, and the one that had
+been running unnoticed the longest.
+
+`std::discrete_distribution` diverges between libstdc++ and libc++ at **exactly one point: a single
+weight.** libstdc++'s `param_type` clears the probabilities below two entries and `operator()` then
+returns 0 *without touching the generator*; libc++ draws twice. From two weights up they agreed in
+every case measured — which is precisely why
+[0019](../decisions/0019-the-engine-owns-its-random-distributions.md) recorded them as agreeing.
+**That measurement was taken where the function does not run.**
+
+It runs in one place: `MakeManUnit()`, reached only when `LEADERS_EXIST` is false, which is true of
+`kingdoms` alone. Half the weighted picks during a `kingdoms` world creation offer one candidate.
+Seed 12345 on a 24×24 world gave `be7627a9…` on macOS and `25581781…` on Linux before, and
+`25581781…` on both after — Linux byte for byte unchanged, per
+[0017](../decisions/0017-x86-64-is-the-reference-for-draw-order.md). Attribution was measured
+rather than assumed: with the same portable replacement compiled on both sides the worlds already
+matched, so `kingdoms` world generation holds no second platform-dependent site.
+
+`rng.hpp` now reproduces libstdc++'s algorithm. **Nothing in it calls libm**, which is what
+separates it from `std::binomial_distribution` — still called, still 0019's deliberate residue,
+because libstdc++'s uses `log` and `exp` and a faithful port could diverge on a last bit and *look*
+fixed. Verified against real libstdc++ under GCC 13.3 and 14.2, 1520 cases each, comparing the
+chosen index **and** the next raw draw: no divergence. Against libc++ the engine now differs in 160
+cases, all at a single weight, which is the point.
+
+**Two guards, because neither path had one.** The turn snapshots replay `run` against an existing
+world, so world creation — terrain, towns, starting locations, city guards — was exercised by
+nothing at all; that is how a defect this old survived 41 green fixtures.
+`snapshot-tests/run-worldgen-snapshot.sh` regenerates a world from a fixed seed and compares it
+byte for byte (`kingdoms`: 92 KB, one second), and `unittest/rng_test.cpp` pins the values while
+asserting *behaviour* for the case that bit — a one-weight pick must leave the following draw
+untouched.
+
+**Also fixed, because it blocked the comparison:** `ResourcesStatistics()` iterated three
+`std::unordered_map` directly, so a new world printed the same numbers in a different order on a
+different standard library. Sorted by item index. No draw is taken there, so no world changes.
+
+0019 is corrected in place rather than rewritten — the wrong paragraph is struck through and the
+reason it was wrong is stated, since the failure mode was a measurement that could not have seen
+what it claimed.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
