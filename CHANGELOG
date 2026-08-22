@@ -127,6 +127,23 @@ Changes in 5.2.5, in this fork
       x86-64 already produced, since that is what the servers run and what
       every recorded seed reproduces: nothing changes there, and aarch64
       now agrees with it instead of disagreeing
+   -- Made the same seed build the same kingdoms world on every standard
+      library.  std::discrete_distribution is unspecified like every other
+      distribution, and the two libraries part company at exactly one point:
+      a single weight, where libstdc++ returns 0 without drawing at all and
+      libc++ draws twice.  Half the weighted picks during a kingdoms world
+      creation offer one candidate, and kingdoms is the only ruleset that
+      makes them - so it was the only one affected, and no snapshot could
+      see it, because none covered world generation.  The engine now
+      implements the pick itself, reproducing what libstdc++ produces, so
+      Linux is unchanged; a recorded world generation now guards the path
+   -- Listed the products, wants and wares of a new world in item order
+      rather than in hash order.  Three std::unordered_map were iterated
+      directly, and the iteration order of one is unspecified, so the same
+      world printed the same numbers in a different sequence on a different
+      standard library.  Nothing about the world changed - no draw is taken
+      there - but the output could not be compared, which is what the new
+      world generation snapshot needs
    -- Stopped a leftover times.* file from changing the turn.  The name of
       a world-events article is drawn from the game's own generator, and a
       collision used to draw again, which put the contents of the working

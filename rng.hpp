@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <iterator>
 #include <concepts>
+#include <cmath>
 
 namespace rng {
 namespace detail {
@@ -83,6 +84,32 @@ inline std::uint64_t uniform_below(std::uint64_t bound) {
     // which is what the standard distribution does for an empty range. Short-circuiting it would
     // silently shift every later draw.
     return m >> 32;
+}
+
+// Draws a double in [0, 1), consuming raw generator output exactly as libstdc++'s
+// std::generate_canonical<double, 53, std::mt19937> does. Only get_weighted_index() needs it;
+// see the comment there for why it is written out rather than called.
+//
+// mt19937 yields 32 bits per draw and a double carries 53, so libstdc++ takes ceil(53/32) == 2
+// draws and reads them as one base-2^32 number. The addition rounds -- 64 bits do not fit in a
+// 53-bit mantissa -- but IEEE rounding is specified, so the result is reproducible as long as the
+// operations keep this order. Nothing here calls libm.
+inline double canonical() {
+    auto& gen = get_initialized_generator();
+
+    const double r = 4294967296.0; // mt19937: max() - min() + 1
+    double sum = 0.0;
+    double tmp = 1.0;
+    for (int k = 0; k < 2; k++) {
+        sum += static_cast<double>(gen()) * tmp;
+        tmp *= r;
+    }
+
+    double ret = sum / tmp;
+    // libstdc++ guards the rounding case where the quotient reaches 1.0, and so must we: the
+    // caller's lower_bound would otherwise run past the last cumulative weight.
+    if (ret >= 1.0) ret = std::nextafter(1.0, 0.0);
+    return ret;
 }
 
 } // namespace detail
@@ -245,12 +272,49 @@ inline std::optional<size_t> get_weighted_index(const WeightContainer& weights) 
     if (std::ranges::empty(weights)) return std::nullopt;
 
     unsigned long long weight_sum = 0;
-    for(const auto& weight : weights) weight_sum += weight;
+    double weight_total = 0.0;
+    size_t count = 0;
+    for(const auto& weight : weights) {
+        weight_sum += weight;
+        weight_total += static_cast<double>(weight); // in libstdc++'s order, so the rounding matches
+        count++;
+    }
 
     if (weight_sum == 0) return std::nullopt;
 
-    std::discrete_distribution<size_t> distribution(std::ranges::begin(weights), std::ranges::end(weights));
-    return distribution(detail::get_initialized_generator());
+    // WRITTEN OUT FOR THE REASON uniform_below() GIVES, AND FOR ONE MORE.
+    //
+    // std::discrete_distribution is unspecified like every other distribution, and here the two
+    // libraries part company at exactly one point: **a single weight**. libstdc++'s param_type
+    // clears the probabilities when there are fewer than two, and operator() then returns 0
+    // WITHOUT TOUCHING THE GENERATOR; libc++ draws anyway. Everything from two weights up agreed
+    // in every case measured -- which is why 0019 recorded the two as agreeing, having measured
+    // where the function does not run.
+    //
+    // It runs in exactly one place: MakeManUnit(), reached only when LEADERS_EXIST is false, which
+    // is true of kingdoms alone. Half of the picks during a kingdoms world creation offer one
+    // candidate, so macOS burned two draws per pick that Linux did not, and the same seed built a
+    // different world. Measured on a 24x24 kingdoms world, seed 12345: game.out differed between
+    // the platforms before this, and is identical after.
+    //
+    // The reproduction below is libstdc++'s: normalise, accumulate, and lower_bound a canonical
+    // double. Unlike std::binomial_distribution -- the one distribution still called, see 0019 --
+    // it uses no libm, so it can be frozen exactly rather than approximately. Verified against
+    // libstdc++ under GCC 13.3 and 14.2 over four seeds and nineteen weight vectors, comparing the
+    // chosen index AND the generator state after each call.
+    if (count < 2) return 0;
+
+    std::vector<double> cumulative;
+    cumulative.reserve(count);
+    double running = 0.0;
+    for(const auto& weight : weights) {
+        running += static_cast<double>(weight) / weight_total;
+        cumulative.push_back(running);
+    }
+    cumulative.back() = 1.0; // libstdc++ pins the last one, so a rounded sum below 1 cannot escape
+
+    const double pick = detail::canonical();
+    return static_cast<size_t>(std::lower_bound(cumulative.begin(), cumulative.end(), pick) - cumulative.begin());
 }
 
 } // namespace rng

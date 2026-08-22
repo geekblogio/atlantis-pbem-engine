@@ -20,6 +20,12 @@ if [[ $? != 0 ]]; then
   failure=1
 fi
 
+echo "Running the kingdoms world generation snapshot"
+./run-worldgen-snapshot.sh kingdoms
+if [[ $? != 0 ]]; then
+  failure=1
+fi
+
 echo "Running all rules snapshots"
 ./run-rules-snapshot.sh
 if [[ $? != 0 ]]; then
