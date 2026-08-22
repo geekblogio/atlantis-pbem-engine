@@ -1,6 +1,6 @@
 # 0014 — A refused faction does not abort the turn
 
-**Status:** proposed, 2026-08-15. Second engine change for `rimefall`, under the boundary
+**Status:** accepted, 2026-08-15. Second engine change for `rimefall`, under the boundary
 [0012](0012-a-ruleset-hook-for-gateway-destinations.md) drew: one hook for one purpose, and
 anything further argued again from scratch. This is that argument.
 

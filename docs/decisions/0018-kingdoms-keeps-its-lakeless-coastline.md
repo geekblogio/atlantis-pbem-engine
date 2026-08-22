@@ -1,6 +1,6 @@
 # 0018 — `kingdoms` keeps its lakeless coastline
 
-**Status:** proposed, 2026-08-18. Records a finding **and the decision not to act on it**, so that
+**Status:** accepted, 2026-08-18. Records a finding **and the decision not to act on it**, so that
 the next reader does not spend the afternoon rediscovering it and then "repairing" it.
 
 ## Context

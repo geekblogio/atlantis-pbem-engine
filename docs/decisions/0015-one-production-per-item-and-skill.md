@@ -1,6 +1,6 @@
 # 0015 — One production per item and skill, in a region
 
-**Status:** proposed, 2026-08-17. Settles where the fix for a duplicated region production belongs,
+**Status:** accepted, 2026-08-17. Settles where the fix for a duplicated region production belongs,
 because two of the three candidate places would have changed what a region yields.
 
 ## Context
