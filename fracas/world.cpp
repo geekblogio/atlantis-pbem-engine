@@ -2071,7 +2071,7 @@ const std::string& AGetNameString( int name )
     return(regionnames[name]);
 }
 
-void Game::CreateWorld()
+bool Game::CreateWorld()
 {
     int nx = 0;
     int ny = 1;
@@ -2080,7 +2080,7 @@ void Game::CreateWorld()
         ny = 2;
         while(nx <= 0) {
             logger::write("How many hexes should the nexus region be?");
-            std::cin >> parser;
+            if (!read_input_line(parser)) return false;
             auto token = parser.get_token();
             nx = token.get_number().value_or(-1);
             if (nx <= 0) continue;
@@ -2097,7 +2097,7 @@ void Game::CreateWorld()
     int xx = 0;
     while (xx <= 0) {
         logger::write("How wide should the map be? ");
-        std::cin >> parser;
+        if (!read_input_line(parser)) return false;
         auto token = parser.get_token();
         xx = token.get_number().value_or(-1);
         if (xx <= 0) continue;
@@ -2109,7 +2109,7 @@ void Game::CreateWorld()
     int yy = 0;
     while (yy <= 0) {
         logger::write("How tall should the map be? ");
-        std::cin >> parser;
+        if (!read_input_line(parser)) return false;
         auto token = parser.get_token();
         yy = token.get_number().value_or(-1);
         if (yy <= 0) continue;
@@ -2210,6 +2210,8 @@ void Game::CreateWorld()
     regions.TownStatistics();
 
     regions.ResourcesStatistics();
+
+    return true;
 }
 
 int ARegionList::GetRegType( ARegion *pReg )

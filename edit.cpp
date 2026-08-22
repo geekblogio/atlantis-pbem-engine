@@ -30,7 +30,13 @@ int Game::EditGame(int *pSaveGame)
         logger::write("> ");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) {
+            // Not an error: a script that has said all it wanted to say leaves the game as it
+            // found it. Saving on the way out would be a decision nobody made.
+            logger::write("");
+            logger::write("Input ended.  Quitting without saving.");
+            return 1;
+        }
         logger::write("");
 
         parser::token token = parser.get_token();
@@ -65,7 +71,7 @@ ARegion *Game::EditGameFindRegion()
     logger::write("Region coords (x y z):");
 
     parser::string_parser parser;
-    std::cin >> parser;
+    if (!read_input_line(parser)) return nullptr;
 
     parser::token token = parser.get_token();
     if (!token) {
@@ -106,7 +112,7 @@ void Game::EditGameFindUnit()
     logger::write("Which unit number?");
 
     parser::string_parser parser;
-    std::cin >> parser;
+    if (!read_input_line(parser)) return;
 
     parser::token token = parser.get_token();
     if (!token) {
@@ -131,7 +137,7 @@ void Game::EditGameRegion(ARegion *pReg)
         logger::write(" 2) Edit terrain...");
         logger::write(" q) Return to previous menu.");
 
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (token == "1") EditGameRegionObjects(pReg);
@@ -164,7 +170,7 @@ void Game::EditGameRegionObjects( ARegion *pReg )
         logger::write( " q) Return to previous menu." );
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -317,7 +323,7 @@ void Game::EditGameRegionTerrain( ARegion *pReg )
         logger::write( " q) Return to previous menu." );
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -556,7 +562,7 @@ void Game::EditGameRegionMarkets(ARegion *pReg)
         logger::write(" q) Return to previous menu.");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -839,7 +845,7 @@ void Game::EditGameUnit(Unit *unit)
         logger::write("  q) Stop editing this unit.");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -864,7 +870,7 @@ void Game::EditGameUnitItems(Unit *pUnit)
         logger::write("  q) Stop editing the items.");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -902,7 +908,7 @@ void Game::EditGameUnitSkills(Unit *pUnit)
         logger::write("  q) Stop editing the skills.");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {
@@ -966,7 +972,7 @@ void Game::EditGameUnitDetails(Unit *unit)
         logger::write("  [q] Go back one screen.");
 
         parser::string_parser parser;
-        std::cin >> parser;
+        if (!read_input_line(parser)) return;
 
         parser::token token = parser.get_token();
         if (!token) {

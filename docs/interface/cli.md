@@ -47,17 +47,32 @@ Which report formats are written depends on the ruleset's `REPORT_FORMAT`; see
 ### `new` and `edit` are interactive
 
 **`new` prompts on stdin** — nexus size (if the ruleset has a multi-hex nexus), map width, map
-height — and loops forever on invalid input. Run non-interactively it will spin against EOF
-rather than fail. Feed it:
+height — and asks again for as long as the answers are unusable. Feed it:
 
 ```bash
 printf '2\n8\n8\n' | havilah new
 ```
 
 The accepted values are ruleset-specific: width and height must be multiples of 8, and a
-multi-hex nexus width must be a multiple of 2.
+multi-hex nexus width must be a multiple of 2. `standard` asks nothing at all — its dimensions
+are fixed in the ruleset — so an empty stdin is fine there.
 
-`edit` is a full interactive menu and is not usable from a script at all.
+**When the input ends before the questions are answered, `new` fails and exits `1`**, writing
+no `game.out`:
+
+```
+The world was not created: the input ended before its questions were answered.
+Couldn't make the new game!
+```
+
+Up to `#68` it did not: the prompt loops never looked at the state of the stream, so a closed
+stdin made them repeat the same question at full speed until something killed the process. A
+short answers file was a hung job rather than an error. Blank lines are stepped over rather than
+treated as answers, so padding a file with them does not help — supply every answer the ruleset
+asks for.
+
+`edit` is a full interactive menu and is not meant to be scripted, but it no longer spins either:
+end of input quits it **without saving**, leaving the game exactly as it was found.
 
 **`run` is not interactive** and is the only subcommand a turn processor needs.
 
@@ -85,6 +100,9 @@ Only two values are produced:
 
 **There is no distinct code per failure mode.** A caller that needs to tell "no such game file"
 from "the turn crashed" has to read stdout. Treat any non-zero as fatal and capture the output.
+
+That includes `new` running out of input, which since `#68` is a `1` rather than a process that
+never returns.
 
 ## stdout
 

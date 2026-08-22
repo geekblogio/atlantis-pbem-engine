@@ -7,7 +7,7 @@ const std::string& AGetNameString(int name) {
     return regionnames[name];
 }
 
-void Game::CreateWorld() {
+bool Game::CreateWorld() {
     logger::write("Creating world");
     regions.create_levels(2);
     // because of the way regions are numbered, if you want 4 hexes you need a height of 4 and a width of 2.
@@ -19,6 +19,9 @@ void Game::CreateWorld() {
 
     ARegion *reg = regions.GetRegion(0,0,0);
     reg->MakeStartingCity();
+
+    // This ruleset asks nothing, so it can never run out of input.
+    return true;
  }
 
 int ARegionList::GetRegType(ARegion *) { return 0; }
