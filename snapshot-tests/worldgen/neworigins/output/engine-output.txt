@@ -1,0 +1,157 @@
+Atlantis Engine Version: 5.2.5 (beta)
+NewOrigins, Version: 3.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+Selected surface land generator? [Original - 1, Parametrical - 2, Island Ring - 3]
+How wide should the map be? 
+How tall should the map be? 
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................
+Making land
+
+Converting Scattered Water
+.
+Setting up the anchors
+..
+Growing Terrain...
+Severing land bridges
+....
+Removing coastal 'lakes'
+..
+Making a level...
+........................................................................
+Setting up the anchors
+.
+Growing Terrain...
+Removing coastal 'lakes'
+.
+Regions 49
+Found 11 candidates for plain gateway
+Best distance of -1 for plain
+Found 28 candidates for forest gateway
+Best distance of 10 for forest
+Found 2 candidates for mountain gateway
+Best distance of 7 for mountain
+Found 7 candidates for swamp gateway
+Best distance of 6 for swamp
+Found 10 candidates for jungle gateway
+Best distance of 4 for jungle
+Found 24 candidates for desert gateway
+Best distance of 4 for desert
+Found 4 candidates for tundra gateway
+Best distance of 5 for tundra
+Maximum distance from the Nexus: 10.
+Densities:
+ocean 202
+plain 14
+forest 29
+mountain 9
+swamp 12
+jungle 10
+desert 25
+tundra 17
+cavern 7
+underforest 7
+tunnels 15
+nexus 1
+chasm 11
+lake 2
+
+Settlements: 9
+Villages: 3 (33%)
+Towns   : 5 (55%)
+Cities  : 1 (11%)
+
+
+Products:
+grain [GRAI] 1874
+livestock [LIVE] 1515
+iron [IRON] 1167
+wood [WOOD] 1219
+stone [STON] 1609
+fur [FUR] 781
+fish [FISH] 11972
+herb [HERB] 712
+horse [HORS] 434
+mithril [MITH] 83
+ironwood [IRWD] 68
+winged horse [WING] 16
+floater hide [FLOA] 31
+rootstone [ROOT] 150
+yew [YEW] 27
+mushroom [MUSH] 142
+admantium [ADMT] 35
+camel [CAME] 232
+giant turtle [TURT] 1039
+
+Wanted:
+grain [GRAI] 684
+livestock [LIVE] 716
+fish [FISH] 620
+horse [HORS] 12
+sword [SWOR] 7
+crossbow [XBOW] 17
+longbow [LBOW] 16
+mithril armor [MARM] 4
+double bow [DBOW] 3
+pearls [PEAR] 12
+jewelry [JEWE] 29
+wine [WINE] 25
+spices [SPIC] 15
+chocolate [CHOC] 22
+vodka [VODK] 40
+silk [SILK] 29
+cotton [COTT] 34
+pick [PICK] 5
+spear [SPEA] 11
+axe [AXE] 20
+hammer [HAMM] 14
+net [NET] 30
+lasso [LASS] 17
+bag [BAG] 10
+spinning wheel [SPIN] 20
+leather armor [LARM] 12
+camel [CAME] 12
+gem [GEM] 46
+javelin [JAVE] 13
+pike [PIKE] 6
+
+For Sale:
+leader [LEAD] 1704
+wood elf [WELF] 972
+high elf [HELF] 899
+ice dwarf [IDWA] 454
+hill dwarf [HDWA] 358
+under dwarf [UDWA] 400
+orc [ORC] 664
+gnome [GNOM] 1090
+centaur [CTAU] 1081
+iron [IRON] 0
+wood [WOOD] 0
+stone [STON] 0
+herb [HERB] 0
+horse [HORS] 0
+sword [SWOR] 0
+chain armor [CARM] 0
+plate armor [PARM] 0
+ivory [IVOR] 35
+pearls [PEAR] 20
+wine [WINE] 16
+spices [SPIC] 42
+chocolate [CHOC] 11
+vodka [VODK] 9
+perfume [PERF] 45
+silk [SILK] 13
+cotton [COTT] 27
+hammer [HAMM] 0
+bag [BAG] 0
+spinning wheel [SPIN] 0
+human [HUMN] 597
+lizardman [LIZA] 179
+goblin [GBLN] 1012
+gnoll [GNOL] 863
+drow elf [DRLF] 238
+gem [GEM] 9
+

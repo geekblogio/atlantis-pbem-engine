@@ -14,7 +14,7 @@ byte of every output file** against what was recorded.
 | --- | --- |
 | `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard`, `neworigins` (14 turns each) and `rimefall` (5) |
 | `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for every ruleset |
-| `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for `kingdoms` only |
+| `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for every ruleset except `neworigins8` |
 | `run-snapshots.sh` | all three, for everything |
 
 The comparison covers `game.*`, `players.*`, `orders.*`, `template.*`, `report.*`, `times.*`
@@ -52,16 +52,29 @@ means engine output changed, and there are only three possibilities:
 **Never re-record to make CI green.** The fixtures are the only automated statement about what
 this engine does; overwriting them without reading the diff discards it silently.
 
-## What the turn replays do not cover
+## World generation
 
-**World creation.** The turn suites replay `<game> run` against a world that already exists, so
-terrain, towns, starting locations and city guards are exercised by nothing at all. That gap was
-not theoretical: `#66` fixed a defect that only ever showed there, and only in `kingdoms`.
+The turn suites replay `<game> run` against a world that already exists, so terrain, towns,
+starting locations and city guards used to be exercised by nothing at all. That gap was not
+theoretical: `#66` fixed a defect that only ever showed there, and only in `kingdoms`.
 
-`run-worldgen-snapshot.sh` closes it for one ruleset. `worldgen/<game>/` holds the answers that
-ruleset's `new` asks for on stdin, the seed, and the files it wrote; a 24×24 `kingdoms` world is
-under 100 KB and takes a second, so extending it to another ruleset costs little. It compares the
-engine's stdout as well as `game.out` and `players.out`.
+`run-worldgen-snapshot.sh` closes it. `worldgen/<game>/` holds three things:
+
+| | |
+| --- | --- |
+| `answers` | what that ruleset's `new` asks for on stdin, one answer per line — empty for `standard`, which asks nothing |
+| `seed` | the `ATLANTIS_SEED` to build with |
+| `output/` | everything the run wrote: `game.out`, `players.out`, `names.out` where the ruleset writes one, and the engine's stdout |
+
+Seven worlds, all 24×24 where the ruleset lets you choose, **1.1 MB in total and under a second
+to replay all of them**. `neworigins8` is deliberately absent: it shares all world generation code
+with `neworigins` and produces the same bytes.
+
+**Adding a ruleset** means creating `worldgen/<game>/{answers,seed}` and running
+`./update-worldgen-snapshot.sh <game>`. Get the answers by running `<game> new` by hand once and
+writing down what it asks — and get them *complete*: the engine's input loops never check for end
+of input, so a file one line short leaves it asking the same question for ever. The runner bounds
+each run at two minutes for that reason and says so when it trips.
 
 ## Re-recording
 
@@ -69,7 +82,7 @@ engine's stdout as well as `game.out` and `players.out`.
 cd snapshot-tests
 ./update-all-game-snapshots.sh
 ./update-all-rule-snapshots.sh
-./update-worldgen-snapshot.sh kingdoms
+./update-all-worldgen-snapshots.sh
 git clean -xfd snapshot-tests
 ```
 

@@ -1,0 +1,150 @@
+Atlantis Engine Version: 5.2.5 (beta)
+Wyreth, Version: 2.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+Making land
+
+Converting Scattered Water
+.....
+Setting up the anchors
+.......
+Growing Terrain...
+Severing land bridges
+........................
+Removing coastal 'lakes'
+...........
+Regions 108
+Densities:
+ocean 1312
+plain 254
+forest 140
+mountain 78
+swamp 127
+jungle 61
+desert 44
+tundra 30
+nexus 1
+lake 2
+
+Settlements: 115
+Villages: 50 (43%)
+Towns   : 32 (27%)
+Cities  : 33 (28%)
+
+
+Products:
+grain [GRAI] 12851
+livestock [LIVE] 13294
+iron [IRON] 2974
+wood [WOOD] 7012
+stone [STON] 1719
+fur [FUR] 3229
+fish [FISH] 77794
+herb [HERB] 4058
+horse [HORS] 7449
+mithril [MITH] 167
+ironwood [IRWD] 315
+winged horse [WING] 423
+floater hide [FLOA] 582
+rootstone [ROOT] 305
+yew [YEW] 219
+giant turtle [TURT] 5580
+
+Wanted:
+grain [GRAI] 8199
+livestock [LIVE] 8143
+fish [FISH] 7981
+sword [SWOR] 225
+crossbow [XBOW] 120
+longbow [LBOW] 149
+chain armor [CARM] 50
+plate armor [PARM] 76
+winged horse [WING] 16
+mithril sword [MSWO] 13
+double bow [DBOW] 13
+ivory [IVOR] 265
+pearls [PEAR] 246
+jewelry [JEWE] 259
+wine [WINE] 315
+spices [SPIC] 240
+chocolate [CHOC] 306
+truffles [TRUF] 355
+vodka [VODK] 244
+perfume [PERF] 265
+silk [SILK] 346
+cotton [COTT] 266
+pick [PICK] 228
+spear [SPEA] 158
+axe [AXE] 98
+hammer [HAMM] 218
+magic crossbow [MXBO] 19
+net [NET] 179
+lasso [LASS] 137
+bag [BAG] 141
+spinning wheel [SPIN] 130
+leather armor [LARM] 95
+cloth armor [CLAR] 108
+lance [LANC] 102
+battle axe [BAXE] 11
+mithril battle axe [MBAX] 5
+javelin [JAVE] 119
+pike [PIKE] 85
+giant turtle [TURT] 22
+
+For Sale:
+leader [LEAD] 14138
+viking [VIKI] 11060
+barbarian [BARB] 1573
+plainsman [PLAI] 11855
+eskimo [ESKI] 91
+nomad [NOMA] 11436
+tribesman [TMAN] 3210
+wood elf [WELF] 5329
+sea elf [SELF] 10807
+high elf [HELF] 10123
+tribal elf [TELF] 1813
+ice dwarf [IDWA] 105
+hill dwarf [HDWA] 2019
+desert dwarf [DDWA] 908
+orc [ORC] 1907
+iron [IRON] -6
+wood [WOOD] -6
+stone [STON] -6
+fur [FUR] -6
+herb [HERB] -6
+horse [HORS] -6
+sword [SWOR] -6
+crossbow [XBOW] -6
+longbow [LBOW] -6
+chain armor [CARM] -6
+plate armor [PARM] -6
+wagon [WAGO] -6
+ivory [IVOR] 205
+pearls [PEAR] 280
+jewelry [JEWE] 184
+wine [WINE] 252
+spices [SPIC] 225
+chocolate [CHOC] 199
+truffles [TRUF] 272
+vodka [VODK] 232
+perfume [PERF] 270
+silk [SILK] 257
+cotton [COTT] 199
+pick [PICK] -6
+spear [SPEA] -6
+axe [AXE] -6
+hammer [HAMM] -6
+net [NET] -6
+lasso [LASS] -6
+bag [BAG] -6
+spinning wheel [SPIN] -6
+leather armor [LARM] -6
+cloth armor [CLAR] -6
+lance [LANC] -6
+javelin [JAVE] -6
+pike [PIKE] -6
+

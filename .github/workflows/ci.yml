@@ -240,8 +240,8 @@ jobs:
       # Two RNG draws in one argument list are evaluated in an order C++ leaves unspecified, and
       # GCC picks a different one per architecture -- which is how one seed built two different
       # worlds. The snapshot suite replays recorded turns on one architecture, so it cannot see
-      # this; the world generation snapshot added in `#66` covers kingdoms only, and one
-      # architecture at that. See docs/decisions/0017.
+      # this; the world generation snapshots cover every ruleset since `#67`, but on one
+      # architecture too. See docs/decisions/0017.
       - name: Refuse unsequenced RNG draws
         run: python3 scripts/check-rng-draw-order.py .
 

@@ -1,0 +1,128 @@
+Atlantis Engine Version: 5.2.5 (beta)
+Standard Atlantis, Version: 5.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+How wide should the map be? 
+How tall should the map be? 
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................
+Making land
+
+Converting Scattered Water
+.
+Setting up the anchors
+.
+Growing Terrain...
+Severing land bridges
+
+Making a level...
+........................................................................
+Setting up the anchors
+.
+Growing Terrain...
+Regions 22
+Densities:
+ocean 159
+plain 43
+forest 5
+mountain 52
+swamp 9
+jungle 10
+desert 13
+tundra 7
+cavern 11
+underforest 17
+tunnels 34
+nexus 1
+
+Settlements: 19
+Villages: 4 (21%)
+Towns   : 4 (21%)
+Cities  : 11 (57%)
+
+
+Products:
+grain [GRAI] 2558
+livestock [LIVE] 2846
+iron [IRON] 2765
+wood [WOOD] 587
+stone [STON] 2516
+fur [FUR] 290
+fish [FISH] 9449
+herb [HERB] 527
+horse [HORS] 1243
+mithril [MITH] 227
+ironwood [IRWD] 38
+winged horse [WING] 96
+floater hide [FLOA] 53
+rootstone [ROOT] 230
+yew [YEW] 8
+giant turtle [TURT] 636
+
+Wanted:
+grain [GRAI] 934
+livestock [LIVE] 999
+fish [FISH] 904
+sword [SWOR] 23
+crossbow [XBOW] 68
+longbow [LBOW] 63
+chain armor [CARM] 22
+plate armor [PARM] 11
+ivory [IVOR] 47
+pearls [PEAR] 18
+jewelry [JEWE] 22
+wine [WINE] 32
+spices [SPIC] 36
+chocolate [CHOC] 31
+truffles [TRUF] 23
+vodka [VODK] 12
+perfume [PERF] 55
+silk [SILK] 33
+cotton [COTT] 61
+spear [SPEA] 79
+giant turtle [TURT] 3
+
+For Sale:
+leader [LEAD] 2438
+viking [VIKI] 1488
+barbarian [BARB] 259
+plainsman [PLAI] 1015
+eskimo [ESKI] 45
+nomad [NOMA] 2674
+tribesman [TMAN] 137
+darkman [DMAN] 108
+wood elf [WELF] 239
+sea elf [SELF] 1765
+high elf [HELF] 1669
+tribal elf [TELF] 131
+hill dwarf [HDWA] 1687
+under dwarf [UDWA] 124
+desert dwarf [DDWA] 68
+orc [ORC] 1094
+iron [IRON] -6
+wood [WOOD] -6
+stone [STON] -6
+fur [FUR] -6
+herb [HERB] -6
+horse [HORS] -6
+sword [SWOR] -6
+crossbow [XBOW] -6
+longbow [LBOW] -6
+chain armor [CARM] -6
+plate armor [PARM] -6
+wagon [WAGO] -6
+ivory [IVOR] 15
+pearls [PEAR] 42
+jewelry [JEWE] 30
+wine [WINE] 12
+spices [SPIC] 69
+chocolate [CHOC] 26
+truffles [TRUF] 28
+vodka [VODK] 26
+perfume [PERF] 9
+silk [SILK] 41
+cotton [COTT] 14
+spear [SPEA] -6
+

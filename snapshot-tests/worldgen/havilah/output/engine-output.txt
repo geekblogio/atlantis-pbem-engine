@@ -1,0 +1,123 @@
+Atlantis Engine Version: 5.2.5 (beta)
+Havilah, Version: 1.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+How wide should the map be? 
+How tall should the map be? 
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................
+Making land
+
+Converting Scattered Water
+.
+Setting up the anchors
+..
+Growing Terrain...
+Severing land bridges
+.........
+Removing coastal 'lakes'
+
+Making a level...
+........................................................................
+Setting up the anchors
+.
+Growing Terrain...
+Removing coastal 'lakes'
+.
+Regions 22
+Maximum distance from the Nexus: 13.
+Densities:
+ocean 222
+plain 25
+forest 6
+mountain 23
+jungle 5
+tundra 29
+underforest 19
+tunnels 30
+nexus 1
+lake 1
+
+Settlements: 8
+Villages: 5 (62%)
+Towns   : 1 (12%)
+Cities  : 2 (25%)
+
+
+Products:
+grain [GRAI] 1551
+livestock [LIVE] 1707
+iron [IRON] 1500
+wood [WOOD] 368
+stone [STON] 1516
+fur [FUR] 554
+fish [FISH] 13375
+herb [HERB] 556
+horse [HORS] 130
+mithril [MITH] 123
+ironwood [IRWD] 28
+winged horse [WING] 52
+rootstone [ROOT] 111
+giant turtle [TURT] 843
+
+Wanted:
+grain [GRAI] 626
+livestock [LIVE] 589
+fish [FISH] 647
+crossbow [XBOW] 25
+longbow [LBOW] 17
+double bow [DBOW] 6
+pearls [PEAR] 30
+wine [WINE] 13
+spices [SPIC] 18
+truffles [TRUF] 38
+vodka [VODK] 54
+perfume [PERF] 36
+silk [SILK] 24
+cotton [COTT] 16
+pick [PICK] 7
+spear [SPEA] 27
+axe [AXE] 28
+net [NET] 19
+lasso [LASS] 25
+bag [BAG] 9
+spinning wheel [SPIN] 10
+leather armor [LARM] 16
+
+For Sale:
+leader [LEAD] 1359
+viking [VIKI] 406
+barbarian [BARB] 327
+plainsman [PLAI] 541
+eskimo [ESKI] 81
+nomad [NOMA] 611
+tribesman [TMAN] 49
+darkman [DMAN] 52
+wood elf [WELF] 194
+sea elf [SELF] 770
+high elf [HELF] 1086
+tribal elf [TELF] 21
+ice dwarf [IDWA] 84
+hill dwarf [HDWA] 992
+under dwarf [UDWA] 762
+orc [ORC] 1012
+iron [IRON] 0
+stone [STON] 0
+horse [HORS] 0
+sword [SWOR] 0
+chain armor [CARM] 0
+ivory [IVOR] 13
+pearls [PEAR] 23
+jewelry [JEWE] 35
+wine [WINE] 32
+spices [SPIC] 27
+truffles [TRUF] 8
+vodka [VODK] 10
+perfume [PERF] 15
+silk [SILK] 16
+cotton [COTT] 16
+pick [PICK] 0
+hammer [HAMM] 0
+
