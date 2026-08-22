@@ -7,14 +7,43 @@
 # nothing. That is not a theoretical gap: `#66` fixed a defect that only ever showed there, in
 # `kingdoms`, the one ruleset whose guards are made by MakeManUnit.
 #
-# A recorded world is cheap. `worldgen/<game>/` holds the answers the ruleset's `new` asks for,
-# the seed, and the files it wrote; a 24x24 kingdoms world is under 100 KB and takes a second.
+# A recorded world is cheap. `worldgen/<game>/` holds the answers the ruleset's `new` asks for on
+# stdin, the seed, and the files it wrote; every recorded world is under 550 KB and none takes a
+# second.
+
+# The engine asks its world size questions in a loop that never checks for end of input, so an
+# answers file with one line too few does not fail -- it spins at full speed for ever. Bound the
+# run rather than hand CI a job that only the six hour limit can stop. `timeout` is not on macOS,
+# so this is done by hand.
+LIMIT_SECONDS=120
+
+# $1 is the file to feed the command on stdin. It has to be named here rather than redirected onto
+# the call: a background job in a non-interactive shell reads /dev/null unless told otherwise, and
+# the engine would then hit end of input and spin.
+run_bounded()
+{
+  local stdin_file="$1"
+  shift
+  "$@" < "$stdin_file" &
+  local pid=$!
+  local waited=0
+  while kill -0 "$pid" 2>/dev/null; do
+    if [[ $waited -ge $LIMIT_SECONDS ]]; then
+      kill -9 "$pid" 2>/dev/null
+      wait "$pid" 2>/dev/null
+      return 124
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid"
+}
 
 cleanup()
 {
   game="$1"
   rm -f "${game}"
-  rm -f game.out players.out names.out engine-output.txt worldgen-difference.txt
+  rm -f worldgen-difference.txt
   rm -rf ./worldgen-output
 }
 
@@ -42,14 +71,27 @@ chmod +x "./$game"
 
 echo -n "Regenerating the $game world..."
 
-seed=$(<"worldgen/$game/seed")
+# Exported rather than prefixed onto the call: a `VAR=value func` prefix on a shell FUNCTION is
+# unspecified by POSIX, and bash keeps the assignment afterwards.
+export ATLANTIS_SEED
+ATLANTIS_SEED=$(<"worldgen/$game/seed")
 
 # The generated world lands in the working directory, so it is built in a subdirectory of its own
-# and compared there -- the turn runners use the same directory and would otherwise collide.
+# and compared there -- the turn runners use this directory too and would otherwise collide.
 rm -rf ./worldgen-output
 mkdir -p ./worldgen-output
-if ! (cd ./worldgen-output && ATLANTIS_SEED="$seed" "../$game" new < "../worldgen/$game/answers" \
-        &> engine-output.txt) ; then
+cd ./worldgen-output || exit 1
+run_bounded "../worldgen/$game/answers" "../$game" new &> engine-output.txt
+status=$?
+cd .. || exit 1
+
+if [[ $status = 124 ]]; then
+  echo "did not finish within ${LIMIT_SECONDS}s -- is worldgen/$game/answers complete? -- Test failed."
+  cleanup "${game}"
+  exit 1
+fi
+
+if [[ $status != 0 ]]; then
   echo "executable crashed. -- Test failed."
   cat ./worldgen-output/engine-output.txt
   cleanup "${game}"

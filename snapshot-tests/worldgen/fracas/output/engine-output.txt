@@ -1,0 +1,94 @@
+Atlantis Engine Version: 5.2.5 (beta)
+Fracas, Version: 4.0.0 (beta)
+
+Using deterministic world seed 20260822 (ATLANTIS_SEED).
+How wide should the map be? 
+How tall should the map be? 
+Making a level...
+.
+Making a level...
+................................................................................................................................................................................................................................................................................................
+Making land
+
+Converting Scattered Water
+.
+Setting up the anchors
+.
+Growing Terrain...
+Severing land bridges
+.....
+Growing Races
+Setting Race Anchors
+Regions 21
+Densities:
+ocean 145
+plain 68
+forest 24
+mountain 1
+swamp 41
+desert 1
+nexus 1
+hill 8
+
+Settlements: 5
+Villages: 2 (40%)
+Towns   : 0 (0%)
+Cities  : 3 (60%)
+
+
+Products:
+grain [GRAI] 2455
+livestock [LIVE] 2586
+iron [IRON] 200
+wood [WOOD] 1294
+stone [STON] 270
+fur [FUR] 347
+fish [FISH] 9394
+herb [HERB] 588
+horse [HORS] 2036
+mithril [MITH] 5
+ironwood [IRWD] 38
+winged horse [WING] 194
+floater hide [FLOA] 243
+rootstone [ROOT] 12
+yew [YEW] 79
+giant turtle [TURT] 613
+
+Wanted:
+grain [GRAI] 330
+livestock [LIVE] 352
+fish [FISH] 380
+horse [HORS] 15
+sword [SWOR] 18
+crossbow [XBOW] 8
+longbow [LBOW] 5
+chain armor [CARM] 18
+plate armor [PARM] 7
+double bow [DBOW] 4
+ivory [IVOR] 27
+wine [WINE] 32
+spices [SPIC] 58
+silk [SILK] 28
+spear [SPEA] 11
+leather armor [LARM] 19
+cloth armor [CLAR] 7
+javelin [JAVE] 12
+pike [PIKE] 6
+giant turtle [TURT] 3
+
+For Sale:
+leader [LEAD] 2102
+viking [VIKI] 193
+plainsman [PLAI] 3596
+darkman [DMAN] 773
+high elf [HELF] 2290
+hill dwarf [HDWA] 79
+orc [ORC] 643
+centaur [CTAU] 2905
+horse [HORS] 0
+ivory [IVOR] 32
+wine [WINE] 37
+spices [SPIC] 8
+silk [SILK] 34
+goblin [GBLN] 319
+

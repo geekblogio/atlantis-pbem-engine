@@ -1074,6 +1074,38 @@ what it claimed.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#67` — a recorded world for every ruleset
+
+`snapshot-tests/worldgen/`, `run-worldgen-snapshot.sh`, `update-worldgen-snapshot.sh`,
+`update-all-worldgen-snapshots.sh`, `run-snapshots.sh`, `docs/snapshot-tests.md`, `ci.yml`. No
+engine change.
+
+`#66` closed the world creation gap for `kingdoms`, because that is where the defect was. **The
+gap was never kingdoms-specific**: the turn suites replay `run` against a world that already
+exists, so terrain, towns, starting locations and city guards were watched by nothing in seven
+other rulesets. Six more worlds now cover them — seven in all, 24×24 where the ruleset lets you
+choose, one seed, **1.1 MB and under a second** to replay. The suite goes from 42 checks to 48.
+
+`neworigins8` is left out for the reason its turn fixtures are: it shares all world generation code
+with `neworigins` and produces the same bytes.
+
+**Measured before recording:** all seven worlds are already byte-identical between macOS/arm64 and
+linux/amd64, so `#66` has no sibling hiding in another ruleset. Recorded on Linux and replayed on
+macOS byte for byte; re-recording `kingdoms` in a fresh session reproduced the bytes `#66` had
+already committed, which is the determinism check that makes the rest worth trusting.
+
+**Both runners bound each run at two minutes.** The engine's world size questions sit in loops that
+never check for end of input, so an answers file one line short does not fail — it repeats the
+question for ever at full speed, which in CI is a job only the six hour limit can stop. The bound
+caught precisely that while this change was being written, from a background job in a
+non-interactive shell reading `/dev/null` instead of the answers file. `timeout` is absent on
+macOS, hence the hand-rolled loop.
+
+**The input loop itself is a defect and is deliberately not fixed here.** Both Python consumers
+drive the engine as a subprocess, where a short or closed stdin hangs instead of returning an
+error. Fixing it touches six rulesets and changes engine behaviour, which does not belong in a
+test recording.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
