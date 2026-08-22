@@ -1138,6 +1138,20 @@ instead of assumed.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#69` — a decision record is accepted once its pull request merges
+
+`docs/decisions/`. Housekeeping, no engine change.
+
+Six records — `0014` through `0019` — still said `proposed` long after their changes had shipped,
+the oldest for a week, so the field carried no information at all. They are marked accepted, and
+`docs/decisions/README.md` now defines the two values instead of leaving them to be inferred:
+`proposed` while the pull request is open, `accepted` once it merges, because under
+[0003](../decisions/0003-no-required-reviews.md) merging **is** the acceptance — review happens
+before the commit and no separate approval step exists to wait for.
+
+Only the status moved. The reasoning in every record is untouched, which is what the register
+demands of itself; the status is the one field about a record's lifecycle rather than its content.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
