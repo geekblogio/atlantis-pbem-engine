@@ -1,6 +1,6 @@
 # 0019 — The engine owns its random distributions
 
-**Status:** proposed, 2026-08-20. Extends [0017](0017-x86-64-is-the-reference-for-draw-order.md),
+**Status:** accepted, 2026-08-20. Extends [0017](0017-x86-64-is-the-reference-for-draw-order.md),
 which fixed one cause of the same symptom and did not reach the larger one.
 
 ## Context

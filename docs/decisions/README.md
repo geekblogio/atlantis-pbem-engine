@@ -9,6 +9,12 @@ you what was weighed, so you can argue against the actual reasoning rather than 
 **Append-only.** A decision that is reversed gets a *new* record superseding the old one; the
 old one stays, marked as superseded. Nothing is edited into agreement with the present.
 
+**Status.** A record is `proposed` while its pull request is open and `accepted` once that pull
+request merges — merging it *is* the acceptance, since review happens before the commit
+([0003](0003-no-required-reviews.md)). The status is the only field that changes after the fact;
+the reasoning never does. Six records sat at `proposed` long after their changes had shipped, which
+is what prompted writing this down.
+
 | # | Decision |
 | --- | --- |
 | [0001](0001-keep-master-as-default-branch.md) | Keep `master` as the default branch |

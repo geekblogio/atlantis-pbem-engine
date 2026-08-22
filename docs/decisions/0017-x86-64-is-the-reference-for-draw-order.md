@@ -1,6 +1,6 @@
 # 0017 — x86-64 is the reference architecture for RNG draw order
 
-**Status:** proposed, 2026-08-18. Fixes a defect whose fix has two equally correct forms, where the
+**Status:** accepted, 2026-08-18. Fixes a defect whose fix has two equally correct forms, where the
 choice between them is not a technical one.
 
 ## Context

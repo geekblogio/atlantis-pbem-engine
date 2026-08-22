@@ -1,6 +1,6 @@
 # 0016 — A town owns its markets; the region owns recruiting
 
-**Status:** proposed, 2026-08-17. Settles how a replaced town's markets are disposed of, and
+**Status:** accepted, 2026-08-17. Settles how a replaced town's markets are disposed of, and
 **amends [0015](0015-one-production-per-item-and-skill.md)**, which claimed the market list could not
 reach the shape this record is about.
 
