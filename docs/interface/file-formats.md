@@ -28,13 +28,19 @@ A missing `orders.<n>` is not an error: that faction simply issued no orders.
 ### `times.<random>` does not mean what it looks like
 
 The suffix is **not a faction number**. Each world-events article is written to
-`times.<0..9999>`, with the number drawn from the engine's RNG and retried until it does not
-collide with an existing file. So:
+`times.<0..9999>`, with the number drawn from the engine's RNG; if that name is taken the engine
+counts up from it without drawing again. So:
 
 - collect them with a glob, never by faction number;
-- **delete them between turns**, or the next turn's collision retries will drift and the file
-  set will accumulate;
+- **delete them between turns**, or the file set accumulates and later turns are increasingly
+  likely to land on a name that is already there;
 - the count is the number of articles, not the number of factions.
+
+Up to `#65` the collision was resolved by drawing again, which put the contents of the working
+directory into the turn: one leftover `times.*` file shifted the shared random stream, and with
+it the monsters that spawned later in the same turn and the generator state saved in `game.out`
+— so every following turn drifted too. A turn replayed in a dirty directory did not reproduce.
+That is fixed; **an uncleared directory now costs nothing but clutter.**
 
 ## `players.in`
 

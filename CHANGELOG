@@ -127,6 +127,16 @@ Changes in 5.2.5, in this fork
       x86-64 already produced, since that is what the servers run and what
       every recorded seed reproduces: nothing changes there, and aarch64
       now agrees with it instead of disagreeing
+   -- Stopped a leftover times.* file from changing the turn.  The name of
+      a world-events article is drawn from the game's own generator, and a
+      collision used to draw again, which put the contents of the working
+      directory into the turn: one file left behind by a crashed run or an
+      uncleared directory shifted the shared stream, so different monsters
+      spawned later in the same turn and game.out saved a different
+      generator state, and every following turn drifted with it - a turn
+      replayed in a dirty directory did not reproduce.  A collision now
+      counts up from the drawn number instead, which costs no draws, so a
+      clean directory writes exactly the file it wrote before
 
 
 Changes from 5.1.0 -> 5.2.0
