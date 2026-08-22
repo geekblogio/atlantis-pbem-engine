@@ -1952,9 +1952,28 @@ void Game::Equilibrate()
 
 void Game::write_times_article(std::string article)
 {
-    std::string fname;
-
-    do { fname = "times." + std::to_string(rng::get_random(10000)); } while (std::filesystem::exists(fname));
+    // DRAW ONCE, WHATEVER THE DIRECTORY ALREADY HOLDS.
+    //
+    // This number comes out of the game's own generator, and the loop that used to stand here
+    // drew again on every collision. That made the contents of the working directory part of the
+    // turn: one leftover times.* file -- from a crashed run, or from a gamemaster who had not
+    // cleared the directory -- shifted the shared stream, and everything drawn afterwards moved
+    // with it. GrowWMons runs later in PostProcessTurn, so different monsters appeared in
+    // different places; game.out then stored a different generator state, so every following turn
+    // drifted as well. Measured on turn 0 of the neworigins fixtures: a single empty times.6157
+    // placed beforehand changed both article names and the whole monster population.
+    //
+    // Counting up costs no draws, so a clean directory -- the normal case, and every recorded
+    // snapshot -- still yields exactly the file it yielded before. The bound stops a directory
+    // holding all ten thousand names from looping forever; that run overwrites one article rather
+    // than hanging, which is the better of two bad outcomes and needs a directory nobody has
+    // cleared in a very long time.
+    int number = rng::get_random(10000);
+    std::string fname = "times." + std::to_string(number);
+    for (int tried = 0; tried < 10000 && std::filesystem::exists(fname); tried++) {
+        number = (number + 1) % 10000;
+        fname = "times." + std::to_string(number);
+    }
     std::ofstream f(fname, std::ios::out | std::ios::trunc);
     if (f.is_open()) {
         f << indent::wrap(78,70,0) << article << '\n';

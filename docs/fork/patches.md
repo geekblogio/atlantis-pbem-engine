@@ -992,6 +992,41 @@ build and is unchanged.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#65` — a leftover `times.*` file no longer changes the turn
+
+`game.cpp`, `docs/interface/file-formats.md`, `CHANGELOG`. The name of a world-events article is
+drawn from the game's own generator, and the collision loop drew again — which put **the contents
+of the working directory into the turn**.
+
+`GrowWMons` runs later in the same `PostProcessTurn`, so a shifted stream moves the monsters, and
+`game.out` saves the generator state, so every following turn drifts with it. A turn replayed in a
+directory still holding files from an earlier or crashed run did not reproduce. Measured on turn 0
+of the `neworigins` fixtures, with one empty `times.6157` placed beforehand: both article names
+moved, and `game.out` and `report.1` with them — a different monster population.
+
+A collision now counts up from the drawn number, which costs no draws. **The stream is untouched**,
+so a clean directory writes exactly the file it wrote before and running games are unaffected —
+the same promise `#61` and `#64` kept. A generator of its own for the filename would read better
+but would remove a draw; sequential `times.001` names would need a discarded draw to keep the
+stream, and would change a published filename format. Both were declined as cosmetics.
+
+41 of 41 snapshots identical, unit tests green, and the dirty run's six output files byte-identical
+to the clean reference — it now differs by the extra file alone.
+
+The documented warning was corrected with it: `file-formats.md` said leftovers made the retries
+"drift" and the files accumulate, which reads as a tidiness note rather than the determinism
+condition it was.
+
+**Cleared while investigating:** the `times.<n>` names an AddressSanitizer build once wrote differed
+from the `-O2` build's, which looked like a second instance of
+[0017](../decisions/0017-x86-64-is-the-reference-for-draw-order.md). It is not. Rebuilt at `-O0` and
+at `-O1 -fsanitize=address` on a clean directory, both produce byte-identical output and the same
+filenames; the old observation was this bug, fed by leftovers from the very runs ASan was there to
+diagnose.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
