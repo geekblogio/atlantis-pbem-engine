@@ -179,6 +179,37 @@ Reported from the downstream bot project, which hit it in a live game.
 
 **Upstream value: high.** A crash on an ordinary order, fixed in one condition.
 
+### `ad07b87` — a recruited unit could study nothing in `kingdoms`
+
+`unit.cpp`, plus a regression test in `unittest/unit_test.cpp`, fixed in `#71`. `Unit::CanStudy`
+enforced the one-skill rule for non-leaders on the *number of skill entries* (`skills.size() > 0`)
+rather than on study days. With `REQUIRED_EXPERIENCE` — of ours only `kingdoms` — `Game::DoBuy`
+seeds the race's specialized skills with experience and zero days, so any unit that had ever
+bought a man already held entries and was refused every skill it tried to begin, its own
+specialities included.
+Experience is not a level: `GetRealSkill` reads days only, and `Unit::Practice` pays into
+experience rather than days whenever the flag is on, so nothing else closed the gap either. Only
+the starting leaders could learn anything.
+
+The condition arrived in `2324a2a` (2012) as a *display* fix — "don't display skills as studyable"
+— eight years after `07f4abd` (2004) added `REQUIRED_EXPERIENCE`, `kingdoms = 50` and the recruit
+seeding in the same commit. `Unit::Study`, `Unit::Practice` and `Unit::AdjustSkills` all measure
+this same rule in days; `CanStudy` was the one place that measured it in entries. The generated
+rulebook, written by the author of the experience system, still promises a specialized unit level
+1 after one month of study.
+
+Fixed by counting a skill as known only when it has days. A non-leader with days in one skill is
+still refused a second. The other five rulesets cannot be reached by the change: with
+`REQUIRED_EXPERIENCE` off nothing writes experience — `SkillList::SetDays` erases a zero-day entry
+unless it carries experience, `SetExp` and `Readin` never create one without — so every entry
+there already has days. Verified by replaying the same four-turn recruit-and-study scenario under
+both binaries in `standard`, `basic`, `fracas`, `havilah` and `neworigins`: byte-identical.
+
+Reported from the downstream bot project, which carries a second `kingdoms`-only campaign because
+of it.
+
+**Upstream value: high.** Upstream ships `kingdoms` with the same two flags and the same rulebook.
+
 ---
 
 ## Fork-local
