@@ -1238,6 +1238,9 @@ which is the whole point of the change.
 keyed once the rebase-merge had invented its SHA. The register-only pull request that carries it
 names itself here, which is exactly the second push `#31` describes.
 
+`#72` — the same again for `ad07b87`, the `Unit::CanStudy` fix from `#71`. Second `upstream/*`
+branch, second register-only pull request, second self-naming push.
+
 **Fork-local, permanently**, like everything under `docs/fork/`.
 
 ### `bea2a21` — vendored nlohmann/json 3.11.3 → 3.12.0
