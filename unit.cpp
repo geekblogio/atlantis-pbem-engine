@@ -1280,7 +1280,22 @@ int Unit::CanStudy(int sk)
 {
     if (skills.GetStudyRate(sk, GetMen()) < 1) return 0;
 
-    if (Globals->SKILL_LIMIT_NONLEADERS && IsNormal() && skills.GetDays(sk) < 1 && skills.size() > 0) {
+    // A non-leader may know only one skill, and knowing a skill means having study days in it.
+    // Counting skill *entries* instead is wrong wherever an entry can exist with no days: with
+    // REQUIRED_EXPERIENCE - of ours only kingdoms - recruiting seeds the race's specialized skills
+    // with experience and zero days, so every recruited unit held entries and was refused every
+    // skill it tried to begin, its own specialities included. Experience is not a level; it only
+    // makes study faster. Unit::Study, Unit::Practice and Unit::AdjustSkills all measure this same
+    // rule in days, and a unit that has days in one skill is still refused a second one below.
+    bool knows_a_skill = false;
+    for(const auto s: skills) {
+        if (s->days > 0) {
+            knows_a_skill = true;
+            break;
+        }
+    }
+
+    if (Globals->SKILL_LIMIT_NONLEADERS && IsNormal() && skills.GetDays(sk) < 1 && knows_a_skill) {
         if (!Globals->MAGE_NONLEADERS || !(SkillDefs[sk].flags & SkillType::MAGIC))
         return 0;
     }
