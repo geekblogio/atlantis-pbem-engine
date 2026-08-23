@@ -125,4 +125,43 @@ ut::suite<"Unit"> unit_suite = []
     delete unit;
     delete faction;
   };
+
+  "A non-leader may begin a skill it holds only experience in"_test = []
+  {
+    // The one-skill rule for non-leaders counts study days, not skill entries. It matters wherever
+    // an entry can exist with no days at all, which is any ruleset with REQUIRED_EXPERIENCE - of
+    // ours only kingdoms: recruiting seeds the race's specialized skills with experience and zero
+    // days, and a unit holding those used to be refused every skill it tried to begin, its own
+    // specialities included.
+    int saved_experience = Globals->REQUIRED_EXPERIENCE;
+    Globals->REQUIRED_EXPERIENCE = 50;
+
+    Faction *faction = new Faction(1);
+    Unit *unit = new Unit(500, faction, 12345);
+    UnitTestHelper helper;
+
+    unit->SetMen(I_BARBARIAN, 10);
+
+    // What recruiting leaves behind: experience, no days, and therefore no skill level.
+    unit->skills.SetExp(S_COMBAT, 10 * GetDaysByLevel(1));
+    expect(unit->skills.size() == 1_i);
+    expect(unit->skills.GetDays(S_COMBAT) == 0_i);
+    expect(unit->GetRealSkill(S_COMBAT) == 0_i);
+
+    // It may begin the skill it has experience in, and any other skill it has not begun.
+    expect(unit->CanStudy(S_COMBAT) == 1_i);
+    expect(unit->CanStudy(S_BUILDING) == 1_i);
+
+    // Once it actually knows a skill - days, not experience - the one-skill rule bites as before.
+    helper.set_skill_level(unit, S_COMBAT, 1);
+    expect(unit->GetRealSkill(S_COMBAT) == 1_i);
+    expect(unit->CanStudy(S_COMBAT) == 1_i);
+    expect(unit->CanStudy(S_BUILDING) == 0_i);
+
+    Globals->REQUIRED_EXPERIENCE = saved_experience;
+
+    // Clean up
+    delete unit;
+    delete faction;
+  };
 };
