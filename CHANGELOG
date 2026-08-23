@@ -127,6 +127,16 @@ Changes in 5.2.5, in this fork
       x86-64 already produced, since that is what the servers run and what
       every recorded seed reproduces: nothing changes there, and aarch64
       now agrees with it instead of disagreeing
+   -- Made item decay reproduce on every standard library, the last draw
+      that did not.  std::binomial_distribution is unspecified like the
+      rest, and libstdc++ and libc++ neither return the same values nor
+      consume the stream at the same rate, so a turn in which a player held
+      summoned undead - the only items that decay - replayed differently on
+      a Mac.  The engine now implements the draw itself, reproducing what
+      libstdc++ produces, so Linux is unchanged; measured against the real
+      distribution under two compilers, and across 263736 draws covering
+      every percentage and item count the rule can produce, the two
+      platforms agree exactly
    -- Stopped `new` and `edit` from spinning against the end of their input.
       Every prompt sits in a loop that asks again when it cannot use the
       answer, and none of them looked at the state of the stream - so a

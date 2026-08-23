@@ -83,16 +83,20 @@ turn identically and passes the whole unit suite.
 
 ## What this does not cover
 
-**`std::binomial_distribution` remains a standard call**, in `rng::calculate_losses` — one site,
-for item decay. It is left alone on purpose, and neither reason is convenience:
+~~**`std::binomial_distribution` remains a standard call**, in `rng::calculate_losses`.~~
+**Overturned by [0020](0020-the-engine-owns-its-binomial-draw.md): the engine owns that one too.**
+
+Two reasons were given here, and **the second was wrong**:
 
 1. **It cannot be frozen the same way.** libstdc++'s binomial uses `std::log` and `std::exp`, and
-   libm results are not guaranteed identical between glibc and Apple's libm. A faithful port could
-   still diverge on a last-bit difference that flips a comparison, which would be worse than the
-   honest gap: it would look fixed.
+   libm results are not guaranteed identical between glibc and Apple's libm. — *Still true, and it
+   is why 0020 measures rather than asserts. It bounds what may be promised; it was never a reason
+   to leave the site alone.*
 2. **A portable replacement would change Linux** — a different draw sequence at that site, and so
-   different outcomes in running games. That is a game change, not a bug fix, and needs its own
-   decision.
+   different outcomes in running games. — *This described **replacing** the distribution with n
+   Bernoulli draws. Freezing is not replacing: a copy of libstdc++'s algorithm calls the same libm
+   with the same arguments on the machine the games run on, so Linux is unchanged by construction.
+   Proposing a game change in the name of not changing games was backwards.*
 
 ~~`std::discrete_distribution` (`rng::get_weighted_index`) was measured to agree between the two
 libraries and is left alone.~~ **Wrong, and corrected by `#66`: the engine owns this one too.**

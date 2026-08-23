@@ -36,3 +36,4 @@ is what prompted writing this down.
 | [0017](0017-x86-64-is-the-reference-for-draw-order.md) | x86-64 is the reference architecture for RNG draw order |
 | [0018](0018-kingdoms-keeps-its-lakeless-coastline.md) | `kingdoms` keeps its lakeless coastline |
 | [0019](0019-the-engine-owns-its-random-distributions.md) | The engine owns its random distributions, extending 0017 |
+| [0020](0020-the-engine-owns-its-binomial-draw.md) | The engine owns its binomial draw too, completing 0019 |

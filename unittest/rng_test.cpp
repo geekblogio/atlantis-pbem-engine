@@ -51,6 +51,25 @@ ut::suite<"RNG"> rng_suite = [] {
         for (int i = 0; i < 50; i++) expect(rng::get_weighted_index(edges).value() == 1_ul);
     };
 
+    "item decay keeps its recorded values"_test = [] {
+        // calculate_losses() is the one draw that reaches libm, through detail::binomial(). Both
+        // of its branches are pinned: the waiting-time method below t * p == 8, and Devroye's
+        // rejection method above it.
+        rng::seed_random(2026);
+        std::vector<int> small;
+        for (int i = 0; i < 6; i++) small.push_back(rng::calculate_losses(20, 8));   // t*p = 1.6
+        expect(small == std::vector<int>{1, 0, 2, 0, 2, 3}) << "waiting-time branch";
+
+        rng::seed_random(2026);
+        std::vector<int> large;
+        for (int i = 0; i < 6; i++) large.push_back(rng::calculate_losses(500, 8));  // t*p = 40
+        expect(large == std::vector<int>{42, 46, 31, 38, 50, 39}) << "rejection branch";
+
+        expect(rng::calculate_losses(100, 0) == 0_i) << "no chance, no losses";
+        expect(rng::calculate_losses(100, 100) == 100_i) << "certain loss takes everything";
+        expect(rng::calculate_losses(0, 50) == 0_i) << "nothing to lose";
+    };
+
     "uniform draws and the shuffle keep their recorded values"_test = [] {
         rng::seed_random(7);
         std::vector<int> rolls;

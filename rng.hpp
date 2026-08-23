@@ -112,6 +112,182 @@ inline double canonical() {
     return ret;
 }
 
+
+// libstdc++'s std::normal_distribution, written out. Marsaglia's polar method: it draws PAIRS and
+// keeps the second value for the next call, so the cache is part of the sequence rather than an
+// optimisation. binomial() below draws from it inside a rejection loop, which is exactly where
+// that matters. A fresh object has an empty cache, which is the state calculate_losses() starts
+// from every time, since it builds a new distribution per call.
+struct normal_source {
+    double saved = 0.0;
+    bool saved_available = false;
+
+    double operator()() {
+        if (saved_available) {
+            saved_available = false;
+            return saved;
+        }
+
+        double x, y, r2;
+        do {
+            x = 2.0 * canonical() - 1.0;
+            y = 2.0 * canonical() - 1.0;
+            r2 = x * x + y * y;
+        } while (r2 > 1.0 || r2 == 0.0);
+
+        const double mult = std::sqrt(-2 * std::log(r2) / r2);
+        saved = x * mult;
+        saved_available = true;
+        return y * mult;
+    }
+};
+
+// The constants libstdc++ derives once per distribution, for t trials at probability p.
+//
+// THIS IS THE ONE PLACE IN rng.hpp THAT CALLS libm. log, exp, sqrt and lgamma are not guaranteed
+// bit-identical between glibc and Apple's libm, so unlike uniform_below(), shuffle() and
+// get_weighted_index() this reproduction is exact on the platform it was copied from and only
+// probably exact elsewhere. See docs/decisions/0020 for what was measured.
+struct binomial_params {
+    double q = 0.0;
+    bool easy = true;
+    double d1 = 0.0, d2 = 0.0, s1 = 0.0, s2 = 0.0, c = 0.0;
+    double a1 = 0.0, a123 = 0.0, s = 0.0, lf = 0.0, lp1p = 0.0;
+
+    binomial_params(int t, double p) {
+        const double p12 = p <= 0.5 ? p : 1.0 - p;
+
+        if (t * p12 >= 8) {
+            easy = false;
+            const double np = std::floor(t * p12);
+            const double pa = np / t;
+            const double one_p = 1 - pa;
+
+            const double pi_4 = 0.7853981633974483096156608458198757L;
+            const double d1x = std::sqrt(np * one_p * std::log(32 * np / (81 * pi_4 * one_p)));
+            d1 = std::round(std::max<double>(1.0, d1x));
+            const double d2x = std::sqrt(np * one_p * std::log(32 * t * one_p / (pi_4 * pa)));
+            d2 = std::round(std::max<double>(1.0, d2x));
+
+            const double spi_2 = 1.2533141373155002512078826424055226L; // sqrt(pi / 2)
+            s1 = std::sqrt(np * one_p) * (1 + d1 / (4 * np));
+            s2 = std::sqrt(np * one_p) * (1 + d2 / (4 * (t * one_p)));
+            c = 2 * d1 / np;
+            a1 = std::exp(c) * s1 * spi_2;
+            const double a12 = a1 + s2 * spi_2;
+            const double s1s = s1 * s1;
+            a123 = a12 + (std::exp(d1 / (t * one_p)) * 2 * s1s / d1 * std::exp(-d1 * d1 / (2 * s1s)));
+            const double s2s = s2 * s2;
+            s = a123 + 2 * s2s / d2 * std::exp(-d2 * d2 / (2 * s2s));
+            lf = std::lgamma(np + 1) + std::lgamma(t - np + 1);
+            lp1p = std::log(pa / one_p);
+
+            q = -std::log(1 - (p12 - pa) / one_p);
+        } else {
+            q = -std::log(1 - p12);
+        }
+    }
+};
+
+// The simple waiting-time method, used on its own when t * p < 8 and as the tail of the rejection
+// method otherwise.
+inline int binomial_waiting(int t, double q) {
+    int x = 0;
+    double sum = 0.0;
+
+    do {
+        if (t == x) return x;
+        const double e = -std::log(1.0 - canonical());
+        sum += e / (t - x);
+        x += 1;
+    } while (sum <= q);
+
+    return x - 1;
+}
+
+// Devroye's rejection algorithm for t * p >= 8, waiting time below that -- libstdc++'s
+// std::binomial_distribution, reproduced draw for draw.
+inline int binomial(int t, double p) {
+    const double p12 = p <= 0.5 ? p : 1.0 - p;
+    const binomial_params param(t, p);
+    int ret;
+
+    if (!param.easy) {
+        normal_source normal;
+        double x;
+
+        const double naf = (1 - std::numeric_limits<double>::epsilon()) / 2;
+        const double thr = std::numeric_limits<int>::max() + naf;
+        const double np = std::floor(t * p12);
+
+        const double spi_2 = 1.2533141373155002512078826424055226L; // sqrt(pi / 2)
+        const double a1 = param.a1;
+        const double a12 = a1 + param.s2 * spi_2;
+        const double a123 = param.a123;
+        const double s1s = param.s1 * param.s1;
+        const double s2s = param.s2 * param.s2;
+
+        bool reject;
+        do {
+            const double u = param.s * canonical();
+            double v = 0.0;
+
+            if (u <= a1) {
+                const double n = normal();
+                const double y = param.s1 * std::abs(n);
+                reject = y >= param.d1;
+                if (!reject) {
+                    const double e = -std::log(1.0 - canonical());
+                    x = std::floor(y);
+                    v = -e - n * n / 2 + param.c;
+                }
+            } else if (u <= a12) {
+                const double n = normal();
+                const double y = param.s2 * std::abs(n);
+                reject = y >= param.d2;
+                if (!reject) {
+                    const double e = -std::log(1.0 - canonical());
+                    x = std::floor(-y);
+                    v = -e - n * n / 2;
+                }
+            } else if (u <= a123) {
+                const double e1 = -std::log(1.0 - canonical());
+                const double e2 = -std::log(1.0 - canonical());
+
+                const double y = param.d1 + 2 * s1s * e1 / param.d1;
+                x = std::floor(y);
+                v = -e2 + param.d1 * (1 / (t - np) - y / (2 * s1s));
+                reject = false;
+            } else {
+                const double e1 = -std::log(1.0 - canonical());
+                const double e2 = -std::log(1.0 - canonical());
+
+                const double y = param.d2 + 2 * s2s * e1 / param.d2;
+                x = std::floor(-y);
+                v = -e2 - param.d2 * y / (2 * s2s);
+                reject = false;
+            }
+
+            reject = reject || x < -np || x > t - np;
+            if (!reject) {
+                const double lfx = std::lgamma(np + x + 1) + std::lgamma(t - (np + x) + 1);
+                reject = v > param.lf - lfx + x * param.lp1p;
+            }
+
+            reject |= x + np >= thr;
+        } while (reject);
+
+        x += np + naf;
+        const int z = binomial_waiting(t - static_cast<int>(x), param.q);
+        ret = static_cast<int>(x) + z;
+    } else {
+        ret = binomial_waiting(t, param.q);
+    }
+
+    if (p12 != p) ret = t - ret;
+    return ret;
+}
+
 } // namespace detail
 
 inline void seed_random() {
@@ -205,9 +381,11 @@ inline int calculate_losses(int amount, int percentage) {
     // Probability of loss for a single item
     double probability = static_cast<double>(clamped_percentage) / 100.0;
 
-    // Use binomial distribution: 'amount' trials, 'probability' chance of success (loss) per trial
-    std::binomial_distribution<> distribution(amount, probability);
-    return distribution(detail::get_initialized_generator());
+    // 'amount' trials, 'probability' chance of losing each -- libstdc++'s binomial distribution,
+    // reproduced in detail::binomial() for the reason 0019 gives for the others. This is the one
+    // that calls libm, so it is the one whose portability is measured rather than argued: see
+    // docs/decisions/0020.
+    return detail::binomial(amount, probability);
 }
 
 // Shuffles the elements in the given container in place using the internal generator.
