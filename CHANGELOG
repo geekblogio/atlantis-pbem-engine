@@ -173,6 +173,19 @@ Changes in 5.2.5, in this fork
       replayed in a dirty directory did not reproduce.  A collision now
       counts up from the drawn number instead, which costs no draws, so a
       clean directory writes exactly the file it wrote before
+   -- Let a recruited unit study again in kingdoms.  A non-leader may know
+      only one skill, and CanStudy counted skill ENTRIES rather than study
+      days: with REQUIRED_EXPERIENCE - of ours only kingdoms - recruiting
+      seeds the race's specialized skills with experience and no days at
+      all, so every unit that had ever bought a man already held entries and
+      was refused every skill it tried to begin, its own specialities
+      included.  Only the starting leaders could learn anything, which the
+      generated rulebook contradicts: it puts a specialized unit at level 1
+      after one month of study.  Study, Practice and AdjustSkills all
+      measure the same rule in days; CanStudy now does too, and a unit that
+      has days in one skill is still refused a second one.  Nothing moves in
+      the other rulesets: with REQUIRED_EXPERIENCE off no skill entry can
+      carry experience, so none can exist with zero days
 
 
 Changes from 5.1.0 -> 5.2.0
