@@ -1152,6 +1152,46 @@ before the commit and no separate approval step exists to wait for.
 Only the status moved. The reasoning in every record is untouched, which is what the register
 demands of itself; the status is the one field about a record's lifecycle rather than its content.
 
+### `#70` — item decay reproduces on every standard library (0020)
+
+`rng.hpp`, `unittest/rng_test.cpp`, `docs/decisions/0020`, `0019`, `CHANGELOG`. The last
+unspecified distribution the engine still called, and the fifth and final member of the family
+`#54`, `#61`, `#64` and `#66` belong to.
+
+`std::binomial_distribution` sits in `rng::calculate_losses`, the monthly decay of summoned undead.
+libstdc++ and libc++ neither return the same values nor consume the stream at the same rate, so a
+turn in which a player held undead replayed differently on a Mac.
+
+**[0019](../decisions/0019-the-engine-owns-its-random-distributions.md) gave two reasons for leaving
+it alone, and the second was wrong.** It described *replacing* the distribution with n Bernoulli
+draws — the same rule stated differently, but consuming different randomness, so running games
+would change. Freezing is not replacing: a copy of libstdc++'s algorithm calls the same libm with
+the same arguments in the same order on the machine the games run on, so Linux is unchanged **by
+construction**. Proposing a game change in the name of not changing games was backwards, and
+[0020](../decisions/0020-the-engine-owns-its-binomial-draw.md) says so plainly.
+
+The first reason survives as a limit on what may be promised — the algorithm calls `log`, `exp`,
+`sqrt` and `lgamma` — so this one is measured rather than argued:
+
+| | result |
+| --- | --- |
+| against real `std::binomial_distribution`, GCC 13.3 and 14.2 | 5 984 cases each, **0 divergences** |
+| `calculate_losses` at its own call site, on Linux | 11 583 cases, **0 divergences** |
+| macOS/arm64 vs linux/amd64, dense sweep | **263 736 draws, identical hash** |
+
+Values and generator state both; the sweep covers every whole percentage 1..99 and item counts
+1..200 and 250..5000 by fifties, so both branches of the algorithm many times over.
+
+`normal_source` comes with it: the rejection loop draws from `std::normal_distribution`, whose
+polar method produces two values per pair and **keeps the second**. That cache is part of the
+sequence rather than an optimisation — a copy recomputing both would consume twice the stream.
+
+0019 is corrected in place rather than rewritten, which is what the register asks of itself: a
+decision reversed for a stated reason is worth more than one quietly deleted.
+
+**Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
