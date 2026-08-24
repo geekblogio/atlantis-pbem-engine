@@ -34,7 +34,7 @@ them; the ruleset determines the game rules, not the interface.
 | Invocation | Reads | Writes |
 | --- | --- | --- |
 | `<game> new` | *(interactive, see below)* | `game.out`, `players.out`, and for `havilah` also `names.out` |
-| `<game> run` | `game.in`, `players.in`, `orders.<n>` | `game.out`, `players.out`, `report.<n>`, `report.<n>.json`, `template.<n>`, `times.<random>` |
+| `<game> run` | `game.in`, `players.in`, `orders.<n>` | `game.out`, `players.out`, `report.<n>`, `report.<n>.json`, `template.<n>`, `times.<random>`, and `rimefall.json` for that ruleset |
 | `<game> edit` | `game.in` | `game.out` *(interactive)* |
 | `<game> map <geo\|wmon\|lair\|gate\|hex> <mapfile>` | `game.in` | `<mapfile>` |
 | `<game> mapunits` | `game.in` | stdout |

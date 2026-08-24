@@ -45,6 +45,7 @@ do
     rm -f game.*
     rm -f players.*
     rm -f times.*
+    rm -f rimefall.json
     rm -f orders.*
     rm -f template.*
     rm -f report.*
@@ -58,6 +59,10 @@ do
   mv players.* output/turn_$turn
   if [[ $(shopt -s nullglob; set -- times.*; echo $#) -ge 1 ]]; then
     mv times.* output/turn_$turn
+  fi
+  # rimefall writes its own per-turn telemetry; no other ruleset does.
+  if [[ -f rimefall.json ]]; then
+    mv rimefall.json output/turn_$turn
   fi
   mv orders.* output/turn_$turn
   mv template.* output/turn_$turn

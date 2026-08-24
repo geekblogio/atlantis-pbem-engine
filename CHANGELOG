@@ -32,6 +32,15 @@ Changes in 5.2.5, in this fork
       undesigned way to win, and one that could end a game while a horde
       still had a home
 
+   -- Made rimefall write rimefall.json each turn: the front's row, the
+      three threat terms separately, the wave placed on each front, whether
+      the dragons are awake, both sources' state and the election standing.
+      The engine log and the times articles already tell a person these
+      things; a series of simulated games needs them as numbers, and a sum
+      cannot say whether a front is driven by time, by prosperity or by
+      players fighting each other.  No other ruleset writes it and nothing
+      reads it, so report.<n>.json is untouched
+
  Bug fixes:
    -- Stopped storing pointers into freed memory in the data tables, which
       crashed combat later

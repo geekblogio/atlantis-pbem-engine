@@ -229,6 +229,16 @@ Its recorded turns are in `snapshot-tests/rimefall_turns` — five turns, coveri
 faction claiming a start location through a gateway and the seal that follows. **They do not reach
 the fronts or the election**, which need a long game; those were verified separately.
 
+**It writes `rimefall.json` every turn**, and it is the only ruleset that writes anything of its
+own. The file carries the front's row, the three threat terms *separately*, the wave actually
+placed on each front, whether the dragons are awake, both sources' state and the election standing
+— see [../interface/file-formats.md](../interface/file-formats.md). The engine log and the times
+articles say the same things to a person; this says them to a program, which is what tuning several
+simulated games needs. The ruleset writes it itself rather than adding to `report.<n>.json`,
+because [0012](decisions/0012-a-ruleset-hook-for-gateway-destinations.md) permits one engine hook
+for one purpose and says plainly that it is not a general licence — and because the engine's report
+is read by other projects.
+
 `rimefall.h` holds the shape constants — the band count and the taper — because `world.cpp` and
 `map.cpp` both read them, and from stage 3 the bands also key the gateways and the start slots.
 One header is what stops those from disagreeing about how many bands the world has.

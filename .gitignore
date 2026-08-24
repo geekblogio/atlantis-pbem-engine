@@ -69,6 +69,7 @@ map_viewer/dist
 /snapshot-tests/standard
 /snapshot-tests/*.html
 /snapshot-tests/*.html.strip
+/snapshot-tests/rimefall.json
 /snapshot-tests/engine-output.txt
 /snapshot-tests/turn-difference.txt
 /snapshot-tests/rules-difference.txt

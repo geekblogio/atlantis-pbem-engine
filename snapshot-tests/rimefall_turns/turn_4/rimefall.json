@@ -1,0 +1,35 @@
+{
+  "election": {
+    "open": false
+  },
+  "front": {
+    "battles": 0,
+    "dragons_awake": false,
+    "population_in_reach": 8523,
+    "ran": true,
+    "row": 3,
+    "stacks_allowed": 0,
+    "stacks_placed": {
+      "east": 0,
+      "north": 0
+    },
+    "threat": {
+      "discord": 0,
+      "prosperity": 0,
+      "threshold": 60,
+      "time": 10,
+      "total": 10
+    }
+  },
+  "sources": {
+    "east": {
+      "held": false,
+      "name": "The Saltspire"
+    },
+    "north": {
+      "held": false,
+      "name": "The Rimewell"
+    }
+  },
+  "turn": 5
+}

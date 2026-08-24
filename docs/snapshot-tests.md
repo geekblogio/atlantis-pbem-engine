@@ -17,8 +17,8 @@ byte of every output file** against what was recorded.
 | `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for every ruleset except `neworigins8` |
 | `run-snapshots.sh` | all three, for everything |
 
-The comparison covers `game.*`, `players.*`, `orders.*`, `template.*`, `report.*`, `times.*`
-and the engine's own stdout. The rules comparison strips the `Last Change:` timestamp line
+The comparison covers `game.*`, `players.*`, `orders.*`, `template.*`, `report.*`, `times.*`,
+`rimefall.json` where that ruleset writes one, and the engine's own stdout. The rules comparison strips the `Last Change:` timestamp line
 first; nothing else is normalised.
 
 ## Running them
