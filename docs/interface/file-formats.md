@@ -21,6 +21,7 @@ All of these live in the process's working directory under fixed names. See
 | `report.<n>.json` | out | the machine-readable report, if `REPORT_FORMAT_JSON` |
 | `template.<n>` | out | order template, only with `REPORT_FORMAT_TEXT` and only for player factions |
 | `times.<random>` | out | world-events articles — see the warning below |
+| `rimefall.json` | out | **`rimefall` only** — that turn's front, sources and election as numbers; see below |
 | `names.out` | out | `havilah` only, written by `new`: every generated region name, for a GM to scan |
 
 A missing `orders.<n>` is not an error: that faction simply issued no orders.
@@ -41,6 +42,34 @@ directory into the turn: one leftover `times.*` file shifted the shared random s
 it the monsters that spawned later in the same turn and the generator state saved in `game.out`
 — so every following turn drifted too. A turn replayed in a dirty directory did not reproduce.
 That is fixed; **an uncleared directory now costs nothing but clutter.**
+
+### `rimefall.json`
+
+Written by the `rimefall` ruleset alone, once per `run`, overwritten each turn. It carries what the
+ruleset's own balance depends on, as numbers rather than prose:
+
+```json
+{
+  "turn": 34,
+  "front": {
+    "row": 12, "ran": true, "dragons_awake": true,
+    "population_in_reach": 21500, "battles": 1,
+    "threat": { "total": 78, "time": 68, "prosperity": 8, "discord": 10, "threshold": 60 },
+    "stacks_allowed": 1, "stacks_placed": { "north": 1, "east": 0 }
+  },
+  "sources": { "north": { "name": "The Rimewell", "held": false },
+               "east":  { "name": "The Saltspire", "held": false } },
+  "election": { "open": false }
+}
+```
+
+**The three threat terms are separate on purpose.** Only their sum is visible anywhere else, and a
+sum cannot say whether a front is being driven by time, by prosperity or by the players fighting
+each other — which is the first question anyone tuning the ruleset asks. `election` grows the
+leader, the electorate and the percentage once both sources are held.
+
+It is a **ruleset's file, not the engine's**: no other ruleset writes it, and nothing else reads
+it. A consumer that does not know about it can ignore it; `report.<n>.json` is unchanged.
 
 ## `players.in`
 

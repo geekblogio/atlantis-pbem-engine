@@ -6,6 +6,7 @@
 #include <string>
 #include <iterator>
 #include <memory>
+#include <fstream>
 
 //
 // ---------------------------------------------------------------------------------------------
@@ -662,6 +663,39 @@ static void CreateQuest(ARegionList& regions, int monfaction)
 // random, and reporting entities and anomalies. They went with the ending they served; rimefall is
 // won by taking both sources and then being elected. See CheckVictory below and 0011 section 6.
 
+//
+// ---------------------------------------------------------------------------------------------
+// Per-turn telemetry
+// ---------------------------------------------------------------------------------------------
+//
+// Everything a game master or a simulation needs to tune this ruleset, as numbers, written to
+// `rimefall.json` beside the reports. The same figures reach a human through the engine log and
+// the times articles, but prose is not a series: the three threat terms in particular have to be
+// separable if anyone is to know WHICH of them is driving the front, and no player report shows
+// them at all.
+//
+// WRITTEN BY THE RULESET, NOT THE ENGINE, and into a file of its own rather than into
+// report.<n>.json. The engine's own report is read by other projects, and 0012 permits exactly one
+// engine hook for one purpose and says plainly that it is not a general licence. A ruleset writing
+// a ruleset's file needs neither.
+//
+// WHY A DESTRUCTOR. Once the ballot is open CheckVictory leaves through six different returns, and
+// the file has to be written on every one of them. A call before each return is a list that will
+// be wrong the first time somebody adds a seventh.
+//
+namespace {
+
+struct rimefall_telemetry {
+    json data = json::object();
+
+    ~rimefall_telemetry() {
+        std::ofstream f("rimefall.json", std::ios::out | std::ios::trunc);
+        if (f.is_open()) f << data.dump(2) << '\n';
+    }
+};
+
+} // namespace
+
 Faction *Game::CheckVictory()
 {
     int visited, unvisited;
@@ -694,6 +728,10 @@ Faction *Game::CheckVictory()
     int front_row = front_surface
         ? rimefall_front_row(TurnNumber(), front_origin ? front_origin->yloc : 0, front_surface)
         : 0;
+
+    rimefall_telemetry telemetry;
+    telemetry.data["turn"] = TurnNumber();
+    telemetry.data["front"] = { {"row", front_row}, {"ran", false} };
 
     // The rebuild reports who claimed a start location since it last ran, and the alliances are
     // applied to exactly those. Order matters: the rebuild reads the old seals to find the event
@@ -769,6 +807,21 @@ Faction *Game::CheckVictory()
                   + (int)(population / 10000) * RIMEFALL_THREAT_PER_10KPOP
                   + discord * RIMEFALL_THREAT_PER_BATTLE;
 
+        telemetry.data["front"]["ran"] = true;
+        telemetry.data["front"]["population_in_reach"] = population;
+        telemetry.data["front"]["battles"] = discord;
+        telemetry.data["front"]["threat"] = {
+            {"total", score},
+            {"time", turn * RIMEFALL_THREAT_PER_TURN},
+            {"prosperity", (int)(population / 10000) * RIMEFALL_THREAT_PER_10KPOP},
+            {"discord", discord * RIMEFALL_THREAT_PER_BATTLE},
+            {"threshold", RIMEFALL_THREAT_THRESHOLD}
+        };
+        telemetry.data["sources"] = {
+            {"north", {{"name", RIMEFALL_NORTH_SOURCE_NAME}, {"held", north_dead}}},
+            {"east",  {{"name", RIMEFALL_EAST_SOURCE_NAME},  {"held", east_dead}}}
+        };
+
         // One line per turn in the engine log, not in any player's report. A game master tuning a
         // live game needs to see which term is driving the front, and the three are impossible to
         // separate from the outside.
@@ -785,6 +838,9 @@ Faction *Game::CheckVictory()
             stacks = 1 + (score - RIMEFALL_THREAT_THRESHOLD) / RIMEFALL_THREAT_PER_EXTRA_STACK;
             if (stacks > RIMEFALL_WAVE_MAX_STACKS) stacks = RIMEFALL_WAVE_MAX_STACKS;
         }
+
+        telemetry.data["front"]["stacks_allowed"] = stacks;
+        telemetry.data["front"]["stacks_placed"] = { {"north", 0}, {"east", 0} };
 
         // The northern front: a slow, broad wall of attrition across the full width of its band.
         if (!north_dead && stacks > 0) {
@@ -807,6 +863,7 @@ Faction *Game::CheckVictory()
                 mon->MoveUnit(reg->GetDummy());
                 placed++;
             }
+            telemetry.data["front"]["stacks_placed"]["north"] = placed;
             if (placed) {
                 write_times_article(
                     "The cold deepens in the north. " + std::to_string(placed) +
@@ -822,6 +879,7 @@ Faction *Game::CheckVictory()
         // the second act forward instead of cancelling it (0011 section 4).
         bool dragons_awake = north_dead ||
             (front_row * 10 >= surface->y * RIMEFALL_DRAGON_WAKE_TENTHS);
+        telemetry.data["front"]["dragons_awake"] = dragons_awake;
 
         if (!east_dead && dragons_awake && stacks > 0) {
             int want = stacks > RIMEFALL_DRAGON_STACKS_MAX ? RIMEFALL_DRAGON_STACKS_MAX : stacks;
@@ -843,6 +901,7 @@ Faction *Game::CheckVictory()
                 mon->MoveUnit(reg->GetDummy());
                 placed++;
             }
+            telemetry.data["front"]["stacks_placed"]["east"] = placed;
             if (placed) {
                 write_times_article(
                     "Wings out of the eastern sea. " + std::to_string(placed) +
@@ -1170,6 +1229,7 @@ Faction *Game::CheckVictory()
             }
             write_times_article("The Crown: " + standing + " No throne can be claimed while a "
                 "horde still has a home.");
+            telemetry.data["election"] = { {"open", false} };
             return nullptr;
         }
 
@@ -1205,7 +1265,10 @@ Faction *Game::CheckVictory()
             }
         }
 
-        if (!best) return nullptr;
+        if (!best) {
+            telemetry.data["election"] = { {"open", true}, {"candidates", 0} };
+            return nullptr;
+        }
 
         // The last faction standing needs no electorate. Anything else would leave a game that
         // cannot end.
@@ -1213,6 +1276,11 @@ Faction *Game::CheckVictory()
         if (electorate <= 0) {
             write_times_article("The Crown: " + best->name + " stands alone over a broken world, "
                 "and is crowned by default.");
+            telemetry.data["election"] = {
+                {"open", true}, {"candidates", living}, {"electorate", 0},
+                {"leader", best->name}, {"allies", best_allies}, {"crowned", true},
+                {"reason", "alone"}
+            };
             return best;
         }
 
@@ -1222,6 +1290,13 @@ Faction *Game::CheckVictory()
             std::to_string(electorate) + " factions in mutual alliance (" +
             std::to_string(percent) + "%, " + std::to_string(RIMEFALL_ELECTION_PERCENT) +
             "% needed).");
+
+        telemetry.data["election"] = {
+            {"open", true}, {"candidates", living}, {"electorate", electorate},
+            {"leader", best->name}, {"allies", best_allies}, {"percent", percent},
+            {"needed", RIMEFALL_ELECTION_PERCENT}, {"tied", tied},
+            {"crowned", percent >= RIMEFALL_ELECTION_PERCENT && !tied}
+        };
 
         if (percent < RIMEFALL_ELECTION_PERCENT) return nullptr;
 
