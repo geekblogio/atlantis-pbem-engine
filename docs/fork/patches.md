@@ -1223,6 +1223,34 @@ decision reversed for a stated reason is worth more than one quietly deleted.
 **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#73` — `rimefall` writes its turn as numbers
+
+`rimefall/extra.cpp`, `snapshot-tests/`, `docs/interface/`, `docs/rulesets.md`, `CHANGELOG`.
+**No engine change**, which is the point of its shape.
+
+Tuning this ruleset means running several games and reading the result, and everything needed for
+that existed only as prose: one line per turn in the engine log, times articles for the events. A
+sum cannot say whether the front is driven by time, by prosperity or by players fighting each other
+— the first question anyone tuning it asks. `rimefall.json` now carries the front's row, the three
+threat terms **separately**, the wave allowed against the wave actually placed on each front,
+whether the dragons are awake, both sources' state and, once the ballot opens, the leader, the
+electorate and the percentage.
+
+**The ruleset writes it, not the engine, and into a file of its own.** Adding fields to
+`report.<n>.json` would touch what the two Python projects read, and an engine hook would need its
+own record: [0012](../decisions/0012-a-ruleset-hook-for-gateway-destinations.md) permits exactly
+one, for one purpose, and states that it is not a general licence. A ruleset writing a ruleset's
+file needs neither.
+
+The write sits in a local object's **destructor**, because `CheckVictory` leaves through six
+different returns once the ballot is open and the file must appear on every one of them.
+
+The re-recorded fixtures are the evidence that it costs nothing: across five turns the only change
+is the new file. Both snapshot runners move and compare it now, or it would have sat unchecked
+beside the fixtures meant to guard it.
+
+**Nothing to offer upstream.** `rimefall` is fork-local in its entirety, and so is this.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
