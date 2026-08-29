@@ -107,7 +107,8 @@ will fail with `turn N missing`.
 ## Why Linux only in CI
 
 The runners are bash and use `[[ ]]`, `shopt -s nullglob`, `&>`, `seq`, `diff -ur` and `chmod`.
-The `Platforms` workflow therefore compiles on Windows and macOS but does not replay snapshots.
+CI no longer builds on any other platform at all ([0021](decisions/0021-ci-builds-linux-only.md)),
+so the question of replaying them elsewhere does not arise.
 
 **This page used to give a second and stronger reason: that the fixtures encode the output of a
 Linux build, so replaying them elsewhere tested the platform rather than the engine. That is no

@@ -1,0 +1,43 @@
+# Toolchain drift — deliberately NOT part of the merge gate.
+#
+# The runner image here is intentionally UNPINNED, the opposite of ci.yml. The gate must be
+# reproducible, so it pins `ubuntu-24.04`. This workflow exists precisely to find out early
+# when a new image ships a compiler whose new warnings break -Werror without any change on
+# our side — so it must track whatever "latest" currently means. When it goes red, pin the
+# gate's image or fix the warning, then let the gate follow.
+#
+# Linux only. The product of this repository is a Linux binary: the downstream projects build
+# it with `make -C src havilah` inside a Debian image. Windows and macOS builds used to run
+# here as well and were removed in docs/decisions/0021 — they were 92% of this workflow's
+# Actions bill and answered a question nobody was asking.
+name: Toolchain Drift
+
+on:
+  schedule:
+    # Mondays 05:00 UTC. Catches image and compiler drift.
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolchain-drift-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # `make all` builds every ruleset and the unit test binary. Compiling is the entire
+      # point here: -Werror turns any new compiler diagnostic into a failure, which is the
+      # signal this workflow is for. No ccache, for the same reason — a cache hit would skip
+      # the compile that is being tested.
+      #
+      # The tests themselves are not run: the gate already runs them on every pull request
+      # that touches code, against a pinned image.
+      - name: Build all rulesets and the unit tests
+        run: make all
