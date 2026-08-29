@@ -37,3 +37,4 @@ is what prompted writing this down.
 | [0018](0018-kingdoms-keeps-its-lakeless-coastline.md) | `kingdoms` keeps its lakeless coastline |
 | [0019](0019-the-engine-owns-its-random-distributions.md) | The engine owns its random distributions, extending 0017 |
 | [0020](0020-the-engine-owns-its-binomial-draw.md) | The engine owns its binomial draw too, completing 0019 |
+| [0021](0021-ci-builds-linux-only.md) | CI builds Linux only |

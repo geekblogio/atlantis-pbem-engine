@@ -102,7 +102,9 @@ Code that is clean under MSVC can still fail CI. If you develop on Windows, buil
 GCC before opening a pull request.
 
 The runner images used by the merge gate are pinned, so a new compiler cannot break the gate on
-its own. The `Platforms` workflow deliberately runs unpinned, weekly, to find that drift early.
+its own. The `Toolchain Drift` workflow deliberately runs unpinned, weekly, to find that drift
+early. It builds on Linux only, and so does everything else in CI — see
+[0021](decisions/0021-ci-builds-linux-only.md).
 
 ## Unit tests
 
@@ -144,6 +146,6 @@ that target monthly and opens a pull request when something moved.
 | undefined reference to a member defined in a `.cpp` | an `inline` on an out-of-line definition — legal only while nothing optimises it away |
 | link succeeds locally, fails in CI | a source file registered in only one of the two build files |
 | `unused variable` under CMake but not under `make` | `RelWithDebInfo` adds `-DNDEBUG`, which compiles `assert()` away; a variable that exists only for an assertion needs `[[maybe_unused]]` |
-| a warning you did not introduce | a newer compiler; check whether `Platforms` is already red |
+| a warning you did not introduce | a newer compiler; check whether `Toolchain Drift` is already red |
 | stale or half-linked objects after an interrupted `make` | `make all-clean`; and check you did not use `-j` |
 | a constant you just changed in a header has no effect | should no longer happen — `.d` files track headers. If it does, check the object has a `.d` beside it; `make all-clean` restores the invariant |

@@ -1251,6 +1251,37 @@ beside the fixtures meant to guard it.
 
 **Nothing to offer upstream.** `rimefall` is fork-local in its entirety, and so is this.
 
+### `#74` — CI builds Linux only
+
+`.github/workflows/platforms.yml` renamed to `toolchain-drift.yml`, plus
+[0021](../decisions/0021-ci-builds-linux-only.md), `CONTRIBUTING.md`, `docs/build-and-test.md`
+and `docs/snapshot-tests.md`. **No engine change.**
+
+The workflow built `make all` on `ubuntu-latest`, `windows-latest` and `macos-latest`, on every
+push to `master` and weekly. Actions bills macOS at ×10 and Windows at ×2, and measured from the
+API over 2026-08-05 to 2026-08-24 — 69 runs, each job rounded up to the whole minute the way
+GitHub bills it — that was **5 586 billed minutes: 3 780 macOS, 1 334 Windows, 472 Linux**. The
+entire merge gate over the same period, 186 runs and 1 284 jobs, cost 984. The workflow that
+gates nothing was 5.7× the one that gates every pull request, and the account ran out of minutes.
+
+Both removed platforms only ever **compiled**. macOS is covered better without the runner:
+development happens on macOS/arm64, where `make all`, the unit tests and the full snapshot suite
+run by hand before a pull request exists, and since `#61` and `#70` that machine replays every
+recorded turn byte for byte. MSVC was already not an authority on warnings — `/WX` is off and
+`4244`, `4267`, `4700` are suppressed — so what Windows caught was code GCC accepts and MSVC
+rejects. That class of finding is the accepted cost, and 0021 says so rather than pretending
+otherwise.
+
+The surviving Linux job also **drops its `push: [master]` trigger**. Every ruleset is already
+built from `CMakeLists.txt` by `Build & Test (cmake)` and from the `Makefile` by `Build (make)`
+on every code-touching pull request; a per-push run added only a second opinion on the image
+pin, which is what the weekly run is for. With one platform left, `Platforms` was the wrong name
+for the one job still being done — building unpinned so a new image's compiler is found before
+the pinned gate meets it — hence `Toolchain Drift`. It is not a required status check, so
+branch protection is untouched ([0002](../decisions/0002-single-aggregating-status-check.md)).
+
+**Nothing to offer upstream.** Upstream's CI is its own, and its cost is not ours.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

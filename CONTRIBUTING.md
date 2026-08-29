@@ -101,9 +101,12 @@ depends on either succeeded or was skipped.
 | `Upstream Hygiene` | fork-local paths on an `upstream/*` branch |
 | `Divergence Register` | that `docs/fork/patches.md` names this pull request's number |
 
-**Windows and macOS are not on the pull request path.** They run in `Platforms` after a merge
-and weekly. A portability regression is found within a day, which is cheaper than seven minutes
-on every pull request for a product that ships as a Linux binary.
+**Linux is the only platform CI builds at all.** The Windows and macOS builds were removed in
+[0021](docs/decisions/0021-ci-builds-linux-only.md): the product ships as a Linux binary, both
+consumers build it inside a Debian image, and those two runners were 92% of what that workflow
+cost in Actions minutes. `Toolchain Drift` still builds every ruleset weekly on the *unpinned*
+`ubuntu-latest`, which is how a compiler that has grown a new warning is found before it reaches
+the pinned gate.
 
 Do not rename or delete the `gate` job in `ci.yml`. Branch protection requires the context `CI`;
 without a job producing it, every pull request stays pending forever.
