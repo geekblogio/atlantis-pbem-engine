@@ -1282,6 +1282,19 @@ branch protection is untouched ([0002](../decisions/0002-single-aggregating-stat
 
 **Nothing to offer upstream.** Upstream's CI is its own, and its cost is not ours.
 
+### `#75` — 0021 and 0020 are accepted
+
+`docs/decisions/0021` and `0020`. Housekeeping, no engine change.
+
+Under `#69` a record is `proposed` while its pull request is open and `accepted` once it merges.
+`#74` merged, so 0021 is accepted. 0020 had said `proposed` since `#70` merged on 2026-08-23 —
+the same drift `#69` was written to stop, one line away in the file next door, so it is corrected
+here rather than left for the next sweep.
+
+Only the status field moved. The reasoning in both records is untouched.
+
+**Fork-local, permanently**, like everything under `docs/decisions/`.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
