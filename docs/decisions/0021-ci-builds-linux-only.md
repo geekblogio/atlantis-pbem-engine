@@ -1,6 +1,6 @@
 # 0021 — CI builds Linux only
 
-**Status:** proposed.
+**Status:** accepted, 2026-08-29.
 
 ## Context
 

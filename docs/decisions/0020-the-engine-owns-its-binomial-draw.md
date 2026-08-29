@@ -1,6 +1,6 @@
 # 0020 — The engine owns its binomial draw too
 
-**Status:** proposed, 2026-08-23. Completes [0019](0019-the-engine-owns-its-random-distributions.md),
+**Status:** accepted, 2026-08-23. Completes [0019](0019-the-engine-owns-its-random-distributions.md),
 whose "what this does not cover" section this record overturns.
 
 ## Context
