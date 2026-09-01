@@ -387,7 +387,8 @@ int report_and_count_empowered_altars(ARegionList& regions, std::list<Faction *>
     return count;
 }
 
-void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) {
+// Empowers one of the altars around the center, and returns whether it found one to empower.
+bool empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) {
     ARegionArray *surface = regions.get_first_region_array_of_type(ARegionArray::LEVEL_SURFACE);
     ARegion *surface_center = surface->GetRegion(surface->x / 2, surface->y / 2);
 
@@ -399,6 +400,13 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
             if (o->type == O_RITUAL_ALTAR) unempowered_altars.push_back(o);
         }
     }
+    // The altars are placed by the island ring generator alone, so a world built by any of the
+    // other surface generators has none at all -- while the annihilation victory condition is
+    // set for the ruleset rather than for the generator, and so runs in every NewOrigins game.
+    // Indexing the empty list here is what crashed every such game on the turn the empowerment
+    // starts. The same holds on a ring world once all six altars are gone.
+    if (unempowered_altars.empty()) return false;
+
     // pick a random altar to empower
     int num = rng::get_random(unempowered_altars.size());
     Object *o = unempowered_altars[num];
@@ -428,7 +436,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
     }
     if (anomalies.size() + entities.size() < unempowered_altars.size()) {
         // We have unspawend entities and anomalies, so just return without removing one.
-        return;
+        return true;
     }
     // If we have any anomalies, remove the one farthest from the center.
     if (anomalies.size() > 0) {
@@ -460,7 +468,7 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
                 if (f->is_npc) continue;
                 f->event("The anomaly in " + anomaly_region->short_print() + " vanishes.", "anomaly", anomaly_region);
             }
-            return;
+            return true;
         }
     }
     // Ok, we couldn't remove any anomalies, so remove the farthest entity instead.
@@ -477,11 +485,11 @@ void empower_random_altar(ARegionList& regions, std::list<Faction *>& factions) 
         if (far_entity) {
             far_entity->items.SetNum(I_IMPRISONED_ENTITY, far_entity->items.GetNum(I_IMPRISONED_ENTITY) - 1);
             far_entity->event(item_string(I_IMPRISONED_ENTITY, 1) + " vanishes suddenly.", "anomaly");
-            return;
+            return true;
         }
     }
     // We somehow got here without removing anything, so just return.
-    return;
+    return true;
 }
 
 
@@ -896,9 +904,11 @@ Faction *Game::CheckVictory()
         int empowered_altars = report_and_count_empowered_altars(regions, factions);
         // If we have hit turn 70, rather than spawning a new anomaly, we will activate a random altar and if
         // needed, destroy a randomly chosen entity.
+        // Count only an altar that was really empowered. Counting the attempt would let the
+        // total reach six on a world that has no altars, which spawns no anomalies from then on
+        // and hands the game to the monsters on turn 100.
         if (TurnNumber() >= 70 && empowered_altars < 6) {
-            empower_random_altar(regions, factions);
-            empowered_altars++;
+            if (empower_random_altar(regions, factions)) empowered_altars++;
         }
 
         int entities = report_and_count_entities(regions, factions);

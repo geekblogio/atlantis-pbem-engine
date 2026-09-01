@@ -1295,6 +1295,48 @@ Only the status field moved. The reasoning in both records is untouched.
 
 **Fork-local, permanently**, like everything under `docs/decisions/`.
 
+### `#77` — the annihilation endgame no longer crashes without altars
+
+`neworigins/extra.cpp`, `CHANGELOG`. Reported as issue #76: a NewOrigins game dies with a
+segmentation fault on the turn after 69, from a saved game, with no order file at all.
+
+`empower_random_altar` indexes its list of candidate altars without checking that it found any.
+`rng::get_random(0)` answers 0, `unempowered_altars[0]` on an empty vector reads past the end,
+and the write through the result faults. The turn number is the whole trigger: the save stands
+at 69, `PreProcessTurn` advances the month before `RunOrders`, and `TurnNumber() >= 70` opens the
+empowerment gate.
+
+**The list is empty on most NewOrigins worlds.** The six altars are placed by the island ring
+generator alone, while `victory_type = "annihilation"` is set for the *ruleset* and therefore
+runs whichever surface generator the game was created with. Every game built with the Original
+or Parametrical generator reaches turn 70 with no altar to empower, and dies there — the whole
+endgame having already run for twenty turns, spawning anomalies it could never resolve.
+`movement_forbidden_by_ruleset` tests for exactly this world ("this is not an N07 ring map and
+thus we won't have altars"); the endgame path did not.
+
+The function now reports whether it empowered anything and `CheckVictory` counts only a real
+empowerment. Counting the attempt would be worse than the crash it replaces: `empowered_altars`
+would climb to six on a world that has none, anomalies would stop spawning, and turn 100 would
+award the game to the monsters over a monolith those worlds do not have either. Measured — the
+generator-1 world that faulted on turn 70 now runs to 115 and is still `Running`.
+
+**Nothing changes on a ring world.** The candidate list is never empty there while fewer than
+six altars stand unempowered, and `get_random(0)` draws no random number, so the shared stream
+does not shift. A 64×64 ring world, seed 312271837, produces byte-identical saves over 75 turns
+before and after; all snapshots and all 22 unit suites are unchanged.
+
+**No regression test.** `unittest/extra.cpp` stubs `Game::CheckVictory`, and
+`empower_random_altar` is a free function in `neworigins/extra.cpp` that is never linked into the
+test binary. Covering it means reworking how the test ruleset is bound, which is a decision of
+its own rather than something to attach to a crash fix.
+
+Left alone and worth naming: `surface_center->neighbors[i]` is dereferenced unchecked in four
+places. The centre is never at the array edge on a generated world, so it is latent.
+
+**Upstream value: high.** The defect is upstream's, unchanged, and the commit is written in
+upstream's voice so it stays cherry-pickable. **Upstream-worthy, not offered**, on
+[0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
