@@ -195,6 +195,18 @@ Changes in 5.2.5, in this fork
       has days in one skill is still refused a second one.  Nothing moves in
       the other rulesets: with REQUIRED_EXPERIENCE off no skill entry can
       carry experience, so none can exist with zero days
+   -- Stopped neworigins from crashing on turn 70 on a world without altars.
+      The annihilation ending empowers the six ritual altars around the
+      centre one per turn from turn 70, and indexed its list of candidates
+      without checking that it found any - so it wrote through a pointer read
+      past the end of an empty vector and the turn died, from a saved game,
+      with no orders involved.  The altars are placed by the island ring
+      generator alone while the ending is switched on for the ruleset, so
+      every game created with the Original or Parametrical surface generator
+      reached that turn with nothing to empower.  An attempt that finds no
+      altar is now counted as what it is: counting it as an empowerment
+      instead would have stopped anomalies spawning and handed the game to
+      the monsters on turn 100.  A ring world is untouched, and no draw moves
 
 
 Changes from 5.1.0 -> 5.2.0
