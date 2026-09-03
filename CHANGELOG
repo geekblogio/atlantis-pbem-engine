@@ -207,6 +207,23 @@ Changes in 5.2.5, in this fork
       altar is now counted as what it is: counting it as an empowerment
       instead would have stopped anomalies spawning and handed the game to
       the monsters on turn 100.  A ring world is untouched, and no draw moves
+   -- Stopped a rimefall faction from losing its first turn to a gateway
+      somebody else reached first.  Two factions choosing the same gateway
+      in the same month is unavoidable - the gateways are a menu, everybody
+      picks before anybody moves, and nobody can see the other choices - and
+      the second one used to be refused and left standing in the Nexus with
+      its month spent.  It is now set down on the nearest start location
+      still open: same band and same terrain first, then same band, then
+      same terrain anywhere, then anywhere at all, and its report says why.
+      A gateway refuses a faction only when no start location anywhere in
+      the world can take it.  Overrun gateways are substituted for the same
+      way, since a band is only renamed once a turn and an order may have
+      been written while it still read as open
+   -- Stopped rimefall from admitting a faction into a world with nothing
+      but overrun ground left in it.  The free slot count called a start
+      location free while the northern front had already taken it, so a
+      newcomer could be accepted and then find no gateway it was allowed to
+      use
 
 
 Changes from 5.1.0 -> 5.2.0

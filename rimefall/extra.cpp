@@ -160,8 +160,19 @@ static int rimefall_pvp_battles(std::vector<Battle *>& battles, Faction *mon, Fa
     return count;
 }
 
-// How many start slots are still free, over the whole world. Used to decide whether a new faction
-// can be admitted at all.
+// Can a newcomer be put on this slot? Free is not enough: a slot the northern front has overrun is
+// no longer offered, and sending anyone there would be sending them into ground that is already
+// lost. The overrun state is read off the gateway's NAME, which rimefall_rebuild_gateways refreshes
+// once a turn, for the same reason ARegion::movement_forbidden_by_ruleset reads it: nothing else
+// about that state is persisted.
+static bool rimefall_slot_offerable(const std::pair<Object *, ARegion *>& slot)
+{
+    if (rimefall_slot_taken(slot.second)) return false;
+    return slot.first->name.rfind("Lost gateway to ", 0) != 0;
+}
+
+// How many start slots can still take a newcomer, over the whole world. Used to decide whether a
+// new faction can be admitted at all, and to tell a refused arrival from a full world.
 //
 // A free function taking the region list rather than a Game method: docs/decisions/0012 permits
 // exactly ONE engine hook, and adding ruleset-specific method names to the shared game.h would
@@ -170,7 +181,7 @@ static int rimefall_free_slot_count(ARegionList& regions)
 {
     int free_slots = 0;
     for (const auto& slot : rimefall_slots(regions)) {
-        if (!rimefall_slot_taken(slot.second)) free_slots++;
+        if (rimefall_slot_offerable(slot)) free_slots++;
     }
     return free_slots;
 }
@@ -1885,10 +1896,10 @@ const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, 
     // So it keys on the SOURCE being the nexus, which is the only way a gateway arrival happens.
     //
     if (origin && origin->type == R_NEXUS) {
-        // Arriving from the nexus is only legal into a free start slot. The engine falls back to
-        // the gateway's nominal destination when the candidate list comes back empty, which is
-        // exactly the case where the band had no room left, so this is the backstop that turns
-        // that fallback into a readable refusal instead of a silent misplacement.
+        // Arriving from the nexus is only legal into a start slot that can still take someone. The
+        // engine falls back to the gateway's nominal destination when the candidate list comes back
+        // empty, so this is the backstop that turns that fallback into a readable refusal instead
+        // of a silent misplacement.
         bool is_slot = false;
         bool lost = false;
         for (const auto& slot : rimefall_slots(regions)) {
@@ -1903,13 +1914,17 @@ const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, 
         if (!is_slot) {
             return "That gateway leads nowhere that is still open";
         }
-        if (lost) {
-            return "The cold has already taken that land";
-        }
-        if (rimefall_slot_taken(this)) {
-            // Two ways here: the gateway has read "Sealed" for turns and someone tried it anyway,
-            // or two factions stepped through in the same turn and the other one was processed
-            // first. The wording has to be true of both, so it says nothing about when.
+        if (lost || rimefall_slot_taken(this)) {
+            // Since 0022, getting this far means Game::filter_gateway_destinations found no
+            // substitute anywhere, so the true statement is about the world and not about this hex.
+            // A faction whose chosen gateway is merely taken is moved to another start location and
+            // never reaches here.
+            if (rimefall_free_slot_count(regions) == 0) {
+                return "There is nowhere left in the world to start";
+            }
+            // Unreachable through a gateway move, and kept anyway: this function is called on every
+            // move in the game, and a start slot someone else holds must stay closed to arrivals
+            // from the nexus however they got here.
             return "That start location is already held";
         }
     }
@@ -1921,30 +1936,30 @@ const std::optional<std::string> ARegion::movement_forbidden_by_ruleset(Unit *, 
     return std::nullopt;
 }
 
-// Ruleset hook from docs/decisions/0012, and the reason that record exists.
+// Ruleset hook from docs/decisions/0012, and the reason that record exists. 0022 added the
+// substitution below and the unit that carries its message.
 //
 // Rimefall keys its gateways on latitude band. The engine cannot express that on its own: it keeps
 // only the TERRAIN of the region a gateway names and rebuilds the candidate set from the whole
 // map, and no terrain identifies a band here — mountain occurs in all five, deliberately, because
 // adamantium comes from mountain alone.
 //
-// So this replaces the candidate list with the free start slots of the band the gateway belongs
-// to. The band comes from the destination's own latitude, never from parsing the gateway's name.
+// So this replaces the candidate list with the slot the gateway names, or, when that slot can no
+// longer take anyone, with the closest substitutes still open. A band comes from a destination's
+// own latitude, never from parsing a gateway's name.
 //
-// An empty result is a legitimate answer: it means that band is full. The engine then leaves the
-// unit's destination at the gateway's nominal region, and ARegion::movement_forbidden_by_ruleset
-// refuses it with something a player can read. The two work as a pair.
-void Game::filter_gateway_destinations(Object *gateway, ARegion *nominal, std::vector<ARegion *>& candidates)
+// An empty result is a legitimate answer, and since 0022 it means one thing only: no start
+// location anywhere in the world can take this unit. The engine then leaves the unit's destination
+// at the gateway's nominal region, and ARegion::movement_forbidden_by_ruleset refuses it with
+// something a player can read. The two work as a pair.
+void Game::filter_gateway_destinations(Unit *unit, Object *gateway, ARegion *nominal,
+    std::vector<ARegion *>& candidates)
 {
     if (!gateway || !nominal) return;
 
-    // ONE GATEWAY IS ONE SLOT. The destination is the hex the gateway actually names, so the band
-    // and the terrain in its name are the truth rather than a hint.
-    //
-    // The first cut of this pooled every free slot in the band instead, and it read badly in
-    // testing: a faction entering "Gateway to the middle lands, desert" was put on a plain,
-    // because the pool had other slots in it. Naming a place and delivering a different one is
-    // worse than offering less choice.
+    // ONE GATEWAY IS ONE SLOT, and the slot it names is always the first answer. The destination is
+    // the hex the gateway actually names, so the band and the terrain in its name are the truth
+    // rather than a hint.
     //
     // Note this SETS the list rather than only shrinking it. docs/decisions/0012 describes the
     // hook as narrowing, and in the ordinary case this is a narrowing to one element — but a slot
@@ -1952,13 +1967,69 @@ void Game::filter_gateway_destinations(Object *gateway, ARegion *nominal, std::v
     // longer list it, since a region's production can drift over a long game. Losing a start
     // location silently, years in, would be the worse failure.
     candidates.clear();
-    if (rimefall_slot_taken(nominal)) return;
 
-    // Overrun slots are not offered. Read from the gateway's own name for the same reason
-    // movement_forbidden_by_ruleset reads it: the state is refreshed once a turn by CheckVictory
-    // and persisted in between.
-    if (gateway->name.rfind("Lost gateway to ", 0) == 0) return;
+    auto slots = rimefall_slots(regions);
 
-    candidates.push_back(nominal);
+    for (const auto& slot : slots) {
+        if (slot.second != nominal) continue;
+        if (!rimefall_slot_offerable(slot)) break;
+        candidates.push_back(nominal);
+        return;
+    }
+
+    //
+    // THE NAMED SLOT IS GONE, SO SUBSTITUTE ONE. Everything below this line is about a collision
+    // nobody could have avoided: the gateways are offered as a menu, every faction chooses in the
+    // same turn before any of them has run, and none of them can see which slots the others picked.
+    // Whoever the engine happened to process second used to lose the whole month for it, on the
+    // faction's first turn in the game.
+    //
+    // The first cut of this ruleset pooled every free slot in the band and read badly in testing: a
+    // faction entering "Gateway to the middle lands, desert" was put on a plain because the pool
+    // had other slots in it. That objection is answered rather than overruled — the substitute is
+    // drawn from the narrowest circle with room in it, so the same band AND the same terrain is
+    // tried first, and only a world with no such slot left widens the search.
+    //
+    int band = rimefall_band_of(nominal, regions);
+
+    std::vector<ARegion *> same_band_terrain, same_band, same_terrain, anywhere;
+    for (const auto& slot : slots) {
+        if (slot.second == nominal) continue;
+        if (!rimefall_slot_offerable(slot)) continue;
+
+        bool band_matches = rimefall_band_of(slot.second, regions) == band;
+        bool terrain_matches = slot.second->type == nominal->type;
+
+        if (band_matches && terrain_matches) same_band_terrain.push_back(slot.second);
+        if (band_matches) same_band.push_back(slot.second);
+        if (terrain_matches) same_terrain.push_back(slot.second);
+        anywhere.push_back(slot.second);
+    }
+
+    bool same_band_answer = true;
+    if (!same_band_terrain.empty()) candidates = same_band_terrain;
+    else if (!same_band.empty()) candidates = same_band;
+    else if (!same_terrain.empty()) { candidates = same_terrain; same_band_answer = false; }
+    else { candidates = anywhere; same_band_answer = false; }
+
+    // Nothing left anywhere. The refusal is the honest answer now, and what it has to say is that
+    // the world is full rather than that this one hex was taken.
+    if (candidates.empty()) return;
+
+    // Say it, because nothing else will. The engine chooses the arrival hex from the list above, so
+    // this function is the only place that knows a substitution happened at all, and the player
+    // would otherwise read a report from a place they never chose. It names the band and not the
+    // hex on purpose: the choice among these candidates is the engine's, and has not been made yet.
+    if (!unit) return;
+
+    std::string wanted = rimefall_band_name(band);
+    unit->event(
+        same_band_answer
+            ? "The land beyond that gateway was claimed before you reached it. You have been set "
+              "down elsewhere in " + wanted + "."
+            : "The land beyond that gateway was claimed before you reached it, and no land was "
+              "left open in " + wanted + ". You have been set down where there was still room.",
+        "arrival"
+    );
 }
 

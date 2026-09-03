@@ -41,7 +41,12 @@ do
 
   cp -f "$turndir/turn_$turn/game.in" game.in
   cp -f "$turndir/turn_$turn/players.in" players.in
-  cp -f "$turndir/turn_$turn/orders.3" orders.3
+  # Every orders file the turn defines, not just faction 3's: a turn where two factions act on each
+  # other needs both of them to give orders. Turns with one orders file behave exactly as before.
+  for ordersfile in "$turndir/turn_$turn"/orders.*; do
+    [[ -e "$ordersfile" ]] || continue
+    cp -f "$ordersfile" "$(basename "$ordersfile")"
+  done
 
   if ! "./$game" run &> engine-output.txt ; then
     echo "executable crashed. -- Test failed."

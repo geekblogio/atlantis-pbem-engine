@@ -12,7 +12,7 @@ byte of every output file** against what was recorded.
 
 | Suite | Covers |
 | --- | --- |
-| `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard`, `neworigins` (14 turns each) and `rimefall` (5) |
+| `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard`, `neworigins` (14 turns each) and `rimefall` (7) |
 | `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for every ruleset |
 | `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for every ruleset except `neworigins8` |
 | `run-snapshots.sh` | all three, for everything |
@@ -97,9 +97,16 @@ than committed.
 
 ## Adding a turn
 
-`snapshot-tests/turns/new-turn.sh` creates the next turn directory. Check with
-`git status` that the new files are actually staged: the repository's `.gitignore` matches
-`game.*`, `players.*`, `report.*` and friends for good reasons elsewhere in the tree, and the
+`snapshot-tests/turns/new-turn.sh` creates the next turn directory.
+
+**A turn may carry one orders file per faction.** The runners copy every `orders.<n>` the turn
+directory holds, and `rimefall_turns/new-turn.sh` seeds one from each `template.<n>` of the
+previous turn, so a turn can exercise two factions acting on each other — which is what
+`rimefall_turns/turn_6` does with two factions entering the same gateway. Delete the orders files
+you do not want to differ from their template; a faction with no orders simply does nothing.
+
+Check with `git status` that the new files are actually staged: the repository's `.gitignore`
+matches `game.*`, `players.*`, `report.*` and friends for good reasons elsewhere in the tree, and the
 fixture directories are re-included by explicit negations. If you add a fixture tree under a
 new path, extend those negations too, or the commit will be silently incomplete and the replay
 will fail with `turn N missing`.

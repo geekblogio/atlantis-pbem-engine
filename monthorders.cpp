@@ -1572,7 +1572,7 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
             // of the gateway's destination survives the lookup above, so a ruleset that keys its
             // gateways on anything else — latitude, for instance — has no other way to be heard.
             // Every ruleset but rimefall leaves the list alone. See docs/decisions/0012.
-            filter_gateway_destinations(obj, newreg, start_locations);
+            filter_gateway_destinations(unit, obj, newreg, start_locations);
 
             // match levels to try for, in order:
             // 0 - completely empty towns
