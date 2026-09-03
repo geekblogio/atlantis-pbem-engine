@@ -465,6 +465,15 @@ worked out fresh every turn from who is actually standing there, so if a faction
 simply walks away, its gateway opens again and the land can be claimed by someone new. Object
 numbers never change, so `[13]` is the same location for the life of the game.
 
+**Two players can pick the same gateway, and both of them arrive.** Everybody chooses in the same
+month and nobody can see the other choices, so a collision is nobody's mistake. The faction the
+engine reaches second is set down on the nearest start location still free — same band and same
+terrain first, then same band, then same terrain anywhere, then anywhere at all — and its report
+carries a line saying the land beyond its gateway was claimed before it got there. Expect the
+occasional question about it: the player named a desert and reads a report from a forest. A gateway
+turns a faction away only when no start location anywhere in the world can take it, and that
+message says so.
+
 **What happens when you add a faction to a full world.**
 
 If you leave a `Faction: new` line in `players.in` when no starting location is free, the faction

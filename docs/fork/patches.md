@@ -1337,6 +1337,41 @@ places. The centre is never at the array edge on a generated world, so it is lat
 upstream's voice so it stays cherry-pickable. **Upstream-worthy, not offered**, on
 [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md).
 
+### `#79` — a taken gateway substitutes a start location (0022)
+
+`game.h`, `monthorders.cpp`, `extra.cpp` in all eight rulesets, the two shared snapshot runners,
+`CHANGELOG`. Reported as issue #78 from a real eight-faction game on turn 2.
+
+**The second engine change to the gateway hook, and it is one parameter.** `#41` introduced
+`Game::filter_gateway_destinations` under [0012](../decisions/0012-a-ruleset-hook-for-gateway-destinations.md);
+this adds a `Unit *` to it, recorded as
+[0022](../decisions/0022-a-taken-gateway-substitutes-a-start-location.md). The engine chooses the
+arrival hex from whatever the ruleset returns, so the ruleset is the only party that knows it
+substituted a destination, and without the unit it has nowhere to say so. Every ruleset but
+`rimefall` still defines the hook empty and ignores every parameter; the shared occupancy cascade
+and the `rng` draw sequence are untouched for all of them, which the unchanged `standard` and
+`neworigins` replays demonstrate.
+
+Two factions choosing the same gateway in the same month used to cost the second one its whole
+turn: the hook answered with an empty list, the engine fell back to the nominal region, and
+`movement_forbidden_by_ruleset` refused the move. The collision is unavoidable by construction —
+the gateways are a menu, everyone chooses before anyone moves — so the loser was simply whoever
+`RunOrders` reached second. `rimefall` now substitutes the closest slot still open: same band and
+same terrain, then same band, then same terrain anywhere, then anywhere.
+
+The **snapshot runners** are the other shared surface. They copied `orders.3` and nothing else, so
+no recorded turn could have two factions acting at once. They now copy every `orders.<n>` the turn
+directory holds — a strict superset, and every existing turn defines exactly one.
+
+**Recorded as a regression test, not just a recording.** `rimefall_turns/turn_5` admits two
+factions and `turn_6` sends both through gateway 6; replayed against the pre-fix engine they fail
+with exactly the message from issue #78.
+
+**Fork-local for the `rimefall` half, upstream-worthy for the hook.** Start-selection policy is
+ruleset-legal by the criterion in `docs/rulesets.md`, the same argument `#41` made for the hook
+itself. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is registered and
+**not offered**.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

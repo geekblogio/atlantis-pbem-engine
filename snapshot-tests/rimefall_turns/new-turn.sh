@@ -12,15 +12,26 @@ if [[ ! -d turn_$nextTurn ]]; then
   mkdir turn_$nextTurn
   cp turn_$curTurn/game.out turn_$nextTurn/game.in
   cp turn_$curTurn/players.out turn_$nextTurn/players.in
-  cp turn_$curTurn/template.3 turn_$nextTurn/orders.3
+  # One orders file per faction that got a template, so a turn can exercise two factions acting at
+  # once. The gateway collision test needs exactly that.
+  for tmpl in turn_$curTurn/template.*; do
+    [[ -e "$tmpl" ]] || continue
+    cp "$tmpl" "turn_$nextTurn/orders.${tmpl##*.}"
+  done
 fi
 
 echo "Modify the input orders for turn_$nextTurn to test desired changes"
 echo "When that is complete, rerun this script."
 
-diff turn_$curTurn/template.3 turn_$nextTurn/orders.3 &> /dev/null
-if [[ $? = 0 ]];
-then
+changed=0
+for tmpl in turn_$curTurn/template.*; do
+  [[ -e "$tmpl" ]] || continue
+  if ! diff "$tmpl" "turn_$nextTurn/orders.${tmpl##*.}" &> /dev/null; then
+    changed=1
+  fi
+done
+
+if [[ $changed = 0 ]]; then
   echo "No order changes have occured.   Exiting."
   exit 0
 fi

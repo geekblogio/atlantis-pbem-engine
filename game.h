@@ -523,21 +523,29 @@ private:
     // Ruleset-supplied. Called when a unit steps into a gateway, after the candidate
     // destinations have been collected and before the occupancy cascade chooses between them.
     //
-    // `gateway` is the object entered and `nominal` the region it names; `candidates` is the list
-    // the ruleset may modify in place. It MAY NARROW, REPLACE, OR LEAVE THE LIST ALONE — do not
-    // assume what comes back is a subset of what went in, because a ruleset's own start locations
-    // need not still satisfy the engine's live candidacy test. Every ruleset but one defines this
-    // empty, leaving the candidate list, the cascade and the rng draw sequence exactly as before.
+    // `unit` is the unit making the move, `gateway` the object entered and `nominal` the region it
+    // names; `candidates` is the list the ruleset may modify in place. It MAY NARROW, REPLACE, OR
+    // LEAVE THE LIST ALONE — do not assume what comes back is a subset of what went in, because a
+    // ruleset's own start locations need not still satisfy the engine's live candidacy test. Every
+    // ruleset but one defines this empty, leaving the candidate list, the cascade and the rng draw
+    // sequence exactly as before.
     //
     // An empty result is a legitimate answer meaning "this gateway leads nowhere available". The
     // engine then falls back to `nominal`, and the ruleset is expected to refuse that arrival from
     // ARegion::movement_forbidden_by_ruleset.
     //
+    // `unit` is there so a ruleset that sends the unit somewhere other than the place the gateway
+    // named can say so in the unit's own report. The engine chooses the arrival hex from whatever
+    // comes back, so only the ruleset knows a substitution happened, and only the unit gives it
+    // somewhere to say it.
+    //
     // It exists because a gateway's destination otherwise does not survive the move: only the
     // terrain of `nominal` is kept, and the set is rebuilt from the whole map. See
-    // docs/decisions/0012, and 0013 for why this sets rather than only filters.
+    // docs/decisions/0012, 0013 for why this sets rather than only filters, and 0022 for the
+    // substitution and the unit.
     //
-    void filter_gateway_destinations(Object *gateway, ARegion *nominal, std::vector<ARegion *>& candidates);
+    void filter_gateway_destinations(Unit *unit, Object *gateway, ARegion *nominal,
+        std::vector<ARegion *>& candidates);
 
     void EndGame(Faction *pVictor);
 

@@ -36,7 +36,11 @@ do
 
   cp -f $turndir/turn_$turn/game.in game.in
   cp -f $turndir/turn_$turn/players.in players.in
-  cp -f $turndir/turn_$turn/orders.3 orders.3
+  # Every orders file the turn defines, for the reason given in run-game-snapshots.sh.
+  for ordersfile in $turndir/turn_$turn/orders.*; do
+    [[ -e "$ordersfile" ]] || continue
+    cp -f "$ordersfile" "$(basename "$ordersfile")"
+  done
 
   ./$game run &> engine-output.txt
   if [[ $? != 0 ]]; then

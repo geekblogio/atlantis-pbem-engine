@@ -38,3 +38,4 @@ is what prompted writing this down.
 | [0019](0019-the-engine-owns-its-random-distributions.md) | The engine owns its random distributions, extending 0017 |
 | [0020](0020-the-engine-owns-its-binomial-draw.md) | The engine owns its binomial draw too, completing 0019 |
 | [0021](0021-ci-builds-linux-only.md) | CI builds Linux only |
+| [0022](0022-a-taken-gateway-substitutes-a-start-location.md) | A taken gateway substitutes a start location |

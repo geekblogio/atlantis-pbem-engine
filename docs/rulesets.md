@@ -225,9 +225,11 @@ it is the ONLY channel for ruleset-specific rulebook prose, because `genrules` g
 else from the data tables, so the bands, the gateways, the fronts, the election and above all the
 nature of the starting alliances are documented there or nowhere.
 
-Its recorded turns are in `snapshot-tests/rimefall_turns` — five turns, covering world load, a
-faction claiming a start location through a gateway and the seal that follows. **They do not reach
-the fronts or the election**, which need a long game; those were verified separately.
+Its recorded turns are in `snapshot-tests/rimefall_turns` — seven turns, covering world load, a
+faction claiming a start location through a gateway, the seal that follows, and two factions
+entering the *same* gateway in one month so that one of them is substituted onto another slot.
+**They do not reach the fronts or the election**, which need a long game; those were verified
+separately.
 
 **It writes `rimefall.json` every turn**, and it is the only ruleset that writes anything of its
 own. The file carries the front's row, the three threat terms *separately*, the wave actually
@@ -277,6 +279,22 @@ means a slot returns to the pool when its holder dies or walks away, without any
 maintain it. `CheckVictory` renames a taken slot to `Sealed gateway to …` rather than removing the
 object, because these carry `buildingseq` numbers and churning them would move object numbers
 around in reports and in the JSON.
+
+**A gateway whose slot is gone substitutes another one rather than refusing the move**, per
+[0022](decisions/0022-a-taken-gateway-substitutes-a-start-location.md). Two factions choosing the
+same gateway in the same month is unavoidable, so the loser of that race is set down on the nearest
+slot still available: same band and same terrain, then same band, then same terrain anywhere, then
+anywhere. `Game::filter_gateway_destinations` emits the substitution as an event on the unit,
+because the engine picks the hex afterwards and nothing else in the chain knows a substitute was
+used. An overrun slot is substituted for the same way and is never itself a substitute.
+
+`rimefall_slot_offerable` is the single predicate for *can a newcomer be put here* — free and not
+overrun — and the substitution, the refusal in `movement_forbidden_by_ruleset` and the free-slot
+count that closes registration all read it. They disagreed before: the count ignored the overrun
+state, so a faction could be admitted into a world with nothing but lost ground left.
+
+An **empty candidate list means the world is full**, and nothing narrower. It used to mean the
+band was full, which is why the refusal it produced named this hex rather than the world.
 
 Two traps are worth knowing before touching this:
 

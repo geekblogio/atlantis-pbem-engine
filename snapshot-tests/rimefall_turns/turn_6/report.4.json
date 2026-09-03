@@ -1,0 +1,377 @@
+{
+  "administrative": {
+    "email": "northman@example.invalid",
+    "password_unset": true,
+    "show_unit_attitudes": false,
+    "times_sent": true
+  },
+  "attitudes": {
+    "ally": [
+      {
+        "name": "Test",
+        "number": 3
+      },
+      {
+        "name": "Southron",
+        "number": 5
+      }
+    ],
+    "default": "neutral",
+    "friendly": [],
+    "hostile": [],
+    "neutral": [],
+    "unfriendly": [
+      {
+        "name": "Creatures",
+        "number": 2
+      }
+    ]
+  },
+  "date": {
+    "month": "July",
+    "year": 1
+  },
+  "engine": {
+    "json_report_version": "1.0.1 (beta)",
+    "ruleset": "Rimefall",
+    "ruleset_version": "1.0.0 (beta)",
+    "version": "5.2.5 (beta)"
+  },
+  "events": [
+    {
+      "category": "movement",
+      "message": "Walks from nexus (0,0,nexus) in The Void to plain (8,14) in Nanplaengon.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "maintenance",
+      "message": "Claims 50 silver for maintenance.",
+      "unit": {
+        "name": "Unit",
+        "number": 73
+      }
+    },
+    {
+      "category": "arrival",
+      "message": "Your neighbours in the middle lands greet you as an ally. This is a custom of the land, not a pact: it binds no one, and either side may end it with DECLARE at any time."
+    }
+  ],
+  "item_reports": [],
+  "name": "Northman",
+  "number": 4,
+  "object_reports": [],
+  "regions": [
+    {
+      "coordinates": {
+        "label": "surface",
+        "x": 8,
+        "y": 14,
+        "z": 1
+      },
+      "entertainment": 57,
+      "exits": [
+        {
+          "direction": "North",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 8,
+              "y": 12,
+              "z": 1
+            },
+            "province": "Nanplaengon",
+            "terrain": "plain"
+          }
+        },
+        {
+          "direction": "Northeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 9,
+              "y": 13,
+              "z": 1
+            },
+            "province": "Glagralltrom",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southeast",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 9,
+              "y": 15,
+              "z": 1
+            },
+            "province": "Glagralltrom",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "South",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 8,
+              "y": 16,
+              "z": 1
+            },
+            "province": "Glagralltrom",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Southwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 7,
+              "y": 15,
+              "z": 1
+            },
+            "province": "Glagralltrom",
+            "terrain": "jungle"
+          }
+        },
+        {
+          "direction": "Northwest",
+          "region": {
+            "coordinates": {
+              "label": "surface",
+              "x": 7,
+              "y": 13,
+              "z": 1
+            },
+            "province": "Nanplaengon",
+            "terrain": "plain"
+          }
+        }
+      ],
+      "markets": {
+        "for_sale": [
+          {
+            "amount": 66,
+            "name": "human",
+            "plural": "humans",
+            "price": 43,
+            "tag": "HUMN"
+          },
+          {
+            "amount": 13,
+            "name": "leader",
+            "plural": "leaders",
+            "price": 756,
+            "tag": "LEAD"
+          }
+        ],
+        "wanted": []
+      },
+      "population": {
+        "amount": 1671,
+        "race": "humans"
+      },
+      "present": true,
+      "products": [
+        {
+          "amount": 40,
+          "name": "livestock",
+          "plural": "livestock",
+          "tag": "LIVE"
+        },
+        {
+          "amount": 20,
+          "name": "horse",
+          "plural": "horses",
+          "tag": "HORS"
+        }
+      ],
+      "province": "Nanplaengon",
+      "tax": 1169,
+      "terrain": "plain",
+      "units": [
+        {
+          "capacity": {
+            "flying": 0,
+            "riding": 0,
+            "swimming": 0,
+            "walking": 15
+          },
+          "faction": {
+            "name": "Northman",
+            "number": 4
+          },
+          "flags": {
+            "avoid": false,
+            "behind": true,
+            "guard": false,
+            "holding": false,
+            "no_aid": false,
+            "no_cross_water": false,
+            "reveal": "faction",
+            "sharing": false,
+            "spoils": "all",
+            "taxing": false
+          },
+          "items": [
+            {
+              "amount": 1,
+              "name": "leader",
+              "plural": "leaders",
+              "tag": "LEAD"
+            }
+          ],
+          "name": "Unit",
+          "number": 73,
+          "orders": [],
+          "own_unit": true,
+          "skills": {
+            "can_study": [
+              {
+                "name": "earthquake",
+                "tag": "EQUA"
+              },
+              {
+                "name": "force shield",
+                "tag": "FSHI"
+              },
+              {
+                "name": "energy shield",
+                "tag": "ESHI"
+              },
+              {
+                "name": "spirit shield",
+                "tag": "SSHI"
+              },
+              {
+                "name": "magical healing",
+                "tag": "MHEA"
+              },
+              {
+                "name": "farsight",
+                "tag": "FARS"
+              },
+              {
+                "name": "mind reading",
+                "tag": "MIND"
+              },
+              {
+                "name": "weather lore",
+                "tag": "WEAT"
+              },
+              {
+                "name": "earth lore",
+                "tag": "EART"
+              },
+              {
+                "name": "necromancy",
+                "tag": "NECR"
+              },
+              {
+                "name": "demon lore",
+                "tag": "DEMO"
+              },
+              {
+                "name": "illusion",
+                "tag": "ILLU"
+              },
+              {
+                "name": "artifact lore",
+                "tag": "ARTI"
+              }
+            ],
+            "known": [
+              {
+                "level": 1,
+                "name": "observation",
+                "skill_days": 30,
+                "tag": "OBSE"
+              },
+              {
+                "level": 1,
+                "name": "force",
+                "skill_days": 30,
+                "tag": "FORC"
+              },
+              {
+                "level": 1,
+                "name": "pattern",
+                "skill_days": 30,
+                "tag": "PATT"
+              },
+              {
+                "level": 1,
+                "name": "spirit",
+                "skill_days": 30,
+                "tag": "SPIR"
+              },
+              {
+                "level": 1,
+                "name": "gate lore",
+                "skill_days": 30,
+                "tag": "GATE"
+              },
+              {
+                "level": 1,
+                "name": "fire",
+                "skill_days": 30,
+                "tag": "FIRE"
+              },
+              {
+                "level": 3,
+                "name": "combat",
+                "skill_days": 180,
+                "tag": "COMB"
+              }
+            ]
+          },
+          "weight": 10
+        }
+      ],
+      "wages": {
+        "amount": 13.5,
+        "max": 504
+      }
+    }
+  ],
+  "skill_reports": [],
+  "statistics": [
+    {
+      "amount": 1,
+      "max": 1,
+      "name": "leader",
+      "plural": "leaders",
+      "rank": 1,
+      "tag": "LEAD",
+      "total": 3
+    }
+  ],
+  "status": {
+    "apprentices": {
+      "allowed": 3,
+      "current": 0,
+      "name": "Apprentice"
+    },
+    "mages": {
+      "allowed": 2,
+      "current": 1
+    },
+    "quartermasters": {
+      "allowed": 2,
+      "current": 0
+    },
+    "regions": {
+      "allowed": 10,
+      "current": 0
+    }
+  },
+  "type": {
+    "magic": 1,
+    "martial": 1
+  },
+  "unclaimed_silver": 11700
+}
