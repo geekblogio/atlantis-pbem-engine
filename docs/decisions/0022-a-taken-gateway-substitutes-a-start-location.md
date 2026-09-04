@@ -1,6 +1,6 @@
 # 0022 — A taken gateway substitutes a start location, it does not refuse the move
 
-**Status:** proposed, 2026-09-03. Extends
+**Status:** accepted, 2026-09-03. Extends
 [0012](0012-a-ruleset-hook-for-gateway-destinations.md) and
 [0013](0013-the-gateway-hook-sets-the-candidate-list.md): the hook they permitted keeps its single
 purpose and gains one parameter. Closes
