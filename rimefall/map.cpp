@@ -2953,9 +2953,15 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                     // little land, and insisting on a market there would close the band. Those
                     // starts do not stay marketless: Game::CreateWorld founds a village on each of
                     // them once the slots are placed (0023).
-                    if ((int) settled.size() < wanted) {
+                    //
+                    // Count against what this band can actually place, not against the quota. A
+                    // band short of candidates does not get the slots it is short of, so counting
+                    // from `wanted` would promise villages for starts that never exist — a band
+                    // with no candidates at all would report one.
+                    int placeable = wanted < (int) by_band[band].size() ? wanted : (int) by_band[band].size();
+                    if ((int) settled.size() < placeable) {
                         logger::write(
-                            "  " + std::to_string(wanted - (int) settled.size()) +
+                            "  " + std::to_string(placeable - (int) settled.size()) +
                             " of its starts will need a village founded for them"
                         );
                     }
