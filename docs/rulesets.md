@@ -260,9 +260,27 @@ weighting tried, one generated world in five came out with a single mountain in 
 
 ### Start slots, and the registry that is not stored
 
-`rimefall` is the only ruleset with a **fixed number of starting locations**. Twenty on a 64×64
+`rimefall` is the only ruleset with a **bounded number of starting locations**. Twenty on a 64×64
 map, distributed by the density curve in `rimefall.h` — 3, 5, 8, 3, 1 from the frozen north to the
-far south — so the middle is roughly twice as crowded per hex of land as either edge. The curve is
+far south — so the middle is roughly twice as crowded per hex of land as either edge.
+
+**The curve is a shape, not a count** ([0024](decisions/0024-the-start-count-scales-with-the-land.md)).
+Its twenty slots were measured on a 64×64 world; the number of starts follows the land a world
+actually holds, at one per `RIMEFALL_LAND_PER_START` (28) land hexes, and the curve decides how they
+spread across the bands. It scales both ways — 88 land hexes on a 24×24 world gives three starts,
+589 on a 64×64 gives twenty-one, 931 on a 64×96 gives thirty-three — so **the map size sets how
+many factions a game can hold**. The southern bands lose their slots first when scaling down,
+because the curve weights them least. The constant is a first number and expected to move once a
+real game has produced balancing data.
+
+Two more things follow from the same thin-world problem. **A band that cannot fill its quota hands
+the slots to the nearest band that still has candidates**, so the world keeps the number of starts
+its land earns — the far south rolls jungle, its only wood, at 4 in 64, and
+`get_starting_region_candidates` requires wood outright, so that band occasionally has no candidate
+at all. And **the slots are placed by a farthest-point sweep**: each goes to the candidate whose
+nearest already-placed start is furthest away, with only the first drawn at random. The sampler it
+replaces drew fifty candidates per slot, which approximates the same answer on a large pool and
+keeps redrawing the same handful on a small one. The curve is
 set against *measured* land rather than against 0010 table 7's assumption that the far north holds
 the most: it is the widest band, but `MakeLand` never seeds the rows beside the pole, so it holds
 less land than the middle.

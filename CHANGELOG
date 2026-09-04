@@ -224,6 +224,28 @@ Changes in 5.2.5, in this fork
       location free while the northern front had already taken it, so a
       newcomer could be accepted and then find no gateway it was allowed to
       use
+   -- Scaled rimefall's start locations to the size of the map.  The
+      density curve - twenty locations, spread 3/5/8/3/1 from the frozen
+      north to the far south - was measured on a 64x64 world and was
+      applied to every world whatever its size, so a 24x24 world offered
+      one start per four hexes of land against one per thirty at the
+      reference size, and 14 of its 20 starts had another one adjacent.
+      The curve is now a shape rather than a count: a world gets one
+      start per 28 land hexes and the curve spreads them across the
+      bands.  It scales both ways - 3 starts on a 24x24 world, 21 on a
+      64x64, 33 on a 64x96 - so the size of the map decides how many
+      factions a game can hold
+   -- Stopped a rimefall band with no candidates from costing the world a
+      start location.  The far south rolls jungle - its only source of
+      wood - at 4 in 64, and a start location must have wood within two
+      hexes, so that band occasionally offers nothing at all and the
+      world came out one location short.  The slots now go to the nearest
+      band that still has candidates
+   -- Placed rimefall's start locations by a farthest-point sweep instead
+      of fifty random samples each.  The sampler approximated the same
+      answer on a large pool and kept redrawing the same handful of hexes
+      on a small one.  No start location is adjacent to another on any of
+      the three map sizes measured
    -- Gave every rimefall start location a settlement.  Start locations
       were curated for resources alone, and the engine's own preference for
       a town cannot reach them: it works through three match levels of the

@@ -2911,90 +2911,202 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                     }
                 }
 
-                std::vector<ARegion *> chosen;
-                std::vector<int> chosen_band;
-                for (int band = 0; band < RIMEFALL_BANDS; band++) {
-                    int wanted = rimefall_starts_per_band[band];
-
-                    // A SETTLED HEX FIRST. get_starting_region_candidates weighs resources and
-                    // says nothing about towns, and the engine's occupancy cascade cannot repair
-                    // that here: its first three match levels are gated on the candidate having a
-                    // town, and Game::filter_gateway_destinations hands it one hex. So a start
-                    // without a market is chosen at world creation and nothing downstream notices.
-                    //
-                    // The market is the whole difference. Recruiting belongs to the region rather
-                    // than the town (0016), so a townless start still raises men — but it can sell
-                    // nothing where it stands, which is the opening every other ruleset's start
-                    // gets to play.
-                    std::vector<ARegion *> settled, wild;
-                    for (ARegion *cand : by_band[band]) {
-                        if (cand->town) settled.push_back(cand);
-                        else wild.push_back(cand);
+                //
+                // THE CURVE IS A SHAPE, NOT A COUNT (0024). Its twenty slots were measured on a
+                // 64x64 world, so the number of starts follows the land this world actually holds
+                // and the curve decides how they spread across the bands.
+                //
+                // Both directions. Twenty starts on ninety land hexes is not a tighter game, it is
+                // a different one: every band becomes the crush zone and the middle band stops
+                // having a role. And a world with twice the land can hold twice the players at the
+                // same density, which is a better answer than handing the same twenty factions
+                // twice the room.
+                //
+                int land = 0;
+                for (int lx = 0; lx < to->x; lx++) {
+                    for (int ly = 0; ly < to->y; ly++) {
+                        ARegion *reg = to->GetRegion(lx, ly);
+                        if (!reg) continue;
+                        if (TerrainDefs[reg->type].similar_type == R_OCEAN) continue;
+                        land++;
                     }
+                }
 
+                int curve_total = 0;
+                for (int band = 0; band < RIMEFALL_BANDS; band++) curve_total += rimefall_starts_per_band[band];
+
+                int target = (land + RIMEFALL_LAND_PER_START / 2) / RIMEFALL_LAND_PER_START;
+                if (target < 1) target = 1;
+
+                //
+                // Largest remainder, so the scaled quotas add up to the target exactly and the
+                // rounding lands where the curve is thinnest rather than always in the same band.
+                // A tie goes to the band the curve weights more heavily, and then to the northern
+                // one, which keeps the apportionment reproducible. It scales up as readily as
+                // down: the whole part of the division carries a world past twenty, and the
+                // remainders share out what is left over.
+                //
+                std::vector<int> quota(RIMEFALL_BANDS, 0);
+                std::vector<int> remainder(RIMEFALL_BANDS, 0);
+                int apportioned = 0;
+                for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                    int exact = rimefall_starts_per_band[band] * target;
+                    quota[band] = exact / curve_total;
+                    remainder[band] = exact % curve_total;
+                    apportioned += quota[band];
+                }
+                while (apportioned < target) {
+                    int pick = -1;
+                    for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                        if (remainder[band] < 0) continue;
+                        if (pick < 0 || remainder[band] > remainder[pick] ||
+                            (remainder[band] == remainder[pick] &&
+                             rimefall_starts_per_band[band] > rimefall_starts_per_band[pick])) {
+                            pick = band;
+                        }
+                    }
+                    if (pick < 0) break;
+                    quota[pick]++;
+                    remainder[pick] = -1;
+                    apportioned++;
+                }
+
+                logger::write(
+                    "The surface holds " + std::to_string(land) + " land hexes, so the density "
+                    "curve is scaled from " + std::to_string(curve_total) + " start slots to " +
+                    std::to_string(target)
+                );
+
+                //
+                // A SETTLED HEX FIRST (0023). get_starting_region_candidates weighs resources and
+                // says nothing about towns, and the engine's occupancy cascade cannot repair that
+                // here: its first three match levels are gated on the candidate having a town, and
+                // Game::filter_gateway_destinations hands it one hex. So a start without a market
+                // would be chosen at world creation and nothing downstream would notice.
+                //
+                // The market is the whole difference. Recruiting belongs to the region rather than
+                // the town (0016), so a townless start still raises men — but it can sell nothing
+                // where it stands. What is left townless after this gets a village founded on it,
+                // in Game::CreateWorld once the slots are placed.
+                //
+                std::vector<std::vector<ARegion *>> settled(RIMEFALL_BANDS), wild(RIMEFALL_BANDS);
+                for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                    for (ARegion *cand : by_band[band]) {
+                        if (cand->town) settled[band].push_back(cand);
+                        else wild[band].push_back(cand);
+                    }
                     logger::write(
                         "Band " + std::to_string(band) + " (" + rimefall_band_name(band) + "): " +
                         std::to_string(by_band[band].size()) + " candidates for " +
-                        std::to_string(wanted) + " start slots, " +
-                        std::to_string(settled.size()) + " of them settled"
+                        std::to_string(quota[band]) + " start slots, " +
+                        std::to_string(settled[band].size()) + " of them settled"
                     );
-                    // A band with too few candidates gets what it has. It is NOT an error: the far
-                    // south is small by design and a thin world is a playable world, just a
-                    // smaller one. SetupFaction refuses factions once every slot is held.
-                    if ((int) by_band[band].size() < wanted) {
-                        logger::write(
-                            "  short by " + std::to_string(wanted - (int) by_band[band].size()) +
-                            "; this band will offer fewer starts than the density curve asks for"
-                        );
-                    }
-                    // Falling back to open ground is the same policy, one step further in: a band
-                    // with fewer settlements than slots gets what it has rather than fewer starts.
-                    // Which is why this is a preference and not a requirement — the far south holds
-                    // little land, and insisting on a market there would close the band. Those
-                    // starts do not stay marketless: Game::CreateWorld founds a village on each of
-                    // them once the slots are placed (0023).
-                    //
-                    // Count against what this band can actually place, not against the quota. A
-                    // band short of candidates does not get the slots it is short of, so counting
-                    // from `wanted` would promise villages for starts that never exist — a band
-                    // with no candidates at all would report one.
-                    int placeable = wanted < (int) by_band[band].size() ? wanted : (int) by_band[band].size();
-                    if ((int) settled.size() < placeable) {
-                        logger::write(
-                            "  " + std::to_string(placeable - (int) settled.size()) +
-                            " of its starts will need a village founded for them"
-                        );
-                    }
+                }
 
-                    for (int n = 0; n < wanted; n++) {
-                        std::vector<ARegion *>& pool = settled.empty() ? wild : settled;
-                        if (pool.empty()) break;
+                std::vector<ARegion *> chosen;
+                std::vector<int> chosen_band;
 
-                        int index = rng::get_random(pool.size());
-                        ARegion *dest = pool[index];
-                        ARegion *best = dest;
-                        int best_index = index;
-                        int tries = 50;
-                        int maxMin = -1;
-                        while (tries--) {
-                            int minDist = 1000;
+                //
+                // FARTHEST POINT, NOT FIFTY GUESSES (0024). Take the candidate whose nearest
+                // already-placed start is furthest away, every time. The sampler this replaces
+                // drew fifty candidates at random and kept the best of them, which is a good
+                // approximation on a large pool and no approximation at all on a small one, where
+                // it kept drawing the same handful of hexes.
+                //
+                // Only the first slot in the world is drawn at random, because there is nothing
+                // for it to be far from yet, and without it every world would start its layout in
+                // the same corner of the map. Everything after it is determined by the map.
+                //
+                auto take_from = [&](int band) -> ARegion * {
+                    std::vector<ARegion *>& pool = settled[band].empty() ? wild[band] : settled[band];
+                    if (pool.empty()) return nullptr;
+
+                    size_t index = 0;
+                    if (chosen.empty()) {
+                        index = rng::get_random(pool.size());
+                    } else {
+                        int best = -1;
+                        for (size_t i = 0; i < pool.size(); i++) {
+                            int nearest = 1000;
                             for (ARegion *other : chosen) {
-                                int curDist = GetPlanarDistance(dest, other, 0);
-                                if (curDist < minDist) minDist = curDist;
+                                int d = GetPlanarDistance(pool[i], other, 0);
+                                if (d < nearest) nearest = d;
                             }
-                            if (minDist > 20) { best = dest; best_index = index; break; }
-                            if (minDist > maxMin) {
-                                maxMin = minDist;
-                                best = dest;
-                                best_index = index;
-                            }
-                            index = rng::get_random(pool.size());
-                            dest = pool[index];
+                            if (nearest > best) { best = nearest; index = i; }
                         }
-                        chosen.push_back(best);
-                        chosen_band.push_back(band);
-                        pool.erase(pool.begin() + best_index);
                     }
+
+                    ARegion *picked = pool[index];
+                    pool.erase(pool.begin() + index);
+                    chosen.push_back(picked);
+                    chosen_band.push_back(band);
+                    return picked;
+                };
+
+                std::vector<int> placed(RIMEFALL_BANDS, 0);
+                for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                    for (int n = 0; n < quota[band]; n++) {
+                        if (!take_from(band)) break;
+                        placed[band]++;
+                    }
+                }
+
+                //
+                // A BAND THAT CANNOT FILL ITS QUOTA HANDS IT ON (0024), to the nearest band that
+                // still has candidates. A band comes up empty when its own land grows nothing the
+                // candidate test accepts — the far south rolls jungle, its only wood, at 4 in 64,
+                // and `get_starting_region_candidates` requires wood outright. Rare, and it used
+                // to cost the world a start location outright: one fewer faction could ever join,
+                // for a reason no player could see.
+                //
+                // The band still offers nothing in such a world. What moves is the slot, not the
+                // shortage, and the log says where it went.
+                //
+                for (int band = 0; band < RIMEFALL_BANDS; band++) {
+                    int missing = quota[band] - placed[band];
+                    if (missing <= 0) continue;
+                    logger::write(
+                        "  " + rimefall_band_name(band) + " could not fill " +
+                        std::to_string(missing) + " of its " + std::to_string(quota[band]) +
+                        " slots"
+                    );
+                    while (missing > 0) {
+                        int from = -1;
+                        int from_distance = RIMEFALL_BANDS + 1;
+                        int from_left = -1;
+                        for (int other = 0; other < RIMEFALL_BANDS; other++) {
+                            if (other == band) continue;
+                            int left = (int) settled[other].size() + (int) wild[other].size();
+                            if (left < 1) continue;
+                            int d = other > band ? other - band : band - other;
+                            if (d < from_distance || (d == from_distance && left > from_left)) {
+                                from = other;
+                                from_distance = d;
+                                from_left = left;
+                            }
+                        }
+                        if (from < 0) {
+                            logger::write("  nowhere left in the world to place them");
+                            break;
+                        }
+                        if (!take_from(from)) break;
+                        placed[from]++;
+                        missing--;
+                        logger::write("  one of them goes to " + rimefall_band_name(from));
+                    }
+                }
+
+                //
+                // What is left townless gets a village in Game::CreateWorld (0023). Reported here
+                // because this is where the count is known.
+                //
+                int townless = 0;
+                for (ARegion *reg : chosen) if (!reg->town) townless++;
+                if (townless > 0) {
+                    logger::write(
+                        std::to_string(townless) + " of the placed slots have no settlement and "
+                        "will have a village founded for them"
+                    );
                 }
 
                 // ONE GATEWAY OBJECT PER START SLOT, and this is what makes the slot registry

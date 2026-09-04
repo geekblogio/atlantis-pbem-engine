@@ -1414,6 +1414,35 @@ the status field changes; the reasoning never does.
 - **0022** — [#79](https://github.com/geekblogio/atlantis-pbem-engine/pull/79) merged 2026-09-03.
 - **0023** — [#81](https://github.com/geekblogio/atlantis-pbem-engine/pull/81) merged 2026-09-04.
 
+### `#84` — the start count scales with the map, and thin bands hand their slots on (0024)
+
+`rimefall/map.cpp`, `rimefall/rimefall.h`, the re-recorded `rimefall` worldgen fixture,
+`CHANGELOG`. Reported as issue #82, from measuring the two fixes before it.
+
+Ruleset-only. Three changes with one cause — the density curve assumes every band offers many more
+candidates than it needs slots:
+
+- **The curve is scaled by the land a world has**, one start per `RIMEFALL_LAND_PER_START` hexes,
+  capped by the curve. It was written for 64×64 and applied to every size, so a 24×24 world offered
+  one start per four hexes of land against one per thirty at the reference, and 14 of its 20 starts
+  had another adjacent. 64×64 still places twenty, 32×32 five, 24×24 three.
+- **A band that cannot fill its quota hands the slots to the nearest band that can.** The far south
+  rolls jungle, its only wood, at 4 in 64, and the engine's candidate test requires wood outright,
+  so that band occasionally has nothing: the reported world offered nineteen starts instead of
+  twenty.
+- **A farthest-point sweep replaces fifty random samples per slot.** One `rng` draw for the whole
+  world, integer distances, stable scan order.
+
+**The issue blamed the sampler and was wrong about it**, which the register records because the
+measurement is the useful part: at 64×64 no two starts were within three hexes even beforehand, and
+on a 24×24 world a perfect sweep still leaves six adjacent pairs because the pool itself is tight.
+The crowding was the quota.
+
+The worldgen fixture is re-recorded and now carries three slots rather than twenty; the recorded
+turns replay from their own `game.in` and did not move.
+
+**Fork-local, permanently.** Start-location policy for a variant this fork invented.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
