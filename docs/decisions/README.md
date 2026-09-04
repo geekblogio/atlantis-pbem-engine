@@ -40,3 +40,4 @@ is what prompted writing this down.
 | [0021](0021-ci-builds-linux-only.md) | CI builds Linux only |
 | [0022](0022-a-taken-gateway-substitutes-a-start-location.md) | A taken gateway substitutes a start location |
 | [0023](0023-a-rimefall-start-carries-a-settlement.md) | A `rimefall` start carries a settlement |
+| [0024](0024-the-start-count-scales-with-the-land.md) | The start count scales with the land |

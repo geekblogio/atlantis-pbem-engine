@@ -80,6 +80,19 @@ const std::string& rimefall_band_name(int band);
 // Expect to revisit this after the first real game; it is the parameter most likely to be wrong.
 extern const int rimefall_starts_per_band[RIMEFALL_BANDS];
 
+// How much land one start location is worth, in surface hexes (0024).
+//
+// THE CURVE ABOVE IS WRITTEN FOR A 64x64 WORLD and says nothing about any other size, which is
+// what this converts. A 64x64 world holds around 590 land hexes, so twenty starts is one per
+// thirty — and the same twenty on a 24x24 world, which holds about ninety, is one per four and a
+// half. That is not a tighter game, it is a different one: every band becomes the crush zone, and
+// the middle band's role in 0010 section 7 stops meaning anything.
+//
+// So the curve is scaled by the land a world actually has, and 64x64 remains the reference: it
+// asks for the full twenty and gets them. A world with more land does not get more — the curve is
+// the design, and this only stops a small world from being asked to carry it.
+#define RIMEFALL_LAND_PER_START 30
+
 // How far apart two start locations may be and still count as neighbours for the starting
 // alliance, in planar distance.
 //

@@ -260,9 +260,25 @@ weighting tried, one generated world in five came out with a single mountain in 
 
 ### Start slots, and the registry that is not stored
 
-`rimefall` is the only ruleset with a **fixed number of starting locations**. Twenty on a 64×64
+`rimefall` is the only ruleset with a **bounded number of starting locations**. Twenty on a 64×64
 map, distributed by the density curve in `rimefall.h` — 3, 5, 8, 3, 1 from the frozen north to the
-far south — so the middle is roughly twice as crowded per hex of land as either edge. The curve is
+far south — so the middle is roughly twice as crowded per hex of land as either edge.
+
+**Twenty is a property of a 64×64 world, not of the ruleset** ([0024](decisions/0024-the-start-count-scales-with-the-land.md)).
+The curve is written for that size, and a smaller world scales it down at one start per
+`RIMEFALL_LAND_PER_START` land hexes: a 24×24 world holds about ninety land hexes and offers three
+starts, where twenty would have been one start per four hexes of land and every band a crush zone.
+A larger world does not get more than the curve asks for. The southern bands lose their slots first
+when scaling down, because the curve weights them least.
+
+Two more things follow from the same thin-world problem. **A band that cannot fill its quota hands
+the slots to the nearest band that still has candidates**, so the world keeps the number of starts
+its land earns — the far south rolls jungle, its only wood, at 4 in 64, and
+`get_starting_region_candidates` requires wood outright, so that band occasionally has no candidate
+at all. And **the slots are placed by a farthest-point sweep**: each goes to the candidate whose
+nearest already-placed start is furthest away, with only the first drawn at random. The sampler it
+replaces drew fifty candidates per slot, which approximates the same answer on a large pool and
+keeps redrawing the same handful on a small one. The curve is
 set against *measured* land rather than against 0010 table 7's assumption that the far north holds
 the most: it is the widest band, but `MakeLand` never seeds the rows beside the pole, so it holds
 less land than the middle.
