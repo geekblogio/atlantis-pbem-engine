@@ -224,6 +224,18 @@ Changes in 5.2.5, in this fork
       location free while the northern front had already taken it, so a
       newcomer could be accepted and then find no gateway it was allowed to
       use
+   -- Gave every rimefall start location a settlement.  Start locations
+      were curated for resources alone, and the engine's own preference for
+      a town cannot reach them: it works through three match levels of the
+      arrival cascade, and rimefall hands that cascade a single hex.  Six
+      of eight factions in a real game began on open ground, which cost
+      them the market and with it the opening every other ruleset's start
+      can play - recruiting was never affected, since the region owns that
+      and not the town.  World creation now draws start locations from
+      settled candidates first, and founds a village on whatever is left
+      townless.  Measured against the same seed: 20 of 20 settled starts on
+      a 24x24 world where 3 were before, and 19 of 19 on a 64x64 where 2
+      were.  Existing worlds keep the start locations they were built with
 
 
 Changes from 5.1.0 -> 5.2.0

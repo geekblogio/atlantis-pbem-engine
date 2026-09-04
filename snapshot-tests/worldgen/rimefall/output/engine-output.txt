@@ -20,13 +20,30 @@ Severing land bridges
 Removing coastal 'lakes'
 .
 Regions 25
-Band 0 (the frozen north): 4 candidates for 3 start slots
-Band 1 (the northern frontier): 12 candidates for 5 start slots
-Band 2 (the middle lands): 18 candidates for 8 start slots
-Band 3 (the southern reaches): 17 candidates for 3 start slots
-Band 4 (the far south): 8 candidates for 1 start slots
+Band 0 (the frozen north): 4 candidates for 3 start slots, 0 of them settled
+  3 of its starts will need a village founded for them
+Band 1 (the northern frontier): 12 candidates for 5 start slots, 2 of them settled
+  3 of its starts will need a village founded for them
+Band 2 (the middle lands): 18 candidates for 8 start slots, 3 of them settled
+  5 of its starts will need a village founded for them
+Band 3 (the southern reaches): 17 candidates for 3 start slots, 2 of them settled
+  1 of its starts will need a village founded for them
+Band 4 (the far south): 8 candidates for 1 start slots, 2 of them settled
 Placed 20 start slots in total
-Maximum distance from the Nexus: 9.
+Founded a village at (6,4): that start slot had no settlement
+Founded a village at (9,3): that start slot had no settlement
+Founded a village at (7,3): that start slot had no settlement
+Founded a village at (6,8): that start slot had no settlement
+Founded a village at (8,6): that start slot had no settlement
+Founded a village at (7,7): that start slot had no settlement
+Founded a village at (17,13): that start slot had no settlement
+Founded a village at (14,14): that start slot had no settlement
+Founded a village at (9,11): that start slot had no settlement
+Founded a village at (10,14): that start slot had no settlement
+Founded a village at (7,13): that start slot had no settlement
+Founded a village at (8,18): that start slot had no settlement
+Founded 12 villages so that every start has a market
+Maximum distance from the Nexus: 8.
 Rimefall: The Rimewell stands in plain (12,0) in Milfu
 Rimefall: The Saltspire stands in plain (18,12) in Markne
 Densities:
@@ -40,10 +57,10 @@ tundra 7
 nexus 1
 lake 1
 
-Settlements: 9
-Villages: 4 (44%)
-Towns   : 4 (44%)
-Cities  : 1 (11%)
+Settlements: 21
+Villages: 16 (76%)
+Towns   : 4 (19%)
+Cities  : 1 (4%)
 
 
 Products:
@@ -67,35 +84,40 @@ camel [CAME] 30
 giant turtle [TURT] 987
 
 Wanted:
-grain [GRAI] 634
-livestock [LIVE] 723
-fish [FISH] 708
-sword [SWOR] 19
-longbow [LBOW] 10
+grain [GRAI] 1464
+livestock [LIVE] 1666
+fish [FISH] 1575
+sword [SWOR] 28
+crossbow [XBOW] 41
+longbow [LBOW] 49
 chain armor [CARM] 14
 plate armor [PARM] 5
 winged horse [WING] 10
-ivory [IVOR] 13
+mithril armor [MARM] 4
+ivory [IVOR] 56
 pearls [PEAR] 54
-wine [WINE] 44
-spices [SPIC] 34
-truffles [TRUF] 28
-vodka [VODK] 14
-perfume [PERF] 15
-cotton [COTT] 53
-pick [PICK] 14
+jewelry [JEWE] 19
+wine [WINE] 68
+spices [SPIC] 85
+chocolate [CHOC] 30
+truffles [TRUF] 74
+vodka [VODK] 24
+perfume [PERF] 30
+silk [SILK] 23
+cotton [COTT] 95
+pick [PICK] 35
 spear [SPEA] 5
-axe [AXE] 15
-hammer [HAMM] 30
-net [NET] 10
-lasso [LASS] 23
-bag [BAG] 4
-spinning wheel [SPIN] 10
-leather armor [LARM] 5
-camel [CAME] 13
-gem [GEM] 26
-javelin [JAVE] 13
-pike [PIKE] 12
+axe [AXE] 35
+hammer [HAMM] 49
+net [NET] 27
+lasso [LASS] 53
+bag [BAG] 20
+spinning wheel [SPIN] 23
+leather armor [LARM] 17
+camel [CAME] 42
+gem [GEM] 75
+javelin [JAVE] 34
+pike [PIKE] 16
 
 For Sale:
 leader [LEAD] 1256
@@ -111,14 +133,19 @@ wood [WOOD] 0
 stone [STON] 0
 herb [HERB] 0
 horse [HORS] 0
-ivory [IVOR] 11
-pearls [PEAR] 34
-jewelry [JEWE] 38
-spices [SPIC] 11
-chocolate [CHOC] 35
-vodka [VODK] 48
+sword [SWOR] 0
+chain armor [CARM] 0
+ivory [IVOR] 53
+pearls [PEAR] 53
+jewelry [JEWE] 60
+wine [WINE] 31
+spices [SPIC] 21
+chocolate [CHOC] 104
+truffles [TRUF] 10
+vodka [VODK] 83
 perfume [PERF] 12
-silk [SILK] 24
+silk [SILK] 39
+cotton [COTT] 15
 pick [PICK] 0
 lasso [LASS] 0
 spinning wheel [SPIN] 0
@@ -126,4 +153,5 @@ human [HUMN] 794
 lizardman [LIZA] 105
 goblin [GBLN] 195
 gnoll [GNOL] 561
+gem [GEM] 19
 
