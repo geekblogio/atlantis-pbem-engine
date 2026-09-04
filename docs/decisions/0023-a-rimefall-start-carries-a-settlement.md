@@ -1,6 +1,6 @@
 # 0023 — A `rimefall` start carries a settlement
 
-**Status:** proposed, 2026-09-04. Ruleset-internal: no engine change, and therefore nothing to
+**Status:** accepted, 2026-09-04. Ruleset-internal: no engine change, and therefore nothing to
 argue against the boundary [0012](0012-a-ruleset-hook-for-gateway-destinations.md) drew. Closes
 [#80](https://github.com/geekblogio/atlantis-pbem-engine/issues/80).
 

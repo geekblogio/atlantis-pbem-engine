@@ -1403,6 +1403,17 @@ from their own `game.in` and did not move.
 
 **Fork-local, permanently.** Start-location policy for a variant this fork invented.
 
+### `#83` — 0022 and 0023 are accepted
+
+`docs/decisions/0022` and `0023`. Housekeeping, no code.
+
+A record is `proposed` while its pull request is open and `accepted` once that pull request merges,
+because under [0003](../decisions/0003-no-required-reviews.md) merging **is** the acceptance. Only
+the status field changes; the reasoning never does.
+
+- **0022** — [#79](https://github.com/geekblogio/atlantis-pbem-engine/pull/79) merged 2026-09-03.
+- **0023** — [#81](https://github.com/geekblogio/atlantis-pbem-engine/pull/81) merged 2026-09-04.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
