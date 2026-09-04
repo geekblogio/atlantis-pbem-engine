@@ -2912,12 +2912,15 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                 }
 
                 //
-                // THE CURVE IS WRITTEN FOR A 64x64 WORLD, so scale it by the land this one has
-                // (0024). Twenty starts on ninety land hexes is not a tighter game, it is a
-                // different one: every band becomes the crush zone and the middle band stops
-                // having a role. A world with more land than the reference does not get more
-                // slots — the curve is the design, and this only keeps a small world from being
-                // asked to carry it.
+                // THE CURVE IS A SHAPE, NOT A COUNT (0024). Its twenty slots were measured on a
+                // 64x64 world, so the number of starts follows the land this world actually holds
+                // and the curve decides how they spread across the bands.
+                //
+                // Both directions. Twenty starts on ninety land hexes is not a tighter game, it is
+                // a different one: every band becomes the crush zone and the middle band stops
+                // having a role. And a world with twice the land can hold twice the players at the
+                // same density, which is a better answer than handing the same twenty factions
+                // twice the room.
                 //
                 int land = 0;
                 for (int lx = 0; lx < to->x; lx++) {
@@ -2933,14 +2936,15 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                 for (int band = 0; band < RIMEFALL_BANDS; band++) curve_total += rimefall_starts_per_band[band];
 
                 int target = (land + RIMEFALL_LAND_PER_START / 2) / RIMEFALL_LAND_PER_START;
-                if (target > curve_total) target = curve_total;
                 if (target < 1) target = 1;
 
                 //
                 // Largest remainder, so the scaled quotas add up to the target exactly and the
-                // rounding loss lands where the curve is thinnest rather than always in the same
-                // band. A tie goes to the band the curve weights more heavily, and then to the
-                // northern one, which keeps the apportionment reproducible.
+                // rounding lands where the curve is thinnest rather than always in the same band.
+                // A tie goes to the band the curve weights more heavily, and then to the northern
+                // one, which keeps the apportionment reproducible. It scales up as readily as
+                // down: the whole part of the division carries a world past twenty, and the
+                // remainders share out what is left over.
                 //
                 std::vector<int> quota(RIMEFALL_BANDS, 0);
                 std::vector<int> remainder(RIMEFALL_BANDS, 0);

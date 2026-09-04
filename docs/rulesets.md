@@ -264,12 +264,14 @@ weighting tried, one generated world in five came out with a single mountain in 
 map, distributed by the density curve in `rimefall.h` — 3, 5, 8, 3, 1 from the frozen north to the
 far south — so the middle is roughly twice as crowded per hex of land as either edge.
 
-**Twenty is a property of a 64×64 world, not of the ruleset** ([0024](decisions/0024-the-start-count-scales-with-the-land.md)).
-The curve is written for that size, and a smaller world scales it down at one start per
-`RIMEFALL_LAND_PER_START` land hexes: a 24×24 world holds about ninety land hexes and offers three
-starts, where twenty would have been one start per four hexes of land and every band a crush zone.
-A larger world does not get more than the curve asks for. The southern bands lose their slots first
-when scaling down, because the curve weights them least.
+**The curve is a shape, not a count** ([0024](decisions/0024-the-start-count-scales-with-the-land.md)).
+Its twenty slots were measured on a 64×64 world; the number of starts follows the land a world
+actually holds, at one per `RIMEFALL_LAND_PER_START` (28) land hexes, and the curve decides how they
+spread across the bands. It scales both ways — 88 land hexes on a 24×24 world gives three starts,
+589 on a 64×64 gives twenty-one, 931 on a 64×96 gives thirty-three — so **the map size sets how
+many factions a game can hold**. The southern bands lose their slots first when scaling down,
+because the curve weights them least. The constant is a first number and expected to move once a
+real game has produced balancing data.
 
 Two more things follow from the same thin-world problem. **A band that cannot fill its quota hands
 the slots to the nearest band that still has candidates**, so the world keeps the number of starts

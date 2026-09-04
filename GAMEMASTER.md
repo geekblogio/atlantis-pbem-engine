@@ -452,14 +452,28 @@ that is deliberate rather than a limitation. Its world holds a fixed number of s
 twenty on a 64x64 map, spread across five latitude bands — and once every one of them is held by a
 living faction, there is nowhere left to put a newcomer.
 
-**How many depends on the size of the map you built.** Twenty is what a 64x64 world offers; the
-count scales with the land below that, at roughly one start per thirty land hexes, so a 32x32 world
-offers about five and a 24x24 world three. Building a small map to host a large game does not work,
-and the engine says what it settled on in one line:
+**The size of the map you build decides how many players your game can hold.** The count follows
+the land, at one start location per 28 land hexes, and the engine says what it settled on in one
+line:
 
 ```
-The surface holds 589 land hexes, so the density curve is scaled from 20 start slots to 20
+The surface holds 589 land hexes, so the density curve is scaled from 20 start slots to 21
 ```
+
+Measured on one seed, so treat these as the shape of it rather than a promise — the ocean's share
+varies from world to world:
+
+| Map | land hexes | start locations |
+| --- | --- | --- |
+| 24x24 | 88 | 3 |
+| 32x32 | 155 | 6 |
+| 48x48 | 326 | 12 |
+| 64x64 | 589 | 21 |
+| 64x96 | 931 | 33 |
+| 96x96 | 1348 | 48 |
+
+Note that an Atlantis map holds **width x height / 2** hexes, and that only land counts. Building a
+small map for a large game does not work, and building a large one commits you to a large game.
 
 You can see the state of the world in any report from a faction still in the Nexus. Each starting
 location is one gateway object:

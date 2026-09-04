@@ -82,16 +82,22 @@ extern const int rimefall_starts_per_band[RIMEFALL_BANDS];
 
 // How much land one start location is worth, in surface hexes (0024).
 //
-// THE CURVE ABOVE IS WRITTEN FOR A 64x64 WORLD and says nothing about any other size, which is
-// what this converts. A 64x64 world holds around 590 land hexes, so twenty starts is one per
-// thirty — and the same twenty on a 24x24 world, which holds about ninety, is one per four and a
-// half. That is not a tighter game, it is a different one: every band becomes the crush zone, and
-// the middle band's role in 0010 section 7 stops meaning anything.
+// THE CURVE ABOVE IS A SHAPE, NOT A COUNT. Its twenty slots were measured on a 64x64 world and say
+// nothing about any other size, which is what this converts: the number of starts follows the land
+// a world actually holds, and the curve decides how they are spread across the bands.
 //
-// So the curve is scaled by the land a world actually has, and 64x64 remains the reference: it
-// asks for the full twenty and gets them. A world with more land does not get more — the curve is
-// the design, and this only stops a small world from being asked to carry it.
-#define RIMEFALL_LAND_PER_START 30
+// It scales both ways. A 24x24 world holds about ninety land hexes and gets three starts, where
+// the flat twenty was one start per four and a half hexes of land — not a tighter game but a
+// different one, with every band a crush zone and the middle band's role in 0010 section 7 gone. A
+// 64x96 world holds around 930 and gets thirty-three, because a bigger world can hold more players
+// at the same density rather than the same players with more room.
+//
+// TWENTY-EIGHT IS A FIRST NUMBER AND IS EXPECTED TO MOVE. It puts a 64x64 world — 590 land hexes
+// or so — at twenty-one, which is the density the curve was balanced at, with enough margin that
+// an ocean-heavy world of that size does not quietly drop a start. Lowering it makes every world
+// more crowded, and whether the crush zone wants that is a question for a real game's data rather
+// than for this comment.
+#define RIMEFALL_LAND_PER_START 28
 
 // How far apart two start locations may be and still count as neighbours for the starting
 // alliance, in planar distance.

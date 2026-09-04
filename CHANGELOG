@@ -230,8 +230,11 @@ Changes in 5.2.5, in this fork
       applied to every world whatever its size, so a 24x24 world offered
       one start per four hexes of land against one per thirty at the
       reference size, and 14 of its 20 starts had another one adjacent.
-      A world now gets one start per thirty land hexes, capped by the
-      curve: 64x64 still offers twenty, 32x32 about five, 24x24 three
+      The curve is now a shape rather than a count: a world gets one
+      start per 28 land hexes and the curve spreads them across the
+      bands.  It scales both ways - 3 starts on a 24x24 world, 21 on a
+      64x64, 33 on a 64x96 - so the size of the map decides how many
+      factions a game can hold
    -- Stopped a rimefall band with no candidates from costing the world a
       start location.  The far south rolls jungle - its only source of
       wood - at 4 in 64, and a start location must have wood within two

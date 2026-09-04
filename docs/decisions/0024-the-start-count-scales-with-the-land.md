@@ -41,11 +41,17 @@ adjacent pairs, because the candidate pool itself is that tight. The crowding is
 
 Three changes, all in `rimefall/map.cpp` and `rimefall.h`.
 
-**1. The curve scales with the land.** One start per `RIMEFALL_LAND_PER_START` (30) surface land
-hexes, capped by the curve total. 64×64 stays the reference and gets its twenty; a world with more
-land does not get more, because the curve is the design and this only stops a small world from
-being asked to carry it. The scaled total is apportioned across the bands by largest remainder, so
-the quotas add up exactly and the rounding loss falls where the curve is thinnest.
+**1. The count follows the land, and the curve becomes a shape rather than a count.** One start
+per `RIMEFALL_LAND_PER_START` (28) surface land hexes, in both directions: a 24×24 world gets
+three, a 64×64 world twenty-one, a 64×96 world thirty-three. A bigger world holding more players at
+the same density is a better answer than the same twenty factions with twice the room. The total is
+apportioned across the bands by largest remainder, so the quotas add up exactly and the rounding
+falls where the curve is thinnest.
+
+**Twenty-eight is a first number and is expected to move.** It puts the reference world at the
+density the curve was balanced against, with enough margin that an ocean-heavy 64×64 world does not
+quietly lose a start — the ten worlds measured for this record held 594 to 638 land hexes. Whether
+the crush zone wants a lower number is a question for a real game's data.
 
 **2. A band that cannot fill its quota hands it to the nearest band that still has candidates.**
 The band still offers nothing — what moves is the slot, not the shortage — and the log names both
@@ -60,16 +66,19 @@ same corner.
 
 Same seed, after all three:
 
-| Map | land | slots | nearest-neighbour distances | villages founded |
+| Map | land hexes | slots | nearest-neighbour distances | villages founded |
 | --- | --- | --- | --- | --- |
 | 24×24 | 88 | 3 | 4, 4, 6 | 1 |
-| 32×32 | 155 | 5 | 3, 3, 4, 5, 6 | 1 |
-| 64×64 | 589 | 20 | 3 to 9, none closer | 2 |
+| 32×32 | 155 | 6 | 3 to 5 | 2 |
+| 48×48 | 326 | 12 | — | — |
+| 64×64 | 589 | 21 | 3 to 9 | 2 |
+| 64×96 | 931 | 33 | — | — |
+| 96×96 | 1348 | 48 | — | — |
 
 The 64×64 world is the one that reported the missing slot: the far south still has no candidates,
-its slot goes to the southern reaches, and the world offers twenty again.
+its slot goes to the southern reaches, and nothing is lost.
 
-**No start location is adjacent to another at any of the three sizes.** The minimum separation at
+**No start location is adjacent to another at any size measured.** The minimum separation at
 64×64 is 3 rather than the 5 a farthest-point sweep could reach on the unrestricted pool; the
 difference is [0023](0023-a-rimefall-start-carries-a-settlement.md) taking settled candidates
 first, which is worth more than two hexes of spacing.
@@ -93,12 +102,16 @@ hexes of land apart. Nothing about that is a small version of the designed game.
 
 ## Consequences
 
-- **Below 64×64 a world offers fewer start locations**, and the southern bands are the first to
-  lose theirs, because the curve weights them least: a 24×24 world places three, all in the
-  northern two-thirds. That is the curve being honoured, not overridden.
-- **The recorded `rimefall` world is re-recorded**, and its slot count drops from twenty to three.
-  The recorded turns replay from their own `game.in` and are untouched.
+- **A small world offers fewer start locations**, and the southern bands are the first to lose
+  theirs, because the curve weights them least: a 24×24 world places three, all in the northern
+  two-thirds. That is the curve being honoured, not overridden.
+- **A large world offers more, and can therefore hold more factions.** `SetupFaction` still refuses
+  a newcomer once every slot is held, so the map size now sets the ceiling on how many players a
+  game can take. A game master picking a map size is choosing a player count.
+- **The recorded `rimefall` world is re-recorded**, and its slot count drops from twenty to three,
+  because it is a 24×24 world. The recorded turns replay from their own `game.in` and are untouched.
 - The selection consumes one `rng` draw for the whole world instead of up to fifty per slot, so
   every world generated from a given seed changes. Nothing outside world creation is affected.
-- `GAMEMASTER.md` and `docs/rulesets.md` no longer state twenty as a property of the ruleset; it is
-  a property of a 64×64 world.
+- `GAMEMASTER.md` and `docs/rulesets.md` no longer state twenty as a property of anything. They
+  give the count as a function of the land, with a measured table beside it, and say plainly that
+  choosing a map size is choosing how many players the game can take.
