@@ -2915,10 +2915,28 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                 std::vector<int> chosen_band;
                 for (int band = 0; band < RIMEFALL_BANDS; band++) {
                     int wanted = rimefall_starts_per_band[band];
+
+                    // A SETTLED HEX FIRST. get_starting_region_candidates weighs resources and
+                    // says nothing about towns, and the engine's occupancy cascade cannot repair
+                    // that here: its first three match levels are gated on the candidate having a
+                    // town, and Game::filter_gateway_destinations hands it one hex. So a start
+                    // without a market is chosen at world creation and nothing downstream notices.
+                    //
+                    // The market is the whole difference. Recruiting belongs to the region rather
+                    // than the town (0016), so a townless start still raises men — but it can sell
+                    // nothing where it stands, which is the opening every other ruleset's start
+                    // gets to play.
+                    std::vector<ARegion *> settled, wild;
+                    for (ARegion *cand : by_band[band]) {
+                        if (cand->town) settled.push_back(cand);
+                        else wild.push_back(cand);
+                    }
+
                     logger::write(
                         "Band " + std::to_string(band) + " (" + rimefall_band_name(band) + "): " +
                         std::to_string(by_band[band].size()) + " candidates for " +
-                        std::to_string(wanted) + " start slots"
+                        std::to_string(wanted) + " start slots, " +
+                        std::to_string(settled.size()) + " of them settled"
                     );
                     // A band with too few candidates gets what it has. It is NOT an error: the far
                     // south is small by design and a thin world is a playable world, just a
@@ -2929,9 +2947,31 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                             "; this band will offer fewer starts than the density curve asks for"
                         );
                     }
-                    for (int n = 0; n < wanted && !by_band[band].empty(); n++) {
-                        int index = rng::get_random(by_band[band].size());
-                        ARegion *dest = by_band[band][index];
+                    // Falling back to open ground is the same policy, one step further in: a band
+                    // with fewer settlements than slots gets what it has rather than fewer starts.
+                    // Which is why this is a preference and not a requirement — the far south holds
+                    // little land, and insisting on a market there would close the band. Those
+                    // starts do not stay marketless: Game::CreateWorld founds a village on each of
+                    // them once the slots are placed (0023).
+                    //
+                    // Count against what this band can actually place, not against the quota. A
+                    // band short of candidates does not get the slots it is short of, so counting
+                    // from `wanted` would promise villages for starts that never exist — a band
+                    // with no candidates at all would report one.
+                    int placeable = wanted < (int) by_band[band].size() ? wanted : (int) by_band[band].size();
+                    if ((int) settled.size() < placeable) {
+                        logger::write(
+                            "  " + std::to_string(placeable - (int) settled.size()) +
+                            " of its starts will need a village founded for them"
+                        );
+                    }
+
+                    for (int n = 0; n < wanted; n++) {
+                        std::vector<ARegion *>& pool = settled.empty() ? wild : settled;
+                        if (pool.empty()) break;
+
+                        int index = rng::get_random(pool.size());
+                        ARegion *dest = pool[index];
                         ARegion *best = dest;
                         int best_index = index;
                         int tries = 50;
@@ -2948,12 +2988,12 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
                                 best = dest;
                                 best_index = index;
                             }
-                            index = rng::get_random(by_band[band].size());
-                            dest = by_band[band][index];
+                            index = rng::get_random(pool.size());
+                            dest = pool[index];
                         }
                         chosen.push_back(best);
                         chosen_band.push_back(band);
-                        by_band[band].erase(by_band[band].begin() + best_index);
+                        pool.erase(pool.begin() + best_index);
                     }
                 }
 

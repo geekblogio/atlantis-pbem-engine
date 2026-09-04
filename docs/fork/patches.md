@@ -1372,6 +1372,37 @@ ruleset-legal by the criterion in `docs/rulesets.md`, the same argument `#41` ma
 itself. Per [0008](../decisions/0008-prepare-upstream-fixes-do-not-submit.md) it is registered and
 **not offered**.
 
+### `#81` — every `rimefall` start location carries a settlement (0023)
+
+`rimefall/map.cpp`, `rimefall/world.cpp`, `rimefall/rimefall_intro.html`, the two re-recorded
+`rimefall` fixtures, `CHANGELOG`. Reported as issue #80 from the same game as #78, replayed on that
+fix.
+
+**Ruleset-only, and that is the interesting part.** Start slots were curated for resources alone:
+`get_starting_region_candidates` never looks at towns, and the engine's own preference for a settled
+arrival cannot reach this ruleset, because it lives in three match levels of the cascade in
+`Game::DoAMoveOrder` and `filter_gateway_destinations` hands that cascade one hex. Six of eight
+factions began with no market to sell into.
+
+The selection now prefers settled candidates, and `Game::CreateWorld` founds a village on whatever
+is left townless. The second half sits in `world.cpp` rather than beside the first because
+`ARegion::add_town` is private and `Game` is a friend of `ARegion` while `ARegionList` is not —
+which is what kept this out of `game.h` and out of a second argument under
+[0012](../decisions/0012-a-ruleset-hook-for-gateway-destinations.md).
+
+Preference alone was built first and rejected on measurement: settled start slots went from 3 to 8
+of 20 on a 24×24 world and from 2 to 17 of 19 at 64×64, because settlements are roughly a tenth of
+the land and a small world holds fewer of them than the density curve asks for starts. With the
+founding it is 20 of 20 and 19 of 19. The whole comparison is in
+[0023](../decisions/0023-a-rimefall-start-carries-a-settlement.md).
+
+**Two fixtures re-recorded, both intended.** `worldgen/rimefall/output`, because `add_town` draws
+from the shared `rng` stream and the world downstream of the founding pass moves; and
+`rules/rimefall.html`, for the new paragraph in the player introduction. The recorded turns replay
+from their own `game.in` and did not move.
+
+**Fork-local, permanently.** Start-location policy for a variant this fork invented.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

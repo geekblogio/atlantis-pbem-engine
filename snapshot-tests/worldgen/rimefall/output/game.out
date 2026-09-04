@@ -4,9 +4,9 @@ Rimefall
 65536
 1
 -1
-1794
+8965
 3
-53
+62
 100
 1
 2
@@ -53,7 +53,7 @@ nexus
 24
 none
 1
-3
+2
 The Void
 0
 nexus
@@ -193,7 +193,7 @@ Gateway
 0
 Gateway to the northern frontier, forest [5]
 none
-111
+63
 -1
 0
 0
@@ -202,7 +202,7 @@ Gateway
 0
 Gateway to the northern frontier, forest [6]
 none
-112
+100
 -1
 0
 0
@@ -229,25 +229,25 @@ Gateway
 0
 Gateway to the middle lands, mountain [9]
 none
-165
+140
 -1
 0
 0
 10
 Gateway
 0
-Gateway to the middle lands, plain [10]
+Gateway to the middle lands, forest [10]
 none
-173
+148
 -1
 0
 0
 11
 Gateway
 0
-Gateway to the middle lands, mountain [11]
+Gateway to the middle lands, plain [11]
 none
-176
+161
 -1
 0
 0
@@ -256,34 +256,34 @@ Gateway
 0
 Gateway to the middle lands, mountain [12]
 none
-140
+165
 -1
 0
 0
 13
 Gateway
 0
-Gateway to the middle lands, forest [13]
+Gateway to the middle lands, mountain [13]
 none
-148
+176
 -1
 0
 0
 14
 Gateway
 0
-Gateway to the middle lands, plain [14]
+Gateway to the middle lands, forest [14]
 none
-174
+137
 -1
 0
 0
 15
 Gateway
 0
-Gateway to the middle lands, forest [15]
+Gateway to the middle lands, plain [15]
 none
-135
+174
 -1
 0
 0
@@ -301,34 +301,34 @@ Gateway
 0
 Gateway to the southern reaches, jungle [17]
 none
-225
+213
 -1
 0
 0
 18
 Gateway
 0
-Gateway to the southern reaches, plain [18]
+Gateway to the southern reaches, mountain [18]
 none
-235
+187
 -1
 0
 0
 19
 Gateway
 0
-Gateway to the southern reaches, mountain [19]
+Gateway to the southern reaches, desert [19]
 none
-199
+221
 -1
 0
 0
 20
 Gateway
 0
-Gateway to the far south, mountain [20]
+Gateway to the far south, jungle [20]
 none
-284
+273
 -1
 0
 0
@@ -371,6 +371,31 @@ none
 -1
 -1
 0
+1
+Merfolk (27)
+none
+27
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+65 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 2
@@ -411,31 +436,6 @@ none
 -1
 -1
 0
-1
-Pirates (14)
-none
-14
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-19 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 3
@@ -604,6 +604,31 @@ none
 -1
 -1
 0
+1
+Kraken (38)
+none
+38
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 KRAK
+0
+NO_SKILL
+0
+-1
 0
 Milfu
 7
@@ -685,6 +710,33 @@ none
 -1
 -1
 0
+1
+Undead (50)
+none
+50
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+43 SKEL
+9 UNDE
+1 LICH
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 8
@@ -765,31 +817,6 @@ none
 -1
 -1
 0
-1
-Kraken (38)
-none
-38
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 KRAK
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 10
@@ -830,6 +857,31 @@ none
 -1
 -1
 0
+1
+Kraken (45)
+none
+45
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 KRAK
+0
+NO_SKILL
+0
+-1
 0
 Wyra
 11
@@ -910,6 +962,31 @@ none
 -1
 -1
 0
+1
+Living Trees (43)
+none
+43
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+4 TREN
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 12
@@ -950,6 +1027,31 @@ none
 -1
 -1
 0
+1
+Merfolk (46)
+none
+46
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+84 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 13
@@ -1000,9 +1102,9 @@ none
 -1
 0
 1
-Kraken (42)
+Kraken (51)
 none
-42
+51
 3
 2
 2
@@ -1184,31 +1286,6 @@ none
 -1
 -1
 0
-1
-Merfolk (12)
-none
-12
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-59 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 17
@@ -1434,31 +1511,6 @@ none
 -1
 -1
 0
-1
-Pirates (43)
-none
-43
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-19 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 22
@@ -1623,31 +1675,6 @@ none
 -1
 -1
 0
-1
-Merfolk (16)
-none
-16
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-70 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 26
@@ -2076,31 +2103,6 @@ none
 -1
 -1
 0
-1
-Pirates (29)
-none
-29
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-13 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 33
@@ -2221,31 +2223,6 @@ none
 -1
 -1
 0
-1
-Merfolk (31)
-none
-31
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-70 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 36
@@ -2468,9 +2445,12 @@ HUMN
 -1
 -1
 1770
-76
-76
-0
+78
+78
+1
+Dasfoomburn
+2525
+3788
 7
 3
 1
@@ -2502,7 +2482,7 @@ SILV
 14
 ENTE
 300
-2
+14
 0
 HUMN
 37
@@ -2521,7 +2501,115 @@ LEAD
 0
 400
 660
-2
+1
+GRAI
+21
+65
+1097
+3597
+65
+130
+21
+1
+LIVE
+15
+86
+1097
+3597
+86
+172
+15
+1
+FISH
+34
+89
+1097
+3597
+89
+178
+34
+1
+XBOW
+89
+6
+3847
+11097
+0
+36
+89
+1
+LBOW
+64
+6
+4597
+11097
+0
+39
+64
+1
+LARM
+53
+5
+5347
+11097
+0
+34
+53
+1
+LASS
+69
+8
+6097
+11097
+0
+49
+69
+0
+IRON
+47
+0
+4347
+11097
+0
+85
+47
+1
+SPIC
+183
+17
+5847
+11097
+0
+86
+183
+1
+CHOC
+250
+15
+7597
+11097
+0
+75
+250
+0
+TRUF
+109
+10
+6097
+11097
+0
+61
+109
+0
+SILK
+61
+15
+7763
+11097
+0
+91
+61
+1
 0
 None
 0
@@ -2530,23 +2618,14 @@ none
 -1
 -1
 0
-0
 1
-Crypt
-0
-Dummy
+City Guard (3)
 none
--1
--1
-0
-1
-Undead (44)
-none
-44
 3
 2
+1
+1
 2
-0
 0
 NO_ITEM
 NO_ITEM
@@ -2559,10 +2638,12 @@ NO_ITEM
 NO_ITEM
 10
 3
-47 SKEL
-10 UNDE
-1 LICH
-0
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
 NO_SKILL
 0
 -1
@@ -2586,7 +2667,10 @@ HDWA
 1849
 87
 87
-0
+1
+Vante
+1308
+1962
 9
 3
 1
@@ -2622,7 +2706,7 @@ SILV
 23
 ENTE
 300
-2
+15
 0
 HDWA
 40
@@ -2642,6 +2726,123 @@ LEAD
 400
 705
 1
+GRAI
+16
+73
+1220
+3720
+73
+146
+16
+1
+LIVE
+15
+75
+1220
+3720
+75
+150
+15
+1
+FISH
+30
+52
+1220
+3720
+52
+104
+30
+1
+AXE
+75
+5
+3970
+11220
+0
+33
+75
+1
+LASS
+76
+4
+4720
+11220
+0
+26
+76
+1
+JAVE
+70
+6
+5470
+11220
+0
+38
+70
+1
+XBOW
+88
+7
+6220
+11220
+0
+46
+88
+0
+STON
+48
+0
+4470
+11220
+0
+60
+48
+0
+IRON
+52
+0
+5220
+11220
+0
+67
+52
+0
+PEAR
+109
+10
+6220
+11220
+0
+65
+109
+0
+WINE
+83
+9
+7886
+11220
+0
+55
+83
+1
+TRUF
+218
+16
+5970
+11220
+0
+81
+218
+1
+COTT
+168
+13
+7720
+11220
+0
+69
+168
+1
 0
 None
 0
@@ -2650,6 +2851,35 @@ none
 -1
 -1
 0
+1
+City Guard (4)
+none
+4
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 42
@@ -2690,31 +2920,6 @@ none
 -1
 -1
 0
-1
-Pirates (23)
-none
-23
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-14 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 43
@@ -2803,6 +3008,31 @@ none
 -1
 -1
 0
+1
+Merfolk (36)
+none
+36
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+90 MERF
+0
+NO_SKILL
+0
+-1
 0
 1
 Whirlpool
@@ -2972,31 +3202,6 @@ none
 -1
 -1
 0
-1
-Merfolk (35)
-none
-35
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-52 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 48
@@ -3041,6 +3246,31 @@ none
 -1
 -1
 0
+1
+Merfolk (47)
+none
+47
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+69 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 49
@@ -3219,9 +3449,12 @@ HUMN
 -1
 -1
 1794
-78
-78
-0
+80
+80
+1
+Bongtegford
+2234
+3351
 6
 4
 1
@@ -3253,7 +3486,7 @@ SILV
 16
 ENTE
 300
-2
+14
 0
 HUMN
 38
@@ -3273,6 +3506,114 @@ LEAD
 400
 672
 1
+GRAI
+16
+59
+1130
+3630
+59
+118
+16
+1
+LIVE
+20
+75
+1130
+3630
+75
+150
+20
+1
+FISH
+33
+76
+1130
+3630
+76
+152
+33
+1
+XBOW
+81
+7
+3880
+11130
+0
+47
+81
+1
+LARM
+64
+7
+4630
+11130
+0
+44
+64
+1
+LBOW
+88
+7
+5380
+11130
+0
+43
+88
+1
+AXE
+75
+6
+6130
+11130
+0
+38
+75
+0
+IRON
+49
+0
+4380
+11130
+0
+84
+49
+1
+IVOR
+205
+16
+5880
+11130
+0
+84
+205
+0
+JEWE
+172
+10
+6130
+11130
+0
+63
+172
+0
+CHOC
+84
+15
+7796
+11130
+0
+93
+84
+1
+COTT
+180
+11
+7630
+11130
+0
+58
+180
+1
 0
 None
 0
@@ -3281,6 +3622,35 @@ none
 -1
 -1
 0
+1
+City Guard (5)
+none
+5
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Oscarn
 53
@@ -3325,6 +3695,31 @@ none
 -1
 -1
 0
+1
+Pirates (35)
+none
+35
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+16 PIRA
+0
+NO_SKILL
+0
+-1
 0
 Oscarn
 54
@@ -3405,6 +3800,56 @@ none
 -1
 -1
 0
+2
+Family of Ogres (39)
+none
+39
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 OGRE
+0
+NO_SKILL
+0
+-1
+0
+Family of Ogres (40)
+none
+40
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 OGRE
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 55
@@ -3445,56 +3890,6 @@ none
 -1
 -1
 0
-2
-Pirates (22)
-none
-22
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-20 PIRA
-0
-NO_SKILL
-0
--1
-0
-Kraken (25)
-none
-25
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 KRAK
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 56
@@ -3859,6 +4254,31 @@ none
 -1
 -1
 0
+1
+Pirates (29)
+none
+29
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+19 PIRA
+0
+NO_SKILL
+0
+-1
 0
 Welglold
 63
@@ -4060,9 +4480,9 @@ none
 -1
 0
 1
-City Guard (3)
+City Guard (6)
 none
-3
+6
 2
 1
 1
@@ -4452,31 +4872,6 @@ none
 -1
 -1
 0
-1
-Pirates (33)
-none
-33
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-15 PIRA
-0
-NO_SKILL
-0
--1
 0
 O'al
 70
@@ -4567,9 +4962,9 @@ none
 -1
 0
 1
-Hydra (45)
+Hydra (52)
 none
-45
+52
 3
 2
 2
@@ -4889,9 +5284,12 @@ HUMN
 -1
 -1
 1594
-80
-80
-0
+82
+82
+1
+Nigost
+2450
+3675
 8
 6
 1
@@ -4919,7 +5317,7 @@ SILV
 15
 ENTE
 300
-2
+14
 0
 HUMN
 38
@@ -4939,6 +5337,114 @@ LEAD
 400
 677
 1
+GRAI
+20
+74
+1036
+3536
+74
+148
+20
+1
+LIVE
+19
+54
+1036
+3536
+54
+108
+19
+1
+FISH
+42
+83
+1036
+3536
+83
+166
+42
+1
+BAG
+70
+7
+3786
+11036
+0
+44
+70
+1
+SPIN
+64
+6
+4536
+11036
+0
+41
+64
+1
+PIKE
+139
+4
+5286
+11036
+0
+29
+139
+1
+LBOW
+80
+4
+6036
+11036
+0
+27
+80
+0
+IRON
+50
+0
+4286
+11036
+0
+66
+50
+1
+IVOR
+204
+14
+5786
+11036
+0
+70
+204
+0
+JEWE
+235
+12
+6036
+11036
+0
+73
+235
+0
+WINE
+87
+10
+7702
+11036
+0
+65
+87
+1
+SILK
+208
+11
+7536
+11036
+0
+55
+208
+1
 0
 None
 0
@@ -4947,6 +5453,35 @@ none
 -1
 -1
 0
+1
+City Guard (7)
+none
+7
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Oscarn
 78
@@ -5071,56 +5606,6 @@ none
 -1
 -1
 0
-2
-Pirates (21)
-none
-21
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-18 PIRA
-0
-NO_SKILL
-0
--1
-0
-Merfolk (28)
-none
-28
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-56 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 80
@@ -5166,9 +5651,9 @@ none
 -1
 0
 1
-Pirates (30)
+Merfolk (33)
 none
-30
+33
 3
 2
 2
@@ -5185,7 +5670,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-20 PIRA
+94 MERF
 0
 NO_SKILL
 0
@@ -5234,31 +5719,6 @@ none
 -1
 -1
 0
-1
-Pirates (40)
-none
-40
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-11 PIRA
-0
-NO_SKILL
-0
--1
 0
 O'al
 82
@@ -5423,31 +5883,6 @@ none
 -1
 -1
 0
-1
-Pirates (39)
-none
-39
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-14 PIRA
-0
-NO_SKILL
-0
--1
 0
 1
 Whirlpool
@@ -5457,31 +5892,6 @@ none
 -1
 -1
 0
-1
-Living Water (46)
-none
-46
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-7 ELEM
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 85
@@ -5643,9 +6053,9 @@ none
 -1
 0
 1
-Kobold Pack (17)
+Wolf Pack (26)
 none
-17
+26
 3
 2
 2
@@ -5662,7 +6072,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-17 KOBO
+7 WOLF
 0
 NO_SKILL
 0
@@ -5685,9 +6095,12 @@ HUMN
 -1
 -1
 1523
-82
-82
-0
+80
+80
+1
+Ceatown
+1170
+1756
 7
 7
 1
@@ -5727,7 +6140,7 @@ SILV
 14
 ENTE
 300
-2
+14
 0
 HUMN
 39
@@ -5747,6 +6160,114 @@ LEAD
 400
 688
 1
+GRAI
+21
+88
+959
+3459
+88
+176
+21
+1
+LIVE
+15
+77
+959
+3459
+77
+154
+15
+1
+FISH
+34
+94
+959
+3459
+94
+188
+34
+1
+XBOW
+60
+8
+3709
+10959
+0
+48
+60
+1
+JAVE
+79
+7
+4459
+10959
+0
+43
+79
+1
+BAG
+81
+4
+5209
+10959
+0
+27
+81
+1
+LBOW
+67
+7
+5959
+10959
+0
+44
+67
+0
+IRON
+48
+0
+4209
+10959
+0
+50
+48
+1
+TRUF
+237
+19
+5709
+10959
+0
+98
+237
+0
+VODK
+79
+11
+5959
+10959
+0
+69
+79
+0
+COTT
+88
+15
+7625
+10959
+0
+93
+88
+1
+GEM
+327
+18
+7459
+10959
+0
+91
+327
+1
 0
 None
 0
@@ -5755,6 +6276,35 @@ none
 -1
 -1
 0
+1
+City Guard (8)
+none
+8
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 89
@@ -6252,9 +6802,9 @@ none
 -1
 0
 1
-Merfolk (13)
+Merfolk (28)
 none
-13
+28
 3
 2
 2
@@ -6271,7 +6821,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-65 MERF
+98 MERF
 0
 NO_SKILL
 0
@@ -6294,9 +6844,12 @@ HELF
 -1
 -1
 2865
-84
-84
-0
+85
+85
+1
+Penco'i
+1714
+2571
 6
 8
 1
@@ -6324,7 +6877,7 @@ SILV
 36
 ENTE
 300
-2
+13
 0
 HELF
 39
@@ -6344,6 +6897,105 @@ LEAD
 400
 694
 1
+GRAI
+20
+64
+1804
+4304
+64
+128
+20
+1
+LIVE
+15
+69
+1804
+4304
+69
+138
+15
+1
+FISH
+33
+96
+1804
+4304
+96
+192
+33
+1
+PICK
+74
+5
+4554
+11804
+0
+34
+74
+1
+CAME
+38
+16
+5304
+11804
+0
+99
+38
+1
+HAMM
+73
+7
+6054
+11804
+0
+42
+73
+1
+BAG
+73
+5
+6804
+11804
+0
+33
+73
+0
+PEAR
+184
+9
+6804
+11804
+0
+59
+184
+1
+TRUF
+198
+11
+6554
+11804
+0
+56
+198
+0
+VODK
+105
+16
+8470
+11804
+0
+99
+105
+1
+COTT
+188
+18
+8304
+11804
+0
+94
+188
+1
 0
 None
 0
@@ -6352,6 +7004,35 @@ none
 -1
 -1
 0
+1
+City Guard (9)
+none
+9
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Le'om
 101
@@ -6424,6 +7105,31 @@ none
 -1
 -1
 0
+1
+Tribe of Centaurs (32)
+none
+32
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+5 CENT
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 102
@@ -6597,8 +7303,7 @@ Pewhupon
 106
 plain
 1
-73
-6
+0
 CTAU
 1956
 1087
@@ -6746,9 +7451,9 @@ none
 -1
 0
 1
-Kraken (36)
+Merfolk (42)
 none
-36
+42
 3
 2
 2
@@ -6765,7 +7470,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-1 KRAK
+93 MERF
 0
 NO_SKILL
 0
@@ -7015,7 +7720,8 @@ Lethherath
 113
 forest
 1
-0
+71
+3
 CTAU
 1701
 915
@@ -7202,9 +7908,9 @@ none
 -1
 0
 1
-City Guard (4)
+City Guard (10)
 none
-4
+10
 2
 1
 1
@@ -7618,6 +8324,31 @@ none
 -1
 -1
 0
+1
+Merfolk (24)
+none
+24
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+96 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 122
@@ -7787,31 +8518,6 @@ none
 -1
 -1
 0
-1
-Kobold Pack (47)
-none
-47
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-13 KOBO
-0
-NO_SKILL
-0
--1
 0
 Lethherath
 125
@@ -7937,6 +8643,31 @@ none
 -1
 -1
 0
+1
+Merfolk (53)
+none
+53
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+80 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 127
@@ -8386,8 +9117,7 @@ Harbach
 136
 forest
 1
-25
-1
+0
 CTAU
 1404
 698
@@ -8480,9 +9210,12 @@ WELF
 -1
 -1
 2817
-86
-86
-0
+81
+81
+1
+Lelmouth
+2364
+3547
 9
 11
 1
@@ -8510,7 +9243,7 @@ SILV
 41
 ENTE
 300
-2
+15
 0
 WELF
 40
@@ -8530,6 +9263,123 @@ LEAD
 400
 705
 1
+GRAI
+21
+65
+1887
+4387
+65
+130
+21
+1
+LIVE
+15
+67
+1887
+4387
+67
+134
+15
+1
+FISH
+35
+79
+1887
+4387
+79
+158
+35
+1
+LASS
+69
+5
+4637
+11887
+0
+34
+69
+1
+PICK
+68
+5
+5387
+11887
+0
+30
+68
+1
+NET
+90
+7
+6137
+11887
+0
+43
+90
+1
+HAMM
+89
+6
+6887
+11887
+0
+37
+89
+0
+SPIN
+93
+0
+5637
+11887
+0
+29
+93
+0
+WOOD
+53
+0
+5887
+11887
+0
+90
+53
+0
+IVOR
+76
+14
+6887
+11887
+0
+85
+76
+0
+CHOC
+136
+13
+8553
+11887
+0
+83
+136
+1
+VODK
+199
+10
+6637
+11887
+0
+53
+199
+1
+GEM
+366
+12
+8387
+11887
+0
+62
+366
+1
 0
 None
 0
@@ -8538,6 +9388,35 @@ none
 -1
 -1
 0
+1
+City Guard (11)
+none
+11
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 138
@@ -8618,31 +9497,6 @@ none
 -1
 -1
 0
-1
-Pirates (26)
-none
-26
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-19 PIRA
-0
-NO_SKILL
-0
--1
 0
 Robricmont
 140
@@ -8840,9 +9694,9 @@ none
 -1
 0
 1
-City Guard (5)
+City Guard (12)
 none
-5
+12
 2
 1
 1
@@ -8873,7 +9727,8 @@ Markne
 141
 plain
 1
-0
+37
+8
 CTAU
 2386
 1136
@@ -9430,9 +10285,9 @@ none
 -1
 0
 1
-City Guard (6)
+City Guard (13)
 none
-6
+13
 2
 1
 1
@@ -9534,6 +10389,31 @@ none
 -1
 -1
 0
+1
+Wolf Pack (37)
+none
+37
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+10 WOLF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 150
@@ -9618,31 +10498,6 @@ none
 -1
 -1
 0
-1
-Kraken (24)
-none
-24
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 KRAK
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 152
@@ -9683,6 +10538,31 @@ none
 -1
 -1
 0
+1
+Merfolk (34)
+none
+34
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+73 MERF
+0
+NO_SKILL
+0
+-1
 0
 Robricmont
 153
@@ -9849,6 +10729,31 @@ none
 -1
 -1
 0
+1
+saltdrake (54)
+none
+54
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 DRAG
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 155
@@ -10022,31 +10927,6 @@ none
 -1
 -1
 0
-1
-Kraken (48)
-none
-48
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 KRAK
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 159
@@ -10105,9 +10985,12 @@ WELF
 -1
 -1
 1885
-68
-68
-0
+70
+70
+1
+Ybidquu
+1929
+2894
 7
 13
 1
@@ -10143,7 +11026,7 @@ SILV
 10
 ENTE
 300
-2
+14
 0
 WELF
 35
@@ -10163,6 +11046,114 @@ LEAD
 400
 621
 1
+GRAI
+20
+92
+1281
+3781
+92
+184
+20
+1
+LIVE
+15
+82
+1281
+3781
+82
+164
+15
+1
+FISH
+37
+76
+1281
+3781
+76
+152
+37
+1
+HAMM
+87
+6
+4031
+11281
+0
+38
+87
+1
+SWOR
+60
+4
+4781
+11281
+0
+27
+60
+1
+PICK
+63
+7
+5531
+11281
+0
+43
+63
+0
+WOOD
+46
+0
+4531
+11281
+0
+84
+46
+0
+SPIN
+100
+0
+5781
+11281
+0
+42
+100
+0
+IVOR
+103
+14
+6281
+11281
+0
+87
+103
+1
+WINE
+278
+14
+6031
+11281
+0
+73
+278
+1
+SPIC
+163
+15
+7781
+11281
+0
+76
+163
+0
+CHOC
+108
+14
+7947
+11281
+0
+89
+108
+1
 0
 None
 0
@@ -10171,6 +11162,35 @@ none
 -1
 -1
 0
+1
+City Guard (14)
+none
+14
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Amark
 161
@@ -10364,9 +11384,9 @@ none
 -1
 0
 1
-City Guard (7)
+City Guard (15)
 none
-7
+15
 2
 1
 1
@@ -10606,9 +11626,12 @@ HDWA
 -1
 -1
 1765
-90
-90
-0
+84
+84
+1
+Ritodgill
+2402
+3604
 17
 13
 1
@@ -10644,7 +11667,7 @@ SILV
 23
 ENTE
 300
-2
+15
 0
 HDWA
 41
@@ -10664,6 +11687,123 @@ LEAD
 400
 722
 1
+GRAI
+19
+53
+1129
+3629
+53
+106
+19
+1
+LIVE
+18
+79
+1129
+3629
+79
+158
+18
+1
+FISH
+38
+54
+1129
+3629
+54
+108
+38
+1
+AXE
+85
+5
+3879
+11129
+0
+31
+85
+1
+LASS
+75
+6
+4629
+11129
+0
+36
+75
+1
+NET
+85
+4
+5379
+11129
+0
+27
+85
+1
+LBOW
+75
+4
+6129
+11129
+0
+28
+75
+0
+CARM
+106
+0
+4879
+11129
+0
+26
+106
+0
+STON
+46
+0
+5129
+11129
+0
+51
+46
+1
+IVOR
+151
+13
+5879
+11129
+0
+68
+151
+1
+WINE
+222
+10
+7629
+11129
+0
+52
+222
+0
+SPIC
+95
+10
+6129
+11129
+0
+63
+95
+0
+GEM
+156
+10
+7795
+11129
+0
+63
+156
+1
 0
 None
 0
@@ -10672,6 +11812,35 @@ none
 -1
 -1
 0
+1
+City Guard (16)
+none
+16
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 166
@@ -10716,31 +11885,6 @@ none
 -1
 -1
 0
-1
-Merfolk (34)
-none
-34
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-76 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 167
@@ -11119,9 +12263,12 @@ HELF
 -1
 -1
 4416
-79
-79
-0
+71
+71
+1
+Gahenmouth
+1904
+2857
 10
 14
 1
@@ -11145,7 +12292,7 @@ SILV
 57
 ENTE
 300
-2
+14
 0
 HELF
 38
@@ -11165,6 +12312,114 @@ LEAD
 400
 672
 1
+GRAI
+15
+93
+2826
+5326
+93
+186
+15
+1
+LIVE
+21
+95
+2826
+5326
+95
+190
+21
+1
+FISH
+33
+58
+2826
+5326
+58
+116
+33
+1
+PICK
+89
+4
+5576
+12826
+0
+26
+89
+1
+SWOR
+73
+5
+6326
+12826
+0
+31
+73
+1
+JAVE
+65
+8
+7076
+12826
+0
+48
+65
+1
+CAME
+37
+13
+7826
+12826
+0
+79
+37
+0
+HORS
+46
+0
+6076
+12826
+0
+61
+46
+1
+JEWE
+454
+19
+7576
+12826
+0
+99
+454
+0
+CHOC
+132
+15
+7826
+12826
+0
+94
+132
+0
+VODK
+64
+8
+9492
+12826
+0
+50
+64
+1
+PERF
+234
+15
+9326
+12826
+0
+76
+234
+1
 0
 None
 0
@@ -11173,6 +12428,35 @@ none
 -1
 -1
 0
+1
+City Guard (17)
+none
+17
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 175
@@ -11231,9 +12515,12 @@ HDWA
 -1
 -1
 1660
-80
-80
-0
+82
+82
+1
+Futell
+2293
+3440
 14
 14
 1
@@ -11265,7 +12552,7 @@ SILV
 16
 ENTE
 300
-2
+15
 0
 HDWA
 38
@@ -11285,6 +12572,123 @@ LEAD
 400
 677
 1
+GRAI
+17
+51
+1095
+3595
+51
+102
+17
+1
+LIVE
+18
+94
+1095
+3595
+94
+188
+18
+1
+FISH
+37
+58
+1095
+3595
+58
+116
+37
+1
+LBOW
+66
+6
+3845
+11095
+0
+37
+66
+1
+LASS
+68
+7
+4595
+11095
+0
+45
+68
+1
+XBOW
+70
+7
+5345
+11095
+0
+47
+70
+1
+AXE
+68
+4
+6095
+11095
+0
+28
+68
+0
+STON
+51
+0
+4345
+11095
+0
+83
+51
+0
+CARM
+109
+0
+5595
+11095
+0
+36
+109
+0
+IVOR
+79
+14
+6095
+11095
+0
+89
+79
+0
+WINE
+117
+12
+7761
+11095
+0
+74
+117
+1
+CHOC
+248
+15
+5845
+11095
+0
+79
+248
+1
+GEM
+404
+19
+7595
+11095
+0
+97
+404
+1
 0
 None
 0
@@ -11293,6 +12697,35 @@ none
 -1
 -1
 0
+1
+City Guard (18)
+none
+18
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Robricmont
 177
@@ -11382,6 +12815,31 @@ none
 -1
 -1
 0
+1
+saltdrake (55)
+none
+55
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 DRAG
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 178
@@ -11422,6 +12880,31 @@ none
 -1
 -1
 0
+1
+Kraken (41)
+none
+41
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 KRAK
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 179
@@ -11631,9 +13114,9 @@ none
 -1
 0
 1
-Kraken (15)
+Pirates (25)
 none
-15
+25
 3
 2
 2
@@ -11650,7 +13133,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-1 KRAK
+12 PIRA
 0
 NO_SKILL
 0
@@ -11744,12 +13227,36 @@ none
 -1
 -1
 0
+1
+Clan of Wild Men (56)
+none
+56
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+6 WMAN
+0
+NO_SKILL
+0
+-1
 0
 Fylpat
 185
 desert
 1
-98
 0
 GNOL
 1476
@@ -12066,9 +13573,9 @@ none
 -1
 0
 1
-City Guard (8)
+City Guard (19)
 none
-8
+19
 2
 1
 1
@@ -12210,31 +13717,6 @@ none
 -1
 -1
 0
-1
-Pirates (37)
-none
-37
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-14 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 190
@@ -12275,31 +13757,6 @@ none
 -1
 -1
 0
-1
-Pirates (32)
-none
-32
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-17 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 191
@@ -12380,6 +13837,31 @@ none
 -1
 -1
 0
+1
+Merfolk (44)
+none
+44
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+53 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 193
@@ -12424,31 +13906,6 @@ none
 -1
 -1
 0
-1
-Merfolk (20)
-none
-20
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-68 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 194
@@ -12782,31 +14239,6 @@ none
 -1
 -1
 0
-1
-Giant Birds (49)
-none
-49
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 ROC
-0
-NO_SKILL
-0
--1
 0
 Ibrook
 200
@@ -13003,6 +14435,31 @@ none
 -1
 -1
 0
+1
+Kraken (49)
+none
+49
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+1 KRAK
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 203
@@ -13213,9 +14670,9 @@ none
 -1
 0
 1
-Merfolk (50)
+Merfolk (57)
 none
-50
+57
 3
 2
 2
@@ -13232,7 +14689,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-75 MERF
+88 MERF
 0
 NO_SKILL
 0
@@ -13539,31 +14996,6 @@ none
 -1
 -1
 0
-1
-Hydra (51)
-none
-51
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-1 HYDR
-0
-NO_SKILL
-0
--1
 0
 Yeeneocoun
 213
@@ -13760,9 +15192,9 @@ none
 -1
 0
 1
-City Guard (9)
+City Guard (20)
 none
-9
+20
 2
 1
 1
@@ -14090,9 +15522,12 @@ GBLN
 -1
 -1
 1755
-82
-82
-0
+77
+77
+1
+Aside
+1593
+2390
 8
 18
 1
@@ -14128,7 +15563,7 @@ SILV
 17
 ENTE
 300
-2
+16
 0
 GBLN
 29
@@ -14148,6 +15583,132 @@ LEAD
 400
 688
 1
+GRAI
+19
+53
+1088
+3588
+53
+106
+19
+1
+LIVE
+20
+90
+1088
+3588
+90
+180
+20
+1
+FISH
+35
+52
+1088
+3588
+52
+104
+35
+1
+MARM
+590
+4
+7338
+11088
+0
+28
+590
+1
+LBOW
+63
+5
+3838
+11088
+0
+35
+63
+1
+XBOW
+81
+6
+4588
+11088
+0
+41
+81
+1
+SPIN
+88
+7
+5338
+11088
+0
+44
+88
+1
+NET
+97
+6
+6088
+11088
+0
+37
+97
+0
+SWOR
+108
+0
+4838
+11088
+0
+31
+108
+0
+PICK
+106
+0
+5588
+11088
+0
+25
+106
+1
+SPIC
+209
+19
+5838
+11088
+0
+99
+209
+0
+CHOC
+128
+12
+6088
+11088
+0
+77
+128
+1
+SILK
+167
+12
+7588
+11088
+0
+62
+167
+0
+GEM
+144
+9
+7754
+11088
+0
+56
+144
+1
 0
 None
 0
@@ -14156,6 +15717,35 @@ none
 -1
 -1
 0
+1
+City Guard (21)
+none
+21
+2
+1
+1
+2
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+40 LEAD
+40 SWOR
+2000 SILV
+2
+COMB 1200
+OBSE 1200
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 222
@@ -14445,6 +16035,31 @@ none
 -1
 -1
 0
+1
+Merfolk (58)
+none
+58
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+98 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 227
@@ -14965,6 +16580,33 @@ none
 -1
 -1
 0
+1
+Undead (59)
+none
+59
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+3
+18 SKEL
+6 UNDE
+1 LICH
+0
+NO_SKILL
+0
+-1
 0
 Yeeneocoun
 236
@@ -15138,6 +16780,31 @@ none
 -1
 -1
 0
+1
+Great Apes (60)
+none
+60
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+2 KONG
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 238
@@ -15426,6 +17093,31 @@ none
 -1
 -1
 0
+1
+Pirates (31)
+none
+31
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+20 PIRA
+0
+NO_SKILL
+0
+-1
 0
 Doardeshvey
 245
@@ -15554,31 +17246,6 @@ none
 -1
 -1
 0
-1
-Pirates (27)
-none
-27
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-19 PIRA
-0
-NO_SKILL
-0
--1
 0
 Phenwexco
 247
@@ -15856,9 +17523,9 @@ none
 -1
 0
 1
-City Guard (10)
+City Guard (22)
 none
-10
+22
 2
 1
 1
@@ -16009,9 +17676,9 @@ none
 -1
 0
 1
-Pirates (41)
+Pirates (48)
 none
-41
+48
 3
 2
 2
@@ -16028,7 +17695,7 @@ NO_ITEM
 NO_ITEM
 10
 1
-20 PIRA
+15 PIRA
 0
 NO_SKILL
 0
@@ -16130,31 +17797,6 @@ none
 -1
 -1
 0
-1
-Merfolk (52)
-none
-52
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-81 MERF
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 253
@@ -16199,31 +17841,6 @@ none
 -1
 -1
 0
-1
-Pirates (18)
-none
-18
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-15 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 254
@@ -17373,9 +18990,9 @@ none
 -1
 0
 1
-City Guard (11)
+City Guard (23)
 none
-11
+23
 2
 1
 1
@@ -17569,6 +19186,31 @@ none
 -1
 -1
 0
+1
+Pirates (30)
+none
+30
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+12 PIRA
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 278
@@ -17697,31 +19339,6 @@ none
 -1
 -1
 0
-1
-Pirates (19)
-none
-19
-3
-2
-2
-0
-0
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-NO_ITEM
-10
-1
-10 PIRA
-0
-NO_SKILL
-0
--1
 0
 Atlantis Ocean
 281
@@ -17811,6 +19428,31 @@ none
 -1
 -1
 0
+1
+Merfolk (61)
+none
+61
+3
+2
+2
+0
+0
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+NO_ITEM
+10
+1
+56 MERF
+0
+NO_SKILL
+0
+-1
 0
 Atlantis Ocean
 283

@@ -388,6 +388,54 @@ bool Game::CreateWorld()
     // No shaft links and no underworld gates: there is nothing below the surface to reach.
     regions.SetACNeighbors( 0, 1, xx, yy );
 
+    //
+    // EVERY START LOCATION GETS A MARKET (0023).
+    //
+    // SetACNeighbors prefers candidates that already carry a settlement, and on a large world that
+    // is nearly enough by itself — 17 of 19 slots at 64x64. It cannot be enough on a small one:
+    // settlements are roughly a tenth of the land, so a 24x24 world holds about nine of them and
+    // the density curve asks for twenty starts. Preference alone cannot conjure the other eleven.
+    //
+    // So what is left without a settlement is given a village. What that buys is precisely the
+    // MARKET: recruiting belongs to the region rather than the town (0016), so a townless start
+    // could always raise men, but it had nothing to sell into where it stood — no wanted list at
+    // all — and the opening every other ruleset's start plays was closed to it.
+    //
+    // A VILLAGE, never a town or a city. The size is the smallest one that carries a market, so a
+    // slot that had to be helped never outranks one the map settled on its own.
+    //
+    // This runs here rather than in map.cpp because ARegion::add_town is private and Game is a
+    // friend of ARegion while ARegionList is not — which keeps the whole change inside the ruleset,
+    // with no second engine hook to argue for. add_town installs the town and its market block;
+    // the region's wages, entertainment and taxable wealth are recomputed by SetIncome in
+    // ARegion::PostTurn on the first turn processed, so nothing else has to be refreshed here.
+    {
+        ARegionArray *nex = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
+        int founded = 0;
+        if (nex) {
+            for (int x = 0; x < nex->x; x++) {
+                for (int y = 0; y < nex->y; y++) {
+                    ARegion *reg = nex->GetRegion(x, y);
+                    if (!reg) continue;
+                    for (const auto o : reg->objects) {
+                        if (o->type != O_GATEWAY || o->inner < 0) continue;
+                        ARegion *dest = regions.GetRegion(o->inner);
+                        if (!dest || dest->town) continue;
+                        dest->add_town(TOWN_VILLAGE);
+                        founded++;
+                        logger::write(
+                            "Founded a village at (" + std::to_string(dest->xloc) + "," +
+                            std::to_string(dest->yloc) + "): that start slot had no settlement"
+                        );
+                    }
+                }
+            }
+        }
+        logger::write(
+            "Founded " + std::to_string(founded) + " villages so that every start has a market"
+        );
+    }
+
     regions.InitSetupGates( 1 );
 
     regions.FixUnconnectedRegions();

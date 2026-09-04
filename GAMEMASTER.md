@@ -465,6 +465,23 @@ worked out fresh every turn from who is actually standing there, so if a faction
 simply walks away, its gateway opens again and the land can be claimed by someone new. Object
 numbers never change, so `[13]` is the same location for the life of the game.
 
+**Every start location has a market.** The world generator prefers hexes that already carry a
+settlement, and founds a village on the ones that do not, so a new faction always arrives somewhere
+it can sell what it produces. The engine log says how each band was filled and names every village
+it founded:
+
+```
+Band 2 (the middle lands): 18 candidates for 8 start slots, 3 of them settled
+  5 of its starts will need a village founded for them
+Founded a village at (17,13): that start slot had no settlement
+```
+
+**This is done at world creation, so a world you are already running keeps the start locations it
+was built with.** If a game of yours has starts on open ground and you want to repair them, add a
+town by hand: `<game> edit`, `1` to find a region, the region's `x y z`, then the region menu's
+`town`. Do it only to a location nobody holds, and remember that the gateway names the terrain
+rather than the settlement, so nothing a player has read becomes untrue.
+
 **Two players can pick the same gateway, and both of them arrive.** Everybody chooses in the same
 month and nobody can see the other choices, so a collision is nobody's mistake. The faction the
 engine reaches second is set down on the nearest start location still free — same band and same

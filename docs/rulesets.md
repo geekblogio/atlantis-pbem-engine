@@ -280,6 +280,19 @@ maintain it. `CheckVictory` renames a taken slot to `Sealed gateway to …` rath
 object, because these carry `buildingseq` numbers and churning them would move object numbers
 around in reports and in the JSON.
 
+**A start slot carries a settlement**, per
+[0023](decisions/0023-a-rimefall-start-carries-a-settlement.md), and it takes two steps because one
+is not enough. `SetACNeighbors` draws from candidates that already have a town and falls back to
+open ground only when a band runs out; `Game::CreateWorld` then founds a village on whatever is
+still townless. `get_starting_region_candidates` weighs resources and ignores towns, and the
+engine's three town-only match levels cannot repair that here — they are handed one hex. Preference
+alone reaches 17 of 19 slots at 64×64 and 8 of 20 at 24×24, because a small world holds fewer
+settlements than the density curve asks for starts.
+
+The founding lives in `world.cpp` rather than next to the selection because `ARegion::add_town` is
+private and `Game` is a friend of `ARegion` while `ARegionList` is not. That is the whole reason the
+two halves are in different files.
+
 **A gateway whose slot is gone substitutes another one rather than refusing the move**, per
 [0022](decisions/0022-a-taken-gateway-substitutes-a-start-location.md). Two factions choosing the
 same gateway in the same month is unavoidable, so the loser of that race is set down on the nearest
