@@ -122,7 +122,7 @@ Errors go to stdout as well, not stderr.
 
 ## Environment variables
 
-All four are **opt-in**: unset, the engine behaves exactly as it did before they existed, and
+All five are **opt-in**: unset, the engine behaves exactly as it did before they existed, and
 logs nothing about them.
 
 | Variable | Effect | Provenance |
@@ -131,6 +131,7 @@ logs nothing about them.
 | `ATLANTIS_SIM_MODE` | narrows `REPORT_FORMAT` to JSON: no text report, no order template. **Ignored, with a message, on a ruleset that does not enable the JSON report** — all seven do today, so the guard is a safety net for a future one that does not. | fork-local |
 | `ATLANTIS_NO_GM_REPORT` | clears `GM_REPORT`, so the world-wide report for the NPC faction is not built. Worth roughly 70% of a turn's wall time; the share grows with the map. | fork-local |
 | `ATLANTIS_FORCE_GM_REPORT` | sets `GM_REPORT`, so the world-wide report is built by a ruleset that ships with it off. Affects `basic` alone today; the other six already have it on and the variable is a no-op there. | fork-local |
+| `ATLANTIS_PHASE_DUMPS` | `run` also writes the world state after reading the orders and after every phase of `RunOrders`, 32 files named `phase.<nn>-<name>.out` in the game.out format ([file-formats.md](file-formats.md#phasenn-nameout)). The turn itself is unchanged: the files draw nothing from the RNG. No effect on `new`, `edit` or `check`. | fork-local |
 
 `ATLANTIS_SIM_MODE` and `ATLANTIS_NO_GM_REPORT` are deliberately independent: a recorded
 simulation still wants the GM report as ground truth, only throwaway runs do not.
@@ -150,6 +151,17 @@ turn one. `basic` is the one shipped ruleset in that state.
 Nothing in the simulation depends on the report being absent: it is written after the turn is
 resolved and it draws no random numbers, which is what the `#30` re-record demonstrated. The
 cost of forcing it on is wall time, the same 70 % the `NO` variant saves.
+
+### What `ATLANTIS_PHASE_DUMPS` is for
+
+The Python port of this engine (`geekblogio/atlantis-pbem-ng`) runs the same turn and compares
+its state with this engine's. `game.out` shows only the end of the turn, so a difference found
+there could come from any of the thirty-odd phases. With the phase files it shows up after the
+phase that causes it ([0025](../decisions/0025-the-world-after-every-phase.md)).
+
+`snapshot-tests/run-phase-dump-snapshot.sh` replays the recorded `standard` turns with the
+variable set and requires everything the turn writes, apart from the phase files and the one
+line announcing the variable, to be the recording byte for byte.
 
 ## Things that are *not* configurable
 

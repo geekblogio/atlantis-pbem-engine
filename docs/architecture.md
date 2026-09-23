@@ -68,6 +68,12 @@ annihilation, maintenance, migration.
 **The order between phases is game-visible behaviour.** Changing it moves snapshot output, and
 usually changes who wins a race for a scarce resource.
 
+Every phase ends with a `dump_phase(<nn>, "<name>")` call, which writes the world state when
+`ATLANTIS_PHASE_DUMPS` is set and does nothing otherwise
+([0025](decisions/0025-the-world-after-every-phase.md)). A phase added or moved needs its call
+moved with it, and the table in [interface/file-formats.md](interface/file-formats.md) updated:
+the numbers are a consumer's contract.
+
 Parsing is separate from execution. `parseorders.cpp` validates orders and queues them per
 unit; each phase then walks all units. The same parser backs the `check` subcommand, which
 syntax-checks an order file against a `DummyGame` and needs no `game.in`.

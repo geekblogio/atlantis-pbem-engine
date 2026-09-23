@@ -100,6 +100,9 @@ public:
     // dummy
     int get_seed() { return rng::get_random(10000); };
 
+    // The world state in the game.out format, as SaveGame and the phase files write it.
+    std::string write_game(int seed);
+
     // Get the contents of the log stream as a string.
     std::string log_output();
 

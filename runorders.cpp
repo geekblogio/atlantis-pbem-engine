@@ -7,50 +7,72 @@ void Game::RunOrders()
     //
     // Form and instant orders are handled during parsing
     //
+    // dump_phase writes the world state after each phase when ATLANTIS_PHASE_DUMPS is set, and
+    // nothing otherwise. The numbers are fixed: a phase the ruleset skips still writes its file.
     logger::write("Running FIND Orders...");
     RunFindOrders();
+    dump_phase(1, "find");
     logger::write("Running ENTER/LEAVE Orders...");
     RunEnterOrders(0);
+    dump_phase(2, "enter");
     logger::write("Running PROMOTE/EVICT Orders...");
     RunPromoteOrders();
+    dump_phase(3, "promote");
     logger::write("Running Combat...");
     DoAttackOrders();
     DoAutoAttacks();
+    dump_phase(4, "combat");
     logger::write("Running STEAL/ASSASSINATE Orders...");
     RunStealthOrders();
+    dump_phase(5, "stealth");
     logger::write("Running GIVE Orders...");
     DoGiveOrders();
+    dump_phase(6, "give");
     logger::write("Running ENTER NEW Orders...");
     RunEnterOrders(1);
+    dump_phase(7, "enter-new");
     logger::write("Running EXCHANGE Orders...");
     DoExchangeOrders();
+    dump_phase(8, "exchange");
     logger::write("Running DESTROY Orders...");
     RunDestroyOrders();
+    dump_phase(9, "destroy");
     logger::write("Running PILLAGE Orders...");
     RunPillageOrders();
+    dump_phase(10, "pillage");
     logger::write("Running TAX Orders...");
     RunTaxOrders();
+    dump_phase(11, "tax");
     logger::write("Running GUARD 1 Orders...");
     DoGuard1Orders();
+    dump_phase(12, "guard1");
     logger::write("Running Magic Orders...");
     ClearCastEffects();
     RunCastOrders();
+    dump_phase(13, "magic");
     logger::write("Running SELL Orders...");
     RunSellOrders();
+    dump_phase(14, "sell");
     logger::write("Running BUY Orders...");
     RunBuyOrders();
+    dump_phase(15, "buy");
     logger::write("Running FORGET Orders...");
     RunForgetOrders();
+    dump_phase(16, "forget");
     logger::write("Mid-Turn Processing...");
     MidProcessTurn();
+    dump_phase(17, "mid-turn");
     logger::write("Running QUIT Orders...");
     RunQuitOrders();
+    dump_phase(18, "quit");
     logger::write("Removing Empty Units...");
     DeleteEmptyUnits();
+    dump_phase(19, "empty-units");
     if (Globals->ALLOW_WITHDRAW) {
         logger::write("Running WITHDRAW Orders...");
         DoWithdrawOrders();
     }
+    dump_phase(20, "withdraw");
 
     // Make sure we have a sacrifice enabled object before we run the orders
     for (auto ob = 0; ob < NOBJECTS; ob++) {
@@ -61,6 +83,7 @@ void Game::RunOrders()
         RunSacrificeOrders();
         break;
     }
+    dump_phase(21, "sacrifice");
 
     logger::write("Running Consolidated Movement Orders...");
     RunMovementOrders();
@@ -68,35 +91,45 @@ void Game::RunOrders()
     SinkUncrewedFleets();
     DrownUnits();
     FindDeadFactions();
+    dump_phase(22, "movement");
     logger::write("Running Teach Orders...");
     RunTeachOrders();
+    dump_phase(23, "teach");
     logger::write("Running Month-long Orders...");
     RunMonthOrders();
+    dump_phase(24, "month");
     logger::write("Running Economics...");
     ProcessEconomics();
+    dump_phase(25, "economics");
     logger::write("Running Teleport Orders...");
     RunTeleportOrders();
+    dump_phase(26, "teleport");
     if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
         logger::write("Running Transport Orders...");
         CheckTransportOrders();
         RunTransportOrders();
     }
+    dump_phase(27, "transport");
 
     if (!(SkillDefs[S_ANNIHILATION].flags & SkillType::DISABLED)) {
         logger::write("Running Annihilation Orders...");
         RunAnnihilateOrders();
     }
+    dump_phase(28, "annihilate");
 
     logger::write("Assessing Maintenance costs...");
     AssessMaintenance();
+    dump_phase(29, "maintenance");
     if (Globals->DYNAMIC_POPULATION) {
         logger::write("Processing Migration...");
         ProcessMigration();
     }
+    dump_phase(30, "migration");
     logger::write("Post-Turn Processing...");
     PostProcessTurn();
     DeleteEmptyUnits();
     RemoveEmptyObjects();
+    dump_phase(31, "post-turn");
 }
 
 void Game::ClearCastEffects()

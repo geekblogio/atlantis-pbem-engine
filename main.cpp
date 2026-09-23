@@ -26,6 +26,7 @@ void usage()
     logger::write("  ATLANTIS_SIM_MODE         write only the JSON report, no text report or template");
     logger::write("  ATLANTIS_NO_GM_REPORT     do not write the world-wide GM report");
     logger::write("  ATLANTIS_FORCE_GM_REPORT  write it even where the ruleset disables it");
+    logger::write("  ATLANTIS_PHASE_DUMPS      `run` also writes the world after every phase, phase.<nn>-<name>.out");
 }
 
 int main(int argc, char *argv[])
@@ -98,6 +99,15 @@ int main(int argc, char *argv[])
     if (std::getenv("ATLANTIS_FORCE_GM_REPORT")) {
         Globals->GM_REPORT = 1;
         logger::write("World GM report forced on (ATLANTIS_FORCE_GM_REPORT).");
+    }
+
+    // For the Python port (atlantis-pbem-ng), which compares its turn with this engine's phase
+    // by phase: the world state after reading the orders and after every phase of RunOrders, in
+    // the game.out format. The files draw nothing from the RNG, so the turn itself is unchanged.
+    // Inert when unset, like the other four (ADR 0005).
+    if (std::getenv("ATLANTIS_PHASE_DUMPS")) {
+        game.set_phase_dumps(true);
+        logger::write("Writing the world after every phase (ATLANTIS_PHASE_DUMPS).");
     }
 
     game.ModifyTablesPerRuleset();

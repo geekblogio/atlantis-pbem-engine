@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include <string.h>
 
 #include "game.h"
@@ -320,6 +322,11 @@ void Game::set_deterministic_seed(int seed)
     init_random_seed = [seed]() { rng::seed_random(seed); };
 }
 
+void Game::set_phase_dumps(bool enabled)
+{
+    phase_dumps = enabled;
+}
+
 bool read_input_line(parser::string_parser& parser)
 {
     std::cin >> parser;
@@ -490,6 +497,14 @@ int Game::SaveGame()
     std::ofstream f("game.out", std::ios::out|std::ios::ate);
     if (!f.is_open()) return(0);
 
+    // The one draw of saving: it seeds the next turn (OpenGame). Nothing write_game calls draws,
+    // so taking it before the first line leaves the stream of draws as it was.
+    write_game(f, rng::get_random(10000));
+    return(1);
+}
+
+void Game::write_game(std::ostream& f, int seed)
+{
     //
     // Write out Globals
     //
@@ -500,7 +515,7 @@ int Game::SaveGame()
 
     f << year << "\n";
     f << month << "\n";
-    f << rng::get_random(10000) << "\n";
+    f << seed << "\n";
     f << factionseq << "\n";
     f << unitseq << "\n";
     f << shipseq << "\n";
@@ -521,8 +536,22 @@ int Game::SaveGame()
 
     // Write out quests
     quests.write_quests(f);
+}
 
-    return(1);
+void Game::dump_phase(int number, const std::string& name)
+{
+    if (!phase_dumps) return;
+
+    std::ostringstream file_name;
+    file_name << "phase." << std::setw(2) << std::setfill('0') << number << '-' << name << ".out";
+    std::ofstream f(file_name.str(), std::ios::out|std::ios::trunc);
+    if (!f.is_open()) {
+        logger::write("Couldn't write " + file_name.str() + ".");
+        return;
+    }
+    // The seed line is a placeholder. Drawing one here, as SaveGame does, would move every draw
+    // after it and change the turn being recorded.
+    write_game(f, 0);
 }
 
 void Game::DummyGame()
@@ -1026,6 +1055,7 @@ int Game::RunGame()
         logger::write("QUITting Inactive Factions...");
         RemoveInactiveFactions();
     }
+    dump_phase(0, "orders");
 
     logger::write("Running the Turn...");
     RunOrders();

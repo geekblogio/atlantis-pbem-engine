@@ -20,6 +20,12 @@ if [[ $? != 0 ]]; then
   failure=1
 fi
 
+echo "Running the standard snapshots with phase dumps"
+./run-phase-dump-snapshot.sh
+if [[ $? != 0 ]]; then
+  failure=1
+fi
+
 echo "Running the world generation snapshots"
 for game in standard basic fracas havilah kingdoms neworigins rimefall; do
   ./run-worldgen-snapshot.sh "$game"
