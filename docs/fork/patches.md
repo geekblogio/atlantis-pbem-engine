@@ -1443,7 +1443,7 @@ turns replay from their own `game.in` and did not move.
 
 **Fork-local, permanently.** Start-location policy for a variant this fork invented.
 
-### `#NN` — the world after every phase, for the Python port (0025)
+### `#85` — the world after every phase, for the Python port (0025)
 
 `game.h`, `game.cpp`, `runorders.cpp`, `main.cpp`, a unit test, a snapshot runner, the interface
 documents. `ATLANTIS_PHASE_DUMPS` makes `run` write the world state after the orders are read and
