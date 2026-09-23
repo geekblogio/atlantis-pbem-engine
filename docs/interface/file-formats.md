@@ -23,6 +23,7 @@ All of these live in the process's working directory under fixed names. See
 | `times.<random>` | out | world-events articles — see the warning below |
 | `rimefall.json` | out | **`rimefall` only** — that turn's front, sources and election as numbers; see below |
 | `names.out` | out | `havilah` only, written by `new`: every generated region name, for a GM to scan |
+| `phase.<nn>-<name>.out` | out | **only with `ATLANTIS_PHASE_DUMPS`** — the world after each phase of the turn; see below |
 
 A missing `orders.<n>` is not an error: that faction simply issued no orders.
 
@@ -70,6 +71,65 @@ leader, the electorate and the percentage once both sources are held.
 
 It is a **ruleset's file, not the engine's**: no other ruleset writes it, and nothing else reads
 it. A consumer that does not know about it can ignore it; `report.<n>.json` is unchanged.
+
+### `phase.<nn>-<name>.out`
+
+Written by `run` when `ATLANTIS_PHASE_DUMPS` is set, by every ruleset: the world state at 32
+points of the turn, in the `game.out` format. `00-orders` is the state after the orders are read
+and inactive factions removed, the moment `RunOrders` starts; each further file is the state
+after one phase of `Game::RunOrders`:
+
+| `<nn>-<name>` | After |
+| --- | --- |
+| `00-orders` | `ReadOrders`, `RemoveInactiveFactions` |
+| `01-find` | `RunFindOrders` |
+| `02-enter` | `RunEnterOrders(0)` |
+| `03-promote` | `RunPromoteOrders` |
+| `04-combat` | `DoAttackOrders`, `DoAutoAttacks` |
+| `05-stealth` | `RunStealthOrders` |
+| `06-give` | `DoGiveOrders` |
+| `07-enter-new` | `RunEnterOrders(1)` |
+| `08-exchange` | `DoExchangeOrders` |
+| `09-destroy` | `RunDestroyOrders` |
+| `10-pillage` | `RunPillageOrders` |
+| `11-tax` | `RunTaxOrders` |
+| `12-guard1` | `DoGuard1Orders` |
+| `13-magic` | `ClearCastEffects`, `RunCastOrders` |
+| `14-sell` | `RunSellOrders` |
+| `15-buy` | `RunBuyOrders` |
+| `16-forget` | `RunForgetOrders` |
+| `17-mid-turn` | `MidProcessTurn` |
+| `18-quit` | `RunQuitOrders` |
+| `19-empty-units` | `DeleteEmptyUnits` |
+| `20-withdraw` | `DoWithdrawOrders`, if `ALLOW_WITHDRAW` |
+| `21-sacrifice` | `RunSacrificeOrders`, if an enabled object takes sacrifices |
+| `22-movement` | `RunMovementOrders`, `SinkUncrewedFleets`, `DrownUnits`, `FindDeadFactions` |
+| `23-teach` | `RunTeachOrders` |
+| `24-month` | `RunMonthOrders` |
+| `25-economics` | `ProcessEconomics` |
+| `26-teleport` | `RunTeleportOrders` |
+| `27-transport` | `CheckTransportOrders`, `RunTransportOrders`, if `ALLOW_TRANSPORT` |
+| `28-annihilate` | `RunAnnihilateOrders`, if the ANNIHILATION skill is enabled |
+| `29-maintenance` | `AssessMaintenance` |
+| `30-migration` | `ProcessMigration`, if `DYNAMIC_POPULATION` |
+| `31-post-turn` | `PostProcessTurn`, `DeleteEmptyUnits`, `RemoveEmptyObjects` |
+
+**The set of files is fixed.** A phase the ruleset skips still writes its file, the same state
+as the one before it, so a consumer can rely on all 32 names.
+
+Three things to know before reading them:
+
+- **The seed line is `0`.** `game.out` carries a value drawn from the RNG to seed the next turn;
+  drawing one per phase file would move every draw after it and change the turn being recorded.
+  The line is a placeholder and says nothing about the generator.
+- **The last file is not `game.out`.** After `31-post-turn` the turn still writes the reports,
+  empties the dead units' holding area and deletes dead factions before `game.out` is saved.
+- **Every run writes all 32 again.** A set left over from an earlier turn is replaced file by
+  file, so a run with the variable set never mixes two turns. A run without it leaves an old set
+  in place; clear the directory between turns, as for `times.*`.
+
+The format is `game.out`'s, and the same caveat applies: positional and without a schema. It is
+meant to be read by the code that reads `game.in`, or by a converter built on it.
 
 ## `players.in`
 

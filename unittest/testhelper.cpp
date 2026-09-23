@@ -22,6 +22,12 @@ void UnitTestHelper::setup_turn() {
     game.PreProcessTurn();
 }
 
+std::string UnitTestHelper::write_game(int seed) {
+    std::stringstream out;
+    game.write_game(out, seed);
+    return out.str();
+}
+
 void UnitTestHelper::setup_reports() {
     game.MakeFactionReportLists();
 }

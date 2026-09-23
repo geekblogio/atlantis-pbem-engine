@@ -1443,6 +1443,24 @@ turns replay from their own `game.in` and did not move.
 
 **Fork-local, permanently.** Start-location policy for a variant this fork invented.
 
+### `#85` — the world after every phase, for the Python port (0025)
+
+`game.h`, `game.cpp`, `runorders.cpp`, `main.cpp`, a unit test, a snapshot runner, the interface
+documents. `ATLANTIS_PHASE_DUMPS` makes `run` write the world state after the orders are read and
+after each of the 31 phases of `RunOrders`, as `phase.<nn>-<name>.out` in the `game.out` format.
+
+`SaveGame`'s body became `write_game(std::ostream&, int seed)`, so the phase files and `game.out`
+come from one writer. **A phase file draws nothing**: its seed line is `0`, because the draw
+`SaveGame` makes for the next turn would, repeated per phase, shift every draw after it.
+`run-phase-dump-snapshot.sh` is the evidence rather than the argument: the 14 recorded `standard`
+turns replay with the variable set and everything but the phase files and the announcing log line
+matches the recording.
+
+Engine code, but inert when unset: no recorded turn, rulebook or world moved.
+
+**Fork-local.** It exists for `geekblogio/atlantis-pbem-ng`, which compares its turn with this
+engine's phase by phase; upstream has no such consumer.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

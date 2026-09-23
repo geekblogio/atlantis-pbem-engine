@@ -22,6 +22,13 @@ stdout.
 That interface is specified in [../interface/](../interface/README.md). This document is only
 about who depends on it and what that obligates.
 
+A third project uses this repository differently. **`geekblogio/atlantis-pbem-ng`**, a Python
+port of the engine, pins it as a submodule and builds `standard` from it as the oracle the port is
+compared against: the recorded turns in `snapshot-tests/`, the files a turn writes, and the phase
+files of `ATLANTIS_PHASE_DUMPS` ([0025](../decisions/0025-the-world-after-every-phase.md)). It
+moves only when it bumps the submodule, so a change here reaches it on its own schedule, but the
+phase files exist for it alone.
+
 ## What they depend on, concretely
 
 - **`make -C src havilah` keeps working**, and the Makefile path in particular — not just
@@ -30,11 +37,12 @@ about who depends on it and what that obligates.
   process. Changing that is a rewrite on their side, not an adaptation.
 - **`report.<n>.json`.** The simulation reads nothing else. A removed or renamed field is a
   silent failure the next time a turn runs.
-- **The four environment variables.** `ATLANTIS_SEED`, `ATLANTIS_SIM_MODE` and
+- **Four of the five environment variables.** `ATLANTIS_SEED`, `ATLANTIS_SIM_MODE` and
   `ATLANTIS_NO_GM_REPORT` are load-bearing for the simulation, by name; `ATLANTIS_FORCE_GM_REPORT`
   is load-bearing for the orchestrator, which sets it on every turn so that a `basic` game has a
   world history at all. That is precisely why they are environment variables rather than CLI
-  flags — see [ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md).
+  flags — see [ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md). The fifth,
+  `ATLANTIS_PHASE_DUMPS`, is the Python port's; neither of these two projects sets it.
 - **`neworigins8`** for the live game. Consumers that want NewOrigins 8 build that target
   rather than patching `neworigins` — this replaced a local patch and is a deliberate,
   downstream-visible change.

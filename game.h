@@ -68,6 +68,9 @@ public:
     // Make NewGame() build the same world every time. Without this the seed comes from
     // std::random_device. Has no effect on `run`, which restores the seed from game.in.
     void set_deterministic_seed(int seed);
+    // Make `run` write the world state after reading the orders and after every phase of
+    // RunOrders, as phase.<nn>-<name>.out beside game.out. Off by default; see dump_phase.
+    void set_phase_dumps(bool enabled);
     int OpenGame();
     void DummyGame();
 
@@ -145,6 +148,11 @@ private:
     void PreProcessTurn();
     void ReadOrders();
     void RunOrders();
+    // The body of SaveGame: the world state in the game.out format, with the given seed. Draws
+    // nothing; SaveGame draws the seed itself.
+    void write_game(std::ostream& f, int seed);
+    // With phase dumps on, write the world state as phase.<nn>-<name>.out; otherwise nothing.
+    void dump_phase(int number, const std::string& name);
     void ClearOrders(Faction *);
     void MakeFactionReportLists();
     void CountAllSpecialists();
@@ -309,6 +317,9 @@ private:
     // control the random number seed used for new game generation (by default it uses the existing
     // seedrandomrandom function) which uses the current time.
     std::function<void()> init_random_seed = static_cast<void(*)()>(&rng::seed_random);
+
+    // Whether `run` writes the phase files (set_phase_dumps). Off unless ATLANTIS_PHASE_DUMPS is set.
+    bool phase_dumps = false;
 
     enum
     {

@@ -41,3 +41,4 @@ is what prompted writing this down.
 | [0022](0022-a-taken-gateway-substitutes-a-start-location.md) | A taken gateway substitutes a start location |
 | [0023](0023-a-rimefall-start-carries-a-settlement.md) | A `rimefall` start carries a settlement |
 | [0024](0024-the-start-count-scales-with-the-land.md) | The start count scales with the land |
+| [0025](0025-the-world-after-every-phase.md) | The world after every phase, for the Python port |
