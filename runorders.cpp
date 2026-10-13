@@ -1690,12 +1690,31 @@ void Game::DoBuy(ARegion *r, Market *m)
 					if (m->amount == -1) {
 						/* unlimited market */
 						temp = o->num;
-					} else {
-						if (attempted) {
-							temp = (m->amount * o->num +
-									getrandom(attempted)) / attempted;
-							if (temp < 0) temp = 0;
-						}
+					} else if (attempted) {
+						temp = (m->amount * o->num +
+								getrandom(attempted)) / attempted;
+						if (temp < 0) temp = 0;
+					}
+					// Bug fix: GetBuyAmount checked every BUY order of this
+					// market against the purse as it stood *before* any of them
+					// was paid. Several orders on one purse (two BUYs in one
+					// unit, BUY ALL twice, two units drawing on one SHARE unit)
+					// all passed, and ConsumeSharedMoney below stops silently at
+					// an empty purse, so only the first was paid and the rest
+					// were delivered free. Re-check against what is left now.
+					//
+					// Nothing else changes: the random draw above is taken
+					// exactly as before (so the RNG stream is untouched), and
+					// when no earlier order drained this purse temp <= o->num
+					// was already affordable, so the cap never fires. When it
+					// does fire, the stock not bought stays available to the
+					// orders after this one (m->amount is reduced by temp).
+					if (temp * m->price > u->GetSharedMoney()) {
+						temp = u->GetSharedMoney() / m->price;
+						u->Error("BUY: Unit attempted to buy more than it "
+								"could afford.");
+					}
+					if (m->amount != -1) {
 						attempted -= o->num;
 						m->amount -= temp;
 						m->activity += temp;

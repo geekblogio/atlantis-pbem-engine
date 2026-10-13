@@ -956,6 +956,13 @@ void Game::ProcessEntertainOrder(Unit *unit, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, err);
 		if (unit->monthorders) delete unit->monthorders;
 	}
+	// Bug fix: with TAX_PILLAGE_MONTH_LONG, TAX and PILLAGE are month-long
+	// orders held in `taxing`, not in `monthorders`. Every other month-long
+	// order (WORK, PRODUCE, BUILD, STUDY, TEACH, MOVE, SAIL, ADVANCE, IDLE)
+	// clears that flag when it replaces it; ENTERTAIN did not, so TAX followed
+	// by ENTERTAIN reported "Overwriting previous month-long order" and then
+	// both taxed and entertained. Master fixed it the same way.
+	if (Globals->TAX_PILLAGE_MONTH_LONG) unit->taxing = TAX_NONE;
 	ProduceOrder *o = new ProduceOrder;
 	o->item = I_SILVER;
 	o->skill = S_ENTERTAINMENT;

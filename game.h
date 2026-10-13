@@ -62,6 +62,10 @@ I can see what the Item.cpp docs look like.
 class Game
 {
 	friend class Faction;
+	// Test seam: lets unittest/ reach the private order handlers (BUY,
+	// ENTERTAIN, TAX) without a whole turn. Defined only in the unit tests;
+	// the game binaries never see a definition.
+	friend struct GameTestAccess;
 public:
 	Game();
 	~Game();
