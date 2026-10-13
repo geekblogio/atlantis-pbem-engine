@@ -207,6 +207,14 @@ void SetupNames()
 {
 	unsigned int i;
 
+	// Forget the names of any previous world. A fresh process starts with an
+	// empty list and builds one world, so for the `new` command this is a
+	// no-op and changes nothing. It matters only to code that builds several
+	// worlds in one process: AGetName redraws when a name collides with one
+	// already handed out, so stale names would shift the random stream and the
+	// same seed would build a different world.
+	regionnames.DeleteAll();
+
 	nnames = 0;
 	ntowns = 0;
 	nregions = 0;

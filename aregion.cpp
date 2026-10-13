@@ -1500,6 +1500,288 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month,
 	}
 }
 
+int ARegion::produces_item(int item)
+{
+	// master's: the amount of the first production of that item, 0 if none.
+	forlist(&products) {
+		Production *p = (Production *) elem;
+		if (p->itemtype == item) return p->amount;
+	}
+	return 0;
+}
+
+// Port of master's ARegion::basic_region_data: what identifies a region and
+// is visible from afar (also used for exits and the hex map).
+json ARegion::basic_region_data(ARegionList *pRegs)
+{
+	json j;
+	j["terrain"] = TerrainDefs[type].name;
+
+	ARegionArray *pArr = pRegs->pRegionArrays[zloc];
+	std::string label = pArr->strName ? pArr->strName->Str() : "surface";
+	j["coordinates"] = { { "x", xloc }, { "y", yloc }, { "z", zloc }, { "label", label } };
+
+	// The "very deep" wording ShortPrint puts before the level name, under
+	// ShortPrint's own conditions. master computes it slightly differently
+	// (it skips it whenever EASIER_UNDERWORLD is set, and starts at z >= 2
+	// rather than z > 2); following the text keeps the two reports of one
+	// turn in agreement. Under NewOrigins' settings neither ever emits it.
+	if (pArr->strName && !(Globals->EASIER_UNDERWORLD &&
+			(Globals->UNDERWORLD_LEVELS+Globals->UNDERDEEP_LEVELS > 1))) {
+		std::string z_prefix = "";
+		if (zloc > 2 && zloc < Globals->UNDERWORLD_LEVELS+2) {
+			for (int i = zloc; i > 3; i--) z_prefix += "very ";
+			z_prefix += "deep ";
+		} else if ((zloc > Globals->UNDERWORLD_LEVELS+2) &&
+					(zloc < Globals->UNDERWORLD_LEVELS +
+					Globals->UNDERDEEP_LEVELS + 2)) {
+			for (int i = zloc; i > Globals->UNDERWORLD_LEVELS + 3; i--) z_prefix += "very ";
+			z_prefix += "deep ";
+		}
+		if (!z_prefix.empty()) j["coordinates"]["depth_prefix"] = z_prefix;
+	}
+
+	j["province"] = name->Str();
+	if (town) {
+		j["settlement"] = {
+			{ "name", town->name->Str() },
+			{ "size", TownString(town->TownType()).Str() }
+		};
+	}
+	return j;
+}
+
+// Port of master's ARegion::build_json_report. The visibility rules are
+// WriteReport's; where master's JSON and stable's text disagree, this
+// follows the text (commented below).
+void ARegion::build_json_report(json& j, Faction *fac, int month,
+		ARegionList *pRegions)
+{
+	Farsight *farsight = GetFarsight(&farsees, fac);
+	Farsight *passer = GetFarsight(&passers, fac);
+	bool present = Present(fac) || fac->IsNPC();
+
+	// this faction cannot see this region (left as null, like master)
+	if (!farsight && !passer && !present) return;
+
+	j = basic_region_data(pRegions);
+	j["present"] = present && !fac->IsNPC();
+
+	if (Population() && (present || farsight ||
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS))) {
+		j["population"] = { { "amount", Population() } };
+		if (Globals->RACES_EXIST) {
+			j["population"]["race"] = ItemDefs[race].names;
+		} else {
+			// The text prints no race here; master writes "men".
+			j["population"]["race"] = "men";
+		}
+		j["tax"] = (present || farsight ||
+			Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY) ? wealth : 0;
+	}
+
+	if (Globals->WEATHER_EXISTS) {
+		std::string weather_name = clearskies ? "unnaturally clear" : SeasonNames[weather];
+		j["weather"] = {
+			{ "current", weather_name },
+			{ "next", SeasonNames[pRegions->GetWeather(this, (month + 1) % 12)] }
+		};
+	}
+
+	if (type == R_NEXUS) {
+		int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
+		char *nexus_desc = new char[len];
+		snprintf(nexus_desc, len, AC_STRING, Globals->WORLD_NAME,
+				Globals->WORLD_NAME);
+		j["description"] = nexus_desc;
+		delete [] nexus_desc;
+	}
+
+	// WriteEconomy is called with present || farsight; so is everything here.
+	int seen = present || farsight;
+
+	Production *p = products.GetProd(I_SILVER, -1);
+	double wages = p ? p->productivity / 10.0 : 0;
+	int max_wages = p ? p->amount : 0;
+	j["wages"] = (p && ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || seen))
+		? json{ { "amount", wages }, { "max", max_wages } }
+		: json{ { "amount", 0 } };
+
+	json wanted = json::array();
+	json for_sale = json::array();
+	forlist(&markets) {
+		Market *m = (Market *) elem;
+		if (!m->amount) continue;
+		if (!seen && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS)) continue;
+
+		ItemType &itemdef = ItemDefs[m->item];
+		json item = {
+			{ "name", itemdef.name }, { "plural", itemdef.names },
+			{ "tag", itemdef.abr }, { "price", m->price }
+		};
+		if (m->amount != -1) item["amount"] = m->amount;
+		else item["unlimited"] = true;
+
+		if (m->type == M_SELL) {
+			if (ItemDefs[m->item].type & IT_ADVANCED) {
+				if (!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
+					if (!HasItem(fac, m->item)) continue;
+				}
+			}
+			wanted.push_back(item);
+		} else {
+			for_sale.push_back(item);
+		}
+	}
+	j["markets"] = { { "wanted", wanted }, { "for_sale", for_sale } };
+
+	p = products.GetProd(I_SILVER, S_ENTERTAINMENT);
+	if (p) {
+		j["entertainment"] = (seen ||
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ENTERTAINMENT)) ? p->amount : 0;
+	}
+
+	j["products"] = json::array();
+	{
+		forlist(&products) {
+			Production *prod = (Production *) elem;
+			ItemType &itemdef = ItemDefs[prod->itemtype];
+			if (prod->itemtype == I_SILVER) continue; // wages and entertainment above
+			if (itemdef.type & IT_ADVANCED) {
+				// WriteProducts shows an advanced resource to whoever can
+				// make it whether or not the region is only seen in transit;
+				// master's JSON additionally hides it in transit. Text wins.
+				if (!(CanMakeAdv(fac, prod->itemtype) || fac->IsNPC())) continue;
+			} else if (!seen && !(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES)) {
+				continue;
+			}
+			json item = {
+				{ "name", itemdef.name }, { "plural", itemdef.names }, { "tag", itemdef.abr },
+			};
+			if (prod->amount != -1) item["amount"] = prod->amount;
+			else item["unlimited"] = true;
+			j["products"].push_back(item);
+		}
+	}
+
+	bool default_state = (seen || (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS));
+	bool exits_seen[NDIRS];
+	std::fill_n(exits_seen, NDIRS, default_state);
+	if (!default_state && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS)) {
+		forlist(&passers) {
+			Farsight *fp = (Farsight *) elem;
+			if (fp->faction == fac) {
+				for (int i = 0; i < NDIRS; i++) {
+					exits_seen[i] |= (bool) fp->exits_used[i];
+				}
+			}
+		}
+	}
+
+	j["exits"] = json::array();
+	for (int i = 0; i < NDIRS; i++) {
+		if (!exits_seen[i] || !neighbors[i]) continue;
+		j["exits"].push_back({
+			{ "direction", DirectionStrs[i] },
+			{ "region", neighbors[i]->basic_region_data(pRegions) }
+		});
+	}
+
+	if (Globals->GATES_EXIST && gate && gate != -1) {
+		bool can_see_gate = false;
+		if (fac->IsNPC()) can_see_gate = true;
+		if (Globals->IMPROVED_FARSIGHT && farsight) {
+			forlist(&farsees) {
+				Farsight *watcher = (Farsight *) elem;
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_GATE_LORE)) can_see_gate = true;
+				}
+			}
+		}
+		if (Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) {
+			forlist(&passers) {
+				Farsight *watcher = (Farsight *) elem;
+				if (watcher && watcher->faction == fac && watcher->unit) {
+					if (watcher->unit->GetSkill(S_GATE_LORE)) can_see_gate = true;
+				}
+			}
+		}
+		forlist(&objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				if ((u->faction == fac) && u->GetSkill(S_GATE_LORE)) can_see_gate = true;
+			}
+		}
+
+		// As master: a closed gate is reported as "open": false whether or
+		// not SHOW_CLOSED_GATES lets the text mention it.
+		if (can_see_gate) {
+			j["gate"]["open"] = gateopen;
+			if (gateopen) {
+				j["gate"]["number"] = gate;
+				if (!Globals->DISPERSE_GATE_NUMBERS) {
+					j["gate"]["total"] = pRegions->numberofgates;
+				}
+			}
+		}
+	}
+
+	int obs = GetObservation(fac, 0);
+	int truesight = GetTrueSight(fac, 0);
+	int detfac = 0;
+
+	int passobs = GetObservation(fac, 1);
+	int passtrue = GetTrueSight(fac, 1);
+	int passdetfac = detfac;
+
+	if (fac->IsNPC()) {
+		obs = 10;
+		passobs = 10;
+	}
+
+	{
+		forlist(&objects) {
+			Object *o = (Object *) elem;
+			forlist(&o->units) {
+				Unit *u = (Unit *) elem;
+				if (u->faction == fac && u->GetSkill(S_MIND_READING) > 1) {
+					detfac = 1;
+				}
+			}
+		}
+	}
+	if (Globals->IMPROVED_FARSIGHT && farsight) {
+		forlist(&farsees) {
+			Farsight *watcher = (Farsight *) elem;
+			if (watcher && watcher->faction == fac && watcher->unit) {
+				if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
+					detfac = 1;
+				}
+			}
+		}
+	}
+
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_USE_UNIT_SKILLS) &&
+			(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_UNITS)) {
+		forlist(&passers) {
+			Farsight *watcher = (Farsight *) elem;
+			if (watcher && watcher->faction == fac && watcher->unit) {
+				if (watcher->unit->GetSkill(S_MIND_READING) > 1) {
+					passdetfac = 1;
+				}
+			}
+		}
+	}
+
+	{
+		forlist(&objects) {
+			((Object *) elem)->build_json_report(j, fac, obs, truesight, detfac,
+					passobs, passtrue, passdetfac, seen);
+		}
+	}
+}
+
 // DK
 void ARegion::WriteTemplate(Areport *f, Faction *fac,
 		ARegionList *pRegs, int month)
@@ -2005,7 +2287,10 @@ ARegionList::~ARegionList()
 			delete pRegionArrays[i];
 		}
 
-		delete pRegionArrays;
+		// Allocated with new[] in CreateLevels, so it must be freed with delete[].
+		// Plain delete here is undefined behaviour; it only runs at process exit,
+		// which is why it went unnoticed, but some allocators abort on it.
+		delete [] pRegionArrays;
 	}
 }
 
@@ -2933,8 +3218,13 @@ void makeRivers(Map* map, ARegionArray* arr, std::vector<WaterBody*>& waterBodie
 
 	std::cout << "Max river reach " << maxRiverReach << std::endl;
 
+	// Separate from the game's ISAAC stream. seedclock() is time(0) unless
+	// ATLANTIS_SEED pins it, in which case this shuffle is reproducible too.
+	// Note that with the clock, this reading is taken seconds after the one
+	// seedrandomrandom() took, so a world built live is not reproduced by
+	// ATLANTIS_SEED=<its world seed> alone wherever this shuffle matters.
 	auto rng = std::default_random_engine();
-	rng.seed( time(0) );
+	rng.seed( seedclock() );
 
 	graph.setCost([ map, &rivers ](ARegion* current, ARegion* next) {
 		int cost = std::max(1, map->map.get(next->xloc * 2, next->yloc * 2)->elevation);

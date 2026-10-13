@@ -26,6 +26,7 @@
 #define GAME_IO
 
 #include "astring.h"
+#include <ctime>
 
 void initIO();
 void doneIO();
@@ -34,7 +35,13 @@ void doneIO();
 int getrandom(int);
 /* Seed the random number generator */
 void seedrandom(int);
+/* Seed it for a new world: from the clock, or from ATLANTIS_SEED if set */
 void seedrandomrandom();
+/* Pin every world-generation seed to this value (ATLANTIS_SEED) */
+void setfixedseed(int);
+/* The value world generation seeds its generators from: the fixed seed if
+ * one was set, otherwise time(0). */
+time_t seedclock();
 
 int makeRoll(int rolls, int sides);
 int clamp(int min, int value, int max);

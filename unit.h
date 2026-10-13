@@ -49,6 +49,7 @@ class UnitId;
 #include "object.h"
 #include <set>
 #include <string>
+#include "atljson.h"
 
 enum {
 	GUARD_NONE,
@@ -132,6 +133,12 @@ class Unit : public AListElem
 		AString SpoilsReport(void);
 		int CanGetSpoil(Item *i);
 		void WriteReport(Areport *,int,int,int,int, int, int);
+		// JSON report, ported from master. `attitude` is the reader's
+		// attitude towards this unit's faction (A_*).
+		json build_json_descriptor();
+		void build_json_report(json& j, int obs, int truesight, int detfac,
+				int autosee, int attitude);
+		json write_json_orders();
 		AString GetName(int);
 		AString MageReport();
 		AString ReadyItem();

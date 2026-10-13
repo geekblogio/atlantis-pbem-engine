@@ -35,6 +35,7 @@ class Battle;
 #include "items.h"
 #include "events.h"
 #include <vector>
+#include "atljson.h"
 
 enum {
 	ASS_NONE,
@@ -62,6 +63,8 @@ class Battle : public AListElem
 		~Battle();
 
 		void Report(Areport *,Faction *);
+		// JSON counterpart of Report (port of master's).
+		void build_json_report(json& j, Faction *fac);
 		void AddLine(const AString &);
 
 		int Run(Events* events, ARegion *, Unit *, AList *, Unit *, AList *, int ass,

@@ -32,17 +32,25 @@
 #include "skills.h"
 #include "gamedata.h"
 
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
+
 void usage()
 {
 	Awrite("atlantis new");
 	Awrite("atlantis run");
 	Awrite("atlantis edit");
 	Awrite("");
-	Awrite("atlantis map <geo|wmon|lair|gate> <mapfile>");
+	Awrite("atlantis map <geo|wmon|lair|gate|hex> <mapfile>");
 	Awrite("atlantis mapunits");
 	Awrite("atlantis genrules <introfile> <cssfile> <rules-outputfile>");
 	Awrite("");
 	Awrite("atlantis check <orderfile> <checkfile>");
+	Awrite("");
+	Awrite("Environment:");
+	Awrite("  ATLANTIS_SEED=<integer>   fix the world generation seed used by `new`");
+	Awrite("  ATLANTIS_FORCE_GM_REPORT  write the world-wide GM report every turn");
 }
 
 int main(int argc, char *argv[])
@@ -62,6 +70,36 @@ int main(int argc, char *argv[])
 		usage();
 		doneIO();
 		return 0;
+	}
+
+	// ATLANTIS_SEED makes `new` reproducible: the same seed builds a
+	// byte-identical game.out. It stands in for the clock reading the world
+	// would otherwise be seeded from (see seedclock() in gameio.cpp), so the
+	// seed of a game created live is the creation time in Unix seconds.
+	// Unset -- the normal case -- nothing changes. `run` is unaffected either
+	// way: a running game reseeds from the value saved in game.in.
+	if (const char *seed_env = std::getenv("ATLANTIS_SEED")) {
+		try {
+			int seed = std::stoi(seed_env);
+			setfixedseed(seed);
+			Awrite(AString("Using deterministic world seed ") + seed +
+					" (ATLANTIS_SEED).");
+		} catch (const std::exception&) {
+			Awrite(AString("Ignoring ATLANTIS_SEED: '") + seed_env +
+					"' is not an integer.");
+		}
+	}
+
+	// Writes the world-wide GM report (faction 1) every turn, not just on the
+	// first one. It flips the ruleset global, exactly as master does; nothing
+	// in the game reads GM_REPORT except the report writers, so the turn
+	// itself plays out the same. (Writing the GM report does record "seen"
+	// items/skill levels on faction 1 via ShowSkill::Report -> DiscoverItem,
+	// so a ruleset that ships with GM_REPORT = 0 can get a different faction 1
+	// record in game.out. NewOrigins ships with GM_REPORT = 1: no difference.)
+	if (std::getenv("ATLANTIS_FORCE_GM_REPORT")) {
+		Globals->GM_REPORT = 1;
+		Awrite("World GM report forced on (ATLANTIS_FORCE_GM_REPORT).");
 	}
 
 	game.ModifyTablesPerRuleset();

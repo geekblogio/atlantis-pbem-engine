@@ -49,6 +49,7 @@ class ARegionArray;
 #include <map>
 #include <vector>
 #include <functional>
+#include "atljson.h"
 
 /* Weather Types */
 enum {
@@ -201,6 +202,12 @@ class ARegion : public AListElem
 		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
 		void WriteReport(Areport *f, Faction *fac, int month,
 				ARegionList *pRegions);
+		// JSON report, ported from master. Master reads the level name from
+		// ARegion::level; stable keeps no such pointer, hence pRegs.
+		json basic_region_data(ARegionList *pRegs);
+		void build_json_report(json& j, Faction *fac, int month,
+				ARegionList *pRegions);
+		int produces_item(int item);
 		// DK
 		void WriteTemplate(Areport *, Faction *, ARegionList *, int);
 		void WriteTemplateHeader(Areport *, Faction *, ARegionList *, int);

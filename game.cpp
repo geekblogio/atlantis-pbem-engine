@@ -39,6 +39,12 @@
 #include "gamedata.h"
 #include "quests.h"
 
+#include <algorithm>
+#include <fstream>
+#include <set>
+#include <string>
+#include <vector>
+
 Game::Game()
 {
 	gameStatus = GAME_STATUS_UNINIT;
@@ -225,6 +231,77 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (AString(typestr) == "wmon") type = 1;
 	if (AString(typestr) == "lair") type = 2;
 	if (AString(typestr) == "gate") type = 3;
+
+	if (AString(typestr) == "hex") {
+		// Port of master's `map hex` (Game::view_map, type 5): the whole world
+		// as JSON, one bucket of hexes per level, the nexus left out. It is
+		// the only view of a world before its first turn has produced a
+		// report. Same keys and value types as master; the level label
+		// carries the array index ("underworld1"), as master's does.
+		// Written with std::ofstream like master (truncating), not Aoutfile,
+		// which refuses to write over a non-empty file.
+		AString fname = mapfile;
+		std::ofstream out(fname.Str(), std::ios::out | std::ios::trunc);
+		if (!out.is_open()) return(0);
+
+		json worldmap;
+		std::vector<ARegion *> start_regions;
+		for (int i = 0; i < regions.numLevels; i++) {
+			ARegionArray *pArr = regions.pRegionArrays[i];
+			if (pArr->levelType == ARegionArray::LEVEL_NEXUS) {
+				// Without starting cities the nexus' inner exits are where
+				// factions start.
+				if (!Globals->START_CITIES_EXIST) {
+					ARegion *nexus = pArr->GetRegion(0, 0);
+					if (nexus) {
+						forlist(&nexus->objects) {
+							Object *o = (Object *) elem;
+							if (o->inner != -1) {
+								start_regions.push_back(regions.GetRegion(o->inner));
+							}
+						}
+					}
+				}
+				continue;
+			}
+			std::string label = pArr->strName ?
+				std::string(pArr->strName->Str()) + std::to_string(i-1) : "surface";
+			worldmap[label] = json::array();
+
+			for (int y = 0; y < pArr->y; y++) {
+				for (int x = 0; x < pArr->x; x++) {
+					ARegion *reg = pArr->GetRegion(x, y);
+					if (!reg) continue;
+					json data = reg->basic_region_data(&regions);
+					bool starting = (std::find(start_regions.begin(),
+							start_regions.end(), reg) != start_regions.end()) ||
+						reg->IsStartingCity();
+					json hexout = {
+						{ "x", x }, { "y", y }, { "z", i },
+						{ "terrain", data["terrain"] },
+						{ "yew", reg->produces_item(I_YEW) },
+						{ "mithril", reg->produces_item(I_MITHRIL) },
+						{ "admantium", reg->produces_item(I_ADMANTIUM) },
+						{ "floater", reg->produces_item(I_FLOATER) },
+						{ "wing", reg->produces_item(I_WHORSE) },
+						{ "gate", reg->gate != 0 },
+						{ "exits", json::array() },
+						{ "shaft", reg->HasShaft() },
+						{ "starting", starting }
+					};
+					for (int d = 0; d < NDIRS; d++) {
+						hexout["exits"].push_back(reg->neighbors[d] != nullptr);
+					}
+					if (reg->town) {
+						hexout["town"] = data["settlement"]["size"];
+					}
+					worldmap[label].push_back(hexout);
+				}
+			}
+		}
+		out << worldmap.dump(2);
+		return(1);
+	}
 
 	Aoutfile f;
 	if (f.OpenByName(mapfile) == -1) return(0);
@@ -1228,12 +1305,29 @@ void Game::WriteReport()
 		if (!fac->IsNPC() ||
 				((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
 			(fac->num == 1))) {
+			// report.<n>.json next to report.<n>, same schema as master.
+			// The three steps must stay in this order (see Faction::
+			// build_json_report in faction.h): the JSON is built first,
+			// while WriteReport has not yet emptied the errors, events and
+			// battles; the text report then runs exactly as it always did
+			// and hands over the skill/item/object reports it printed.
+			json json_report;
+			fac->build_json_report(json_report, this, citems);
+
 			int i = f.OpenByName(str);
 			if (i != -1) {
 				fac->WriteReport(&f, this, citems);
 				f.Close();
 			}
+
+			fac->add_json_show_reports(json_report);
+			std::ofstream jsonf((std::string(str.Str()) + ".json").c_str(),
+					std::ios::out | std::ios::trunc);
+			if (jsonf.is_open()) {
+				jsonf << json_report.dump(2);
+			}
 		}
+		fac->clear_json_report_state();
 		Adot();
 	}
 }
@@ -2130,14 +2224,38 @@ void Game::Equilibrate()
 void Game::WriteTimesArticle(AString article)
 {
 	AString filename;
-	int result;
 	Arules f;
 
+	// The article's name is drawn from the game's own random stream, and the
+	// old loop drew again whenever the name was taken -- so a times.* file
+	// left in the directory by an earlier run consumed extra draws, moved
+	// everything drawn after it (GrowWMons runs later in the same turn) and,
+	// since game.out saves the generator state, every later turn too. The
+	// working directory's contents were part of the game (master #65,
+	// f0cf88d).
+	//
+	// Master's fix draws once and counts up past any taken name. That also
+	// changes the one case that happens in a clean directory: a second
+	// article of the same turn drawing the first one's number (1 in 10000),
+	// which the old loop answered with another draw. To keep every game that
+	// ran in a clean directory exactly as it was, collisions with articles
+	// this process wrote itself are still answered by drawing again, as
+	// before; only names that were already on disk before the run are
+	// skipped by counting, which costs no draw. With no leftover file the
+	// stream is therefore identical to the old code's.
+	static std::set<int> written_this_run;
+	int number;
 	do {
-		filename = "times.";
-		filename += getrandom(10000);
-		result = access(filename.Str(), F_OK);
-	} while (result == 0);
+		number = getrandom(10000);
+	} while (written_this_run.count(number));
+	// Bounded so a directory holding all 10000 names cannot hang the turn;
+	// in that case one old article is overwritten.
+	filename = AString("times.") + number;
+	for (int tried = 1; tried < 10000 && access(filename.Str(), F_OK) == 0; tried++) {
+		number = (number + 1) % 10000;
+		filename = AString("times.") + number;
+	}
+	written_this_run.insert(number);
 
 	if (f.OpenByName(filename) != -1) {
 		f.PutStr(article);

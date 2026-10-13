@@ -1793,7 +1793,13 @@ AString *ShowSkill::Report(Faction *f)
 					temp2 += "]";
 			}
 			if (f) {
-				f->objectshows.Add(ObjectDescription(i));
+				// ObjectShow: the same text, plus the object type for the
+				// JSON report.
+				AString *desc = ObjectDescription(i);
+				if (desc) {
+					f->objectshows.Add(new ObjectShow(*desc, i));
+					delete desc;
+				}
 			}
 		}
 	}

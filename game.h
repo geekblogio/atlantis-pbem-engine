@@ -36,6 +36,9 @@ class Game;
 #include "events.h"
 
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
+// The schema of report.<n>.json, kept identical to master 4e04648's (which
+// defines the same constant), so one reader handles both engines.
+#define JSON_REPORT_VERSION MAKE_ATL_VER(1, 0, 1) // version 1.0.0 didn't report the version number
 
 class OrdersCheck
 {

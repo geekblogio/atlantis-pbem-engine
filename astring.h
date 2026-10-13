@@ -81,5 +81,10 @@ const std::string join(const std::string &delimeter, const std::string &lastDeli
 const bool endsWith(const std::string &str, const std::string &search);
 const bool startsWith(const std::string &str, const std::string &search);
 const std::string capitalize(const std::string &str);
+// For the JSON report: "Name (123)" -> "Name", "Tower [4]" -> "Tower".
+// Same rule as master's filter::strip_number (cut at the last '[' or '(' and
+// one space before it), so the two engines emit the same names.
+const std::string strip_number(const std::string &str);
+const std::string lowercase(const std::string &str);
 
 #endif

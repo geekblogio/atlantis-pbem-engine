@@ -379,6 +379,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 					if (string) {
 						f->PutStr("");
 						f->PutStr(*string);
+						RecordSkillShow((ShowSkill *)elem, *string);
 						delete string;
 					}
 				}
@@ -390,7 +391,8 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			for (i = 0; i < NITEMS; i++) {
 				AString *show = ItemDescription(i, 1);
 				if (show) {
-					itemshows.Add(show);
+					itemshows.Add(new ItemShow(*show, i, 1));
+					delete show;
 				}
 			}
 			if (itemshows.Num()) {
@@ -398,6 +400,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 				forlist(&itemshows) {
 					f->PutStr("");
 					f->PutStr(*((AString *)elem));
+					RecordItemShow((ItemShow *)elem);
 				}
 				itemshows.DeleteAll();
 				f->EndLine();
@@ -407,7 +410,8 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			for (i = 0; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
 				if (show) {
-					objectshows.Add(show);
+					objectshows.Add(new ObjectShow(*show, i));
+					delete show;
 				}
 			}
 			if (objectshows.Num()) {
@@ -415,6 +419,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 				forlist(&objectshows) {
 					f->PutStr("");
 					f->PutStr(*((AString *)elem));
+					RecordObjectShow((ObjectShow *)elem);
 				}
 				objectshows.DeleteAll();
 				f->EndLine();
@@ -595,6 +600,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 			if (string) {
 				f->PutStr("");
 				f->PutStr(*string);
+				RecordSkillShow((ShowSkill *) elem, *string);
 			}
 			delete string;
 		}
@@ -607,6 +613,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 		forlist(&itemshows) {
 			f->PutStr("");
 			f->PutStr(*((AString *) elem));
+			RecordItemShow((ItemShow *) elem);
 		}
 		itemshows.DeleteAll();
 		f->EndLine();
@@ -617,6 +624,7 @@ void Faction::WriteReport(Areport *f, Game *pGame, int ** citems)
 		forlist(&objectshows) {
 			f->PutStr("");
 			f->PutStr(*((AString *)elem));
+			RecordObjectShow((ObjectShow *) elem);
 		}
 		objectshows.DeleteAll();
 		f->EndLine();
@@ -731,23 +739,48 @@ void Faction::CheckExist(ARegionList* regs)
 
 void Faction::Error(const AString &s)
 {
+	Error(s, 0, s);
+}
+
+void Faction::Error(const AString &s, Unit *u, const AString &message)
+{
 	if (IsNPC()) return;
+	// json_errors mirrors `errors` entry for entry, including the cap, so the
+	// decision is taken on `errors` alone.
 	if (errors.Num() > 1000) {
 		if (errors.Num() == 1001) {
 			errors.Add(new AString("Too many errors!"));
+			json_errors.push_back({ "Too many errors!", "", 0 });
 		}
 		return;
 	}
 
 	AString *temp = new AString(s);
 	errors.Add(temp);
+	AString bare = message;
+	json_errors.push_back({
+		bare.Str(),
+		u ? strip_number(u->name->Str()) : "",
+		u ? u->num : 0
+	});
 }
 
 void Faction::Event(const AString &s)
 {
+	Event(s, 0, s);
+}
+
+void Faction::Event(const AString &s, Unit *u, const AString &message)
+{
 	if (IsNPC()) return;
 	AString *temp = new AString(s);
 	events.Add(temp);
+	AString bare = message;
+	json_events.push_back({
+		bare.Str(),
+		u ? strip_number(u->name->Str()) : "",
+		u ? u->num : 0
+	});
 }
 
 void Faction::RemoveAttitude(int f)
@@ -935,7 +968,15 @@ void Faction::DiscoverItem(int item, int force, int full)
 		}
 	}
 	if (force) {
-		itemshows.Add(ItemDescription(item, full));
+		// Wrapped in an ItemShow so the JSON report knows which item the
+		// description is about; the text report still prints it as an AString.
+		// (ItemDescription is null only for a disabled item, which the old
+		// code would have crashed on in AList::Add.)
+		AString *desc = ItemDescription(item, full);
+		if (desc) {
+			itemshows.Add(new ItemShow(*desc, item, full));
+			delete desc;
+		}
 		if (!full)
 			return;
 		// If we've found an item that grants a skill, give a
@@ -993,4 +1034,316 @@ bool Faction::IsActivityRecorded(ARegion *region, FactionActivity type) {
 	}
 
 	return regionActivity.find(type) != std::end(regionActivity);
+}
+
+//
+// JSON report (report.<n>.json)
+//
+// Ported from master 4e04648 (Faction::build_json_report & co.), same schema,
+// JSON_REPORT_VERSION 1.0.1. Where stable's data differs from master's, the
+// value follows what stable's own text report says, so the two files of one
+// turn never disagree. Each such place is commented.
+//
+
+static const char *JsonQuitStrs[] = {
+	"none",
+	"quit order",
+	"quit by gm",
+	"quit and restart",
+	"won game",
+	"game over"
+};
+
+void to_json(json &j, const FactionEvent &e)
+{
+	// master also always writes "category" and, for some events, "region";
+	// stable has neither (see FactionEvent).
+	j = json{ { "message", e.message } };
+	if (e.unit_number) {
+		j["unit"] = { { "name", e.unit_name }, { "number", e.unit_number } };
+	}
+}
+
+void to_json(json &j, const FactionError &e)
+{
+	j = json{ { "message", e.message } };
+	if (e.unit_number) {
+		j["unit"] = { { "name", e.unit_name }, { "number", e.unit_number } };
+	}
+}
+
+bool Faction::gets_gm_report(Game *game)
+{
+	// The same test Game::WriteReport and WriteReport apply for the text.
+	return IsNPC() && num == 1 &&
+		(Globals->GM_REPORT || (game->month == 0 && game->year == 1));
+}
+
+void Faction::RecordSkillShow(ShowSkill *s, const AString &description)
+{
+	AString d = description;
+	std::string desc = d.Str();
+	// ShowSkill::Report always starts its text with "name [ABBR] level: ".
+	// master keeps that header out of "description" (it is name, tag and
+	// level) and its text report puts it back; strip it the same way.
+	AString header = SkillStrs(s->skill) + " " + s->level + ": ";
+	std::string h = header.Str();
+	if (startsWith(desc, h)) desc = desc.substr(h.size());
+	// master skips empty descriptions in the JSON; the text prints them.
+	if (desc.empty()) return;
+	json_shows["skill_reports"].push_back({
+		{ "name", SkillDefs[s->skill].name },
+		{ "tag", SkillDefs[s->skill].abbr },
+		{ "level", s->level },
+		{ "description", desc }
+	});
+}
+
+void Faction::RecordItemShow(ItemShow *s)
+{
+	if (!s->Len()) return;
+	// master's ShowItem::display_name / display_tag
+	std::string name = ItemDefs[s->item].name;
+	std::string tag = ItemDefs[s->item].abr;
+	if (ItemDefs[s->item].type & IT_ILLUSION) {
+		name = "illusory " + name;
+		tag = "I" + tag;
+	}
+	json_shows["item_reports"].push_back({
+		{ "name", name }, { "tag", tag }, { "description", s->Str() }
+	});
+}
+
+void Faction::RecordObjectShow(ObjectShow *s)
+{
+	std::string desc = s->Str();
+	// ObjectDescription starts with "Name: "; master's description is
+	// without it (its text report prints name and description apart).
+	std::string h = std::string(ObjectDefs[s->obj].name) + ": ";
+	if (startsWith(desc, h)) desc = desc.substr(h.size());
+	if (desc.empty()) return;
+	json_shows["object_reports"].push_back({
+		{ "name", ObjectDefs[s->obj].name }, { "description", desc }
+	});
+}
+
+void Faction::add_json_show_reports(json &j)
+{
+	// master always writes all three arrays, empty or not.
+	for (const char *key : { "skill_reports", "item_reports", "object_reports" }) {
+		j[key] = json_shows.contains(key) ? json_shows[key] : json::array();
+	}
+	json_shows = json();
+}
+
+void Faction::clear_json_report_state()
+{
+	json_events.clear();
+	json_errors.clear();
+	json_shows = json();
+}
+
+json Faction::compute_faction_statistics(Game *game, int **citems)
+{
+	json stats = json::array();
+	if (!citems) return stats;
+
+	for (int i = 0; i < NITEMS; i++) {
+		if (ItemDefs[i].type & IT_SHIP) continue;
+
+		// The same numbers WriteFactionStats prints. master reads the own
+		// amount from citems[num - 1]; stable's CountItems fills citems by
+		// position among the non-NPC factions instead, so that index would
+		// be wrong here -- count it the way the text report does.
+		int amount = 0;
+		forlist(&present_regions) {
+			ARegionPtr *r = (ARegionPtr *) elem;
+			forlist(&r->ptr->objects) {
+				Object *obj = (Object *) elem;
+				forlist(&obj->units) {
+					Unit *unit = (Unit *) elem;
+					if (unit->faction == this)
+						amount += unit->items.GetNum(i);
+				}
+			}
+		}
+		if (!amount) continue;
+
+		int place = 1;
+		int max = 0;
+		int total = 0;
+		for (int pl = 0; pl < game->factionseq; pl++) {
+			if (citems[pl][i] > amount) place++;
+			if (max < citems[pl][i]) max = citems[pl][i];
+			total += citems[pl][i];
+		}
+
+		json s = {
+			{ "amount", amount }, { "name", ItemDefs[i].name },
+			{ "plural", ItemDefs[i].names }, { "tag", ItemDefs[i].abr },
+			{ "rank", place }, { "max", max }, { "total", total }
+		};
+		// As master. (The text report tests `type == IT_ILLUSION`, which
+		// never holds for an illusory monster, so it never says "illusion".)
+		if ((ItemDefs[i].type & IT_MONSTER) && (ItemDefs[i].type & IT_ILLUSION))
+			s["illusion"] = true;
+		stats.push_back(s);
+	}
+	return stats;
+}
+
+void Faction::build_gm_json_report(json &j, Game *game)
+{
+	// skill_reports, item_reports and object_reports are added after the
+	// text report (add_json_show_reports): the GM text report generates them.
+	json regions = json::array();
+	forlist(&(game->regions)) {
+		ARegion *reg = (ARegion *) elem;
+		json region;
+		reg->build_json_report(region, this, game->month, &(game->regions));
+		regions.push_back(region);
+	}
+	j["regions"] = regions;
+}
+
+void Faction::build_json_report(json &j, Game *game, int **citems)
+{
+	if (gets_gm_report(game)) {
+		build_gm_json_report(j, game);
+		return;
+	}
+
+	if (Globals->FACTION_STATISTICS) {
+		j["statistics"] = compute_faction_statistics(game, citems);
+	}
+
+	j["engine"] = {
+		{ "version", AString(ATL_VER_STRING(CURRENT_ATL_VER)).Str() },
+		{ "ruleset", Globals->RULESET_NAME },
+		{ "ruleset_version", AString(ATL_VER_STRING(Globals->RULESET_VERSION)).Str() },
+		{ "json_report_version", AString(ATL_VER_STRING(JSON_REPORT_VERSION)).Str() }
+	};
+
+	j["name"] = strip_number(name->Str());
+	j["number"] = num;
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		j["type"] = json::object();
+		for (auto &ft : *FactionTypes) {
+			// find(), not type[ft] as master has: operator[] would insert a
+			// zero entry into a map that is saved in game.out.
+			auto it = type.find(ft);
+			if (it != type.end() && it->second) j["type"][lowercase(ft)] = it->second;
+		}
+	}
+	j["administrative"]["times_sent"] = (times != 0);
+	bool password_unset = (!password || (*password == "none"));
+	j["administrative"]["password_unset"] = password_unset;
+	j["administrative"]["email"] = address ? address->Str() : "";
+	j["administrative"]["show_unit_attitudes"] = (showunitattitudes != 0);
+	if (!password_unset) j["administrative"]["password"] = password->Str();
+	if (Globals->MAX_INACTIVE_TURNS != -1) {
+		int cturn = game->TurnNumber() - lastorders;
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
+			j["administrative"]["inactivity_deletion_turns"] = cturn;
+		}
+	}
+	if (!exists) {
+		j["administrative"]["quit"] = JsonQuitStrs[quit ? quit : QUIT_BY_ORDER];
+	}
+	j["date"] = {
+		{ "month", MonthNames[game->month] },
+		{ "year", game->year }
+	};
+
+	if ((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
+			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)) {
+		j["status"]["mages"] = {
+			{ "current", nummages },
+			{ "allowed", game->AllowedMages(this) }
+		};
+		if (Globals->APPRENTICES_EXIST) {
+			j["status"]["apprentices"] = {
+				{ "current", numapprentices },
+				{ "allowed", game->AllowedApprentices(this) },
+				{ "name", capitalize(Globals->APPRENTICE_NAME) }
+			};
+		}
+	}
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+		if (Globals->FACTION_ACTIVITY != FactionActivityRules::DEFAULT) {
+			bool isMerged = Globals->FACTION_ACTIVITY == FactionActivityRules::MARTIAL_MERGED;
+			j["status"][(isMerged ? "regions" : "activity")] = {
+				{ "current", GetActivityCost(FactionActivity::TAX) },
+				{ "allowed", game->AllowedMartial(this) }
+			};
+		} else {
+			j["status"]["tax_regions"] = {
+				{ "current", GetActivityCost(FactionActivity::TAX) },
+				{ "allowed", game->AllowedTaxes(this) }
+			};
+			j["status"]["trade_regions"] = {
+				{ "current", GetActivityCost(FactionActivity::TRADE) },
+				{ "allowed", game->AllowedTrades(this) }
+			};
+		}
+		if (Globals->TRANSPORT & GameDefs::ALLOW_TRANSPORT) {
+			j["status"]["quartermasters"] = {
+				{ "current", numqms },
+				{ "allowed", game->AllowedQuarterMasters(this) }
+			};
+		}
+		if (Globals->TACTICS_NEEDS_WAR) {
+			j["status"]["tacticians"] = {
+				{ "current", numtacts },
+				{ "allowed", game->AllowedTacticians(this) }
+			};
+		}
+	}
+
+	if (!json_errors.empty()) j["errors"] = json_errors;
+
+	if (battles.Num()) {
+		json jbattles = json::array();
+		forlist(&battles) {
+			json jbattle = json::object();
+			((BattlePtr *) elem)->ptr->build_json_report(jbattle, this);
+			jbattles.push_back(jbattle);
+		}
+		j["battles"] = jbattles;
+	}
+
+	if (!json_events.empty()) j["events"] = json_events;
+
+	j["attitudes"] = json::object();
+	j["attitudes"]["default"] = lowercase(AttitudeStrs[defaultattitude]);
+	for (int i = 0; i < NATTITUDES; i++) {
+		std::string attitude = lowercase(AttitudeStrs[i]);
+		j["attitudes"][attitude] = json::array();
+		forlist(&attitudes) {
+			Attitude *a = (Attitude *) elem;
+			if (a->attitude != i) continue;
+			Faction *fac = GetFaction(&(game->factions), a->factionnum);
+			// The text report dereferences this unchecked; a guard here
+			// cannot change anything that works.
+			if (!fac) continue;
+			j["attitudes"][attitude].push_back({
+				{ "name", strip_number(fac->name->Str()) },
+				{ "number", a->factionnum }
+			});
+		}
+	}
+
+	j["unclaimed_silver"] = unclaimed;
+
+	// skill_reports, item_reports, object_reports: add_json_show_reports.
+
+	json regions = json::array();
+	forlist(&present_regions) {
+		ARegion *reg = ((ARegionPtr *) elem)->ptr;
+		json region;
+		reg->build_json_report(region, this, game->month, &(game->regions));
+		regions.push_back(region);
+	}
+	j["regions"] = regions;
 }

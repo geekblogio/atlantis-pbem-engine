@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <cctype>
 
 AString::AString()
 {
@@ -461,5 +462,21 @@ const std::string capitalize(const std::string &str) {
 	std::string s = str;
 	s[0] = toupper(str[0]);
 
+	return s;
+}
+
+const std::string strip_number(const std::string &str) {
+	auto pos = str.find_last_of("[(");
+	if (pos == std::string::npos) return str;
+	// Only one space is trimmed, like master: some units are named with
+	// trailing spaces and master keeps them.
+	auto trim_pos = pos;
+	if (trim_pos > 0 && std::isspace((unsigned char) str[trim_pos - 1])) trim_pos--;
+	return str.substr(0, trim_pos);
+}
+
+const std::string lowercase(const std::string &str) {
+	std::string s = str;
+	for (auto &c : s) c = tolower((unsigned char) c);
 	return s;
 }

@@ -26,6 +26,10 @@
 #include "unit.h"
 #include "gamedata.h"
 
+#include <algorithm>
+#include <cctype>
+#include <stack>
+
 UnitId::UnitId()
 {
 }
@@ -572,6 +576,303 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac,
 	}
 	temp += ".";
 	f->PutStr(temp);
+}
+
+json Unit::build_json_descriptor()
+{
+	json j = json::object();
+	j["name"] = strip_number(name->Str());
+	j["number"] = num;
+	return j;
+}
+
+static inline void trim_order(std::string& s)
+{
+	s.erase(s.begin(), std::find_if_not(s.begin(), s.end(),
+		[](char c) { return std::isspace((unsigned char) c); }));
+	s.erase(std::find_if_not(s.rbegin(), s.rend(),
+		[](char c) { return std::isspace((unsigned char) c); }).base(), s.end());
+}
+
+// Port of master's Unit::write_json_orders: the orders the unit will carry
+// into next turn, nested by TURN/FORM blocks, in the order and shape the
+// order template (ARegion::WriteTemplate) lists them. Must run before
+// WriteTemplates, which empties oldorders and turnorders.
+json Unit::write_json_orders()
+{
+	std::stack<json> parent_stack;
+	json container = json::array();
+
+	// One order line: close a block on ENDTURN/ENDFORM, open one on
+	// TURN/FORM -- what WriteTemplate does with DropTab/AddTab. Returns the
+	// parsed order so the caller can look for month-long orders.
+	auto add_order = [&](AString *line) {
+		AString temp = *line;
+		temp.getat();
+		AString *token = temp.gettoken();
+		int order_val = NORDERS;
+		if (token) {
+			order_val = Parse1Order(token);
+			delete token;
+		}
+		// The empty-stack guard only matters for an unbalanced ENDTURN,
+		// where master would pop an empty stack; the template then simply
+		// lists the line flat, and so does this.
+		if ((order_val == O_ENDTURN || order_val == O_ENDFORM) && !parent_stack.empty()) {
+			json parent = parent_stack.top();
+			parent_stack.pop();
+			parent.back()["nested"] = container;
+			container = parent;
+		}
+		std::string order = line->Str();
+		trim_order(order);
+		container.push_back({ { "order", order } });
+		if (order_val == O_TURN || order_val == O_FORM) {
+			parent_stack.push(container);
+			container = json::array();
+		}
+		return order_val;
+	};
+	auto open_block = [&](const char *order) {
+		container.push_back({ { "order", order } });
+		parent_stack.push(container);
+		container = json::array();
+	};
+	auto close_block = [&]() {
+		json parent = parent_stack.top();
+		parent_stack.pop();
+		parent.back()["nested"] = container;
+		container = parent;
+		container.push_back({ { "order", "ENDTURN" } });
+	};
+
+	bool has_continuing_month_order = false;
+	forlist(&oldorders) {
+		int order_val = add_order((AString *) elem);
+		switch (order_val) {
+			case O_MOVE:
+			case O_SAIL:
+			case O_TEACH:
+			case O_STUDY:
+			case O_BUILD:
+			case O_PRODUCE:
+			case O_ENTERTAIN:
+			case O_WORK:
+				has_continuing_month_order = true;
+				break;
+			case O_TAX:
+			case O_PILLAGE:
+				if (Globals->TAX_PILLAGE_MONTH_LONG)
+					has_continuing_month_order = true;
+				break;
+		}
+	}
+
+	// Turn blocks from earlier turns. With a continuing month order every
+	// block is deferred (wrapped in TURN/@TURN ... ENDTURN); without one the
+	// first block is next turn's orders, unwrapped, and if it repeats it is
+	// queued again at the end -- WriteTemplate's logic exactly.
+	bool wrap_turn_block = has_continuing_month_order;
+	if (turnorders.First()) {
+		forlist(&turnorders) {
+			TurnOrder *tOrder = (TurnOrder *) elem;
+			// Count what this block opens, so a block that leaves one of its
+			// own TURN/FORM open cannot make close_block pop the wrong level.
+			size_t depth = parent_stack.size();
+			if (wrap_turn_block) open_block(tOrder->repeating ? "@TURN" : "TURN");
+			forlist(&tOrder->turnOrders) {
+				add_order((AString *) elem);
+			}
+			if (wrap_turn_block && parent_stack.size() > depth) close_block();
+			wrap_turn_block = true;
+		}
+		TurnOrder *tOrder = (TurnOrder *) turnorders.First();
+		if (tOrder->repeating && !has_continuing_month_order) {
+			size_t depth = parent_stack.size();
+			open_block("@TURN");
+			forlist(&tOrder->turnOrders) {
+				add_order((AString *) elem);
+			}
+			if (parent_stack.size() > depth) close_block();
+		}
+	}
+	return container;
+}
+
+// Port of master's Unit::build_json_report. Visibility and what is shown
+// follow this branch's WriteReport (master additionally lets NOSTEALTH items
+// reveal a unit; stable has no such item flag).
+void Unit::build_json_report(json& j, int obs, int truesight, int detfac,
+		int autosee, int attitude)
+{
+	int stealth = GetAttribute("stealth");
+	bool my_unit = (obs == -1);
+	bool see_faction = (my_unit || (detfac != 0));
+	bool see_illusion = (my_unit || (GetSkill(S_ILLUSION) <= truesight));
+
+	if (!my_unit) {
+		// WriteReport: unseen unless observation beats stealth, or the unit
+		// reveals itself, guards, or sits in a building (autosee).
+		if ((obs < stealth) && (reveal == REVEAL_NONE) &&
+				(guard != GUARD_GUARD) && !autosee)
+			return;
+		if (obs > stealth || reveal == REVEAL_FACTION) see_faction = true;
+	}
+
+	j = build_json_descriptor();
+
+	if (!my_unit) {
+		j["attitude"] = lowercase(AttitudeStrs[attitude]);
+	} else {
+		j["own_unit"] = true;
+	}
+
+	if (describe) j["description"] = describe->Str();
+
+	j["flags"]["guard"] = (guard == GUARD_GUARD);
+
+	if (see_faction) {
+		j["faction"] = {
+			{ "name", strip_number(faction->name->Str()) },
+			{ "number", faction->num }
+		};
+		j["flags"]["avoid"] = (guard == GUARD_AVOID);
+		if (GetFlag(FLAG_BEHIND)) j["flags"]["behind"] = true;
+	}
+
+	if (my_unit) {
+		if (reveal == REVEAL_UNIT) j["flags"]["reveal"] = "unit";
+		if (reveal == REVEAL_FACTION) j["flags"]["reveal"] = "faction";
+		j["flags"]["holding"] = (GetFlag(FLAG_HOLDING) ? true : false);
+		j["flags"]["taxing"] = (GetFlag(FLAG_AUTOTAX) ? true : false);
+		j["flags"]["no_aid"] = (GetFlag(FLAG_NOAID) ? true : false);
+		j["flags"]["sharing"] = (GetFlag(FLAG_SHARING) ? true : false);
+		if (GetFlag(FLAG_CONSUMING_UNIT)) j["flags"]["consume"] = "unit";
+		if (GetFlag(FLAG_CONSUMING_FACTION)) j["flags"]["consume"] = "faction";
+		j["flags"]["no_cross_water"] = GetFlag(FLAG_NOCROSS_WATER) ? true : false;
+
+		// Only one of these is allowed to be true at a time. (The text
+		// report's SpoilsReport has no "swimming" line; the flag exists.)
+		if (GetFlag(FLAG_NOSPOILS)) j["flags"]["spoils"] = "weightless";
+		else if (GetFlag(FLAG_FLYSPOILS)) j["flags"]["spoils"] = "flying";
+		else if (GetFlag(FLAG_WALKSPOILS)) j["flags"]["spoils"] = "walking";
+		else if (GetFlag(FLAG_RIDESPOILS)) j["flags"]["spoils"] = "riding";
+		else if (GetFlag(FLAG_SAILSPOILS)) j["flags"]["spoils"] = "sailing";
+		else if (GetFlag(FLAG_SWIMSPOILS)) j["flags"]["spoils"] = "swimming";
+		else j["flags"]["spoils"] = "all";
+
+		j["weight"] = items.Weight();
+		j["capacity"]["flying"] = FlyingCapacity();
+		j["capacity"]["riding"] = RidingCapacity();
+		j["capacity"]["walking"] = WalkingCapacity();
+		j["capacity"]["swimming"] = SwimmingCapacity();
+
+		j["skills"]["known"] = json::array();
+		int men = GetMen();
+		forlist(&skills) {
+			Skill *s = (Skill *) elem;
+			if (s->days == 0) continue;
+			json skill = json{
+				{ "name", SkillDefs[s->type].name },
+				{ "tag", SkillDefs[s->type].abbr },
+				{ "level", GetLevelByDays(s->days/men) },
+				{ "skill_days", s->days/men },
+			};
+			if (Globals->REQUIRED_EXPERIENCE) {
+				// What SkillList::Report prints after the '+'. (master
+				// derives it from exp via StudyRateAdjustment.)
+				skill["study_rate"] = skills.GetStudyRate(s->type, men);
+			}
+			j["skills"]["known"].push_back(skill);
+		}
+		for (int i = 0; i < NSKILLS; i++) {
+			if (SkillDefs[i].depends[0].skill != NULL) {
+				if (CanStudy(i)) {
+					j["skills"]["can_study"].push_back({
+						{ "name", SkillDefs[i].name },
+						{ "tag", SkillDefs[i].abbr }
+					});
+				}
+			}
+		}
+
+		if ((type == U_MAGE || type == U_GUARDMAGE) && combat != -1) {
+			j["combat_spell"] = {
+				{ "name", SkillDefs[combat].name }, { "tag", SkillDefs[combat].abbr }
+			};
+		}
+
+		for (int i = 0; i < MAX_READY; ++i) {
+			if (readyWeapon[i] != -1) {
+				j["readied"]["weapons"].push_back({
+					{ "name", ItemDefs[readyWeapon[i]].name },
+					{ "tag", ItemDefs[readyWeapon[i]].abr },
+					{ "plural", ItemDefs[readyWeapon[i]].names }
+				});
+			}
+		}
+		for (int i = 0; i < MAX_READY; ++i) {
+			if (readyArmor[i] != -1) {
+				j["readied"]["armor"].push_back({
+					{ "name", ItemDefs[readyArmor[i]].name },
+					{ "tag", ItemDefs[readyArmor[i]].abr },
+					{ "plural", ItemDefs[readyArmor[i]].names }
+				});
+			}
+		}
+		if (readyItem != -1) {
+			j["readied"]["item"] = {
+				{ "name", ItemDefs[readyItem].name }, { "tag", ItemDefs[readyItem].abr }
+			};
+		}
+
+		if (!visited.empty()) j["visited"] = visited;
+
+		j["orders"] = write_json_orders();
+	}
+
+	j["items"] = json::array();
+
+	// Same order as ItemList::Report: men, monsters, combat items, mounts,
+	// wagons, everything else, silver. `checked` is ItemList's own scratch
+	// flag; ItemList::Report clears it first thing, so using it here leaves
+	// nothing behind for the text report.
+	forlist(&items) ((Item *) elem)->checked = 0;
+	for (int output_phase = 0; output_phase < 7; output_phase++) {
+		forlist(&items) {
+			Item *item = (Item *) elem;
+			if (item->checked) continue;
+
+			ItemType &def = ItemDefs[item->type];
+			bool combat_item = (def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC));
+			bool item_reported_in_other_phase = (
+				(def.type & (IT_WEAPON | IT_BATTLE | IT_ARMOR | IT_MAGIC | IT_MOUNT | IT_MAN | IT_MONSTER)) ||
+				(item->type == I_WAGON) || (item->type == I_MWAGON) || (item->type == I_SILVER)
+			);
+
+			if (output_phase == 0 && !(def.type & IT_MAN)) continue;
+			if (output_phase == 1 && !(def.type & IT_MONSTER)) continue;
+			if (output_phase == 2 && !combat_item) continue;
+			if (output_phase == 3 && !(def.type & IT_MOUNT)) continue;
+			if (output_phase == 4 && !((item->type == I_WAGON) || (item->type == I_MWAGON))) continue;
+			if (output_phase == 5 && item_reported_in_other_phase) continue;
+			if (output_phase == 6 && !(item->type == I_SILVER)) continue;
+
+			item->checked = 1;
+			// Others see only items with weight (ReportByType).
+			if (my_unit || (def.weight != 0)) {
+				json item_obj = json{ { "name", def.name }, { "tag", def.abr }, { "plural", def.names } };
+				if (def.type & IT_SHIP) {
+					item_obj["unfinished"] = true;
+					item_obj["needs"] = item->num;
+				} else {
+					item_obj["amount"] = item->num;
+				}
+				if (see_illusion && (def.type & IT_ILLUSION)) item_obj["illusion"] = true;
+				j["items"].push_back(item_obj);
+			}
+		}
+	}
 }
 
 AString Unit::TemplateReport()
@@ -2464,13 +2765,15 @@ void Unit::DiscardUnfinishedShips() {
 void Unit::Event(const AString & s)
 {
 	AString temp = *name + ": " + s;
-	faction->Event(temp);
+	// The text keeps "Name (123): message"; the JSON report gets the bare
+	// message and this unit (see FactionEvent).
+	faction->Event(temp, this, s);
 }
 
 void Unit::Error(const AString & s)
 {
 	AString temp = *name + ": " + s;
-	faction->Error(temp);
+	faction->Error(temp, this, s);
 }
 
 int Unit::GetAttribute(char const *attrib)

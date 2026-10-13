@@ -2514,7 +2514,13 @@ void ARegionList::MakeUWMaze(ARegionArray *pArr)
 			ARegion *reg = pArr->GetRegion(x, y);
 			if (!reg) continue;
 
-			for (int i=D_NORTH; i<= NDIRS; i++) {
+			// Was `i <= NDIRS`, which read neighbors[NDIRS], one past the end of the
+			// array. In an unoptimised build that slot is the first word of the
+			// adjacent `objects` list, which is still empty here (MakeUWMaze runs
+			// before FinalSetup/Setup create any object), so the extra iteration saw
+			// a null neighbour and did nothing -- the fix therefore builds the same
+			// world. Optimised builds may exploit the UB and crash in this loop.
+			for (int i=D_NORTH; i< NDIRS; i++) {
 				int count = 0;
 				for (int j=D_NORTH; j< NDIRS; j++)
 					if (reg->neighbors[j]) count++;

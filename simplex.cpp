@@ -86,8 +86,11 @@ SimplexNoise::SimplexNoise(
             perm.push_back(i);
         }
 
+        // A generator of its own, apart from the game's ISAAC stream, seeded
+        // from the clock -- or from ATLANTIS_SEED, so that a pinned seed builds
+        // the same world twice (seedclock() is time(0) when it is unset).
         auto rng = std::default_random_engine();
-        rng.seed( time(0) );
+        rng.seed( seedclock() );
 
         std::shuffle(std::begin(perm), std::end(perm), rng);
     }

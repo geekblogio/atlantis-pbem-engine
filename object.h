@@ -34,8 +34,18 @@ class Object;
 #include "faction.h"
 #include "items.h"
 #include <map>
+#include "atljson.h"
 
 #define I_WOOD_OR_STONE -2
+
+// One entry of Faction::objectshows: the description the text report prints,
+// plus the object type it describes, for the JSON report (master's
+// ShowObject). See ItemShow in items.h; same contract.
+class ObjectShow : public AString {
+public:
+	ObjectShow(const AString &text, int obj) : AString(text), obj(obj) {}
+	int obj;
+};
 
 class ObjectType {
 	public:
@@ -90,6 +100,11 @@ class Object : public AListElem
 		void Readin(Ainfile *f, AList *, ATL_VER v);
 		void Writeout(Aoutfile *f);
 		void Report(Areport *, Faction *, int, int, int, int, int, int, int);
+		// JSON counterpart of Report (port of master's): appends this object's
+		// units to j["units"] (the dummy object) or a structure to
+		// j["structures"].
+		void build_json_report(json& j, Faction *fac, int obs, int truesight,
+				int detfac, int passobs, int passtrue, int passdetfac, int present);
 
 		void SetName(AString *);
 		void SetDescribe(AString *);

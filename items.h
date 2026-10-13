@@ -34,6 +34,19 @@ class ItemType;
 #include "astring.h"
 #include <vector>
 
+// One entry of Faction::itemshows. It IS the description the text report
+// prints (code that treats the list as AStrings keeps working unchanged) and
+// additionally remembers which item it describes, so the JSON report can give
+// the item's name and tag (master's ShowItem). Every Add to itemshows must
+// add one of these: Faction::RecordItemShow downcasts unchecked.
+class ItemShow : public AString {
+public:
+	ItemShow(const AString &text, int item, int full)
+		: AString(text), item(item), full(full) {}
+	int item;
+	int full;
+};
+
 enum {
 	ATTACK_COMBAT,
 	ATTACK_ENERGY,

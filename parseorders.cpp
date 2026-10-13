@@ -855,7 +855,13 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 				u->Error("SHOW: No such object.");
 				return;
 			}
-			u->faction->objectshows.Add(ObjectDescription(obj));
+			// ObjectShow carries the object type for the JSON report; the text
+			// report prints it as the AString it is.
+			AString *desc = ObjectDescription(obj);
+			if (desc) {
+				u->faction->objectshows.Add(new ObjectShow(*desc, obj));
+				delete desc;
+			}
 		}
 		if (obj >= -1)
 			return;

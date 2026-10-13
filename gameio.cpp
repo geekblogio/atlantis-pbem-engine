@@ -82,9 +82,31 @@ void seedrandom(int num)
 	randinit( &isaac_ctx, TRUE );
 }
 
+// ATLANTIS_SEED, once main() has parsed it. Unset is the normal case: every
+// seed taken during world generation then comes from the clock, as it always
+// has.
+static bool fixed_seed_set = false;
+static int fixed_seed = 0;
+
+void setfixedseed(int seed)
+{
+	fixed_seed = seed;
+	fixed_seed_set = true;
+}
+
+time_t seedclock()
+{
+	// time_t on purpose: callers used to pass time(0) straight through, and the
+	// implicit conversions they apply to it (to int for seedrandom, to the
+	// engine's result_type for std::default_random_engine::seed) must stay
+	// exactly what they were for a clock reading.
+	if (fixed_seed_set) return (time_t) fixed_seed;
+	return time(0);
+}
+
 void seedrandomrandom()
 {
-	seedrandom( time( 0 ) );
+	seedrandom( seedclock() );
 }
 
 int makeRoll(int rolls, int sides) {
@@ -100,10 +122,33 @@ int clamp(int imin, int ivalue, int imax) {
 	return max(imin, min(ivalue, imax));
 }
 
+// Every prompt in the engine sits in a loop that asks again until it gets a
+// usable answer. Once stdin has ended, a read fails immediately and forever, so
+// such a loop would repeat its question at full speed and never return -- a hung
+// job when the engine is driven as a subprocess with a short answers file. There
+// is nobody left to answer, so stop: nothing has been saved at this point, and
+// a non-zero exit is something the caller can see.
+[[noreturn]] static void inputended()
+{
+	cout << "The input ended before the question was answered. "
+		"Quitting without saving." << ENDLINE;
+	cout.flush();
+	exit(1);
+}
+
 int Agetint()
 {
 	int x;
-	cin >> x;
+	if (!(cin >> x)) {
+		if (cin.eof()) inputended();
+		// Not a number. Before this guard the stream stayed in its failed
+		// state and cleartoendl() spun on it forever, so no working input ever
+		// took this path. Skip the bad line and return 0, which every caller
+		// already treats as invalid and answers by asking again.
+		cin.clear();
+		cleartoendl();
+		return 0;
+	}
 	cleartoendl();
 	return x;
 }
@@ -140,6 +185,15 @@ AString * getfilename(const AString & s)
 
 AString *AGetString()
 {
-	cin.getline( buf, 256, ENDLINE );
+	if (!cin.getline( buf, 256, ENDLINE )) {
+		// Nothing extracted and at the end: the input is over (see
+		// inputended). The edit menu would otherwise loop on "" forever.
+		if (cin.eof() && !cin.gcount()) inputended();
+		// A line too long for buf: getline returns the first 255 characters
+		// and sets failbit, which used to make every later read fail. Keep
+		// what was read (as before), drop the rest of the line, and recover.
+		cin.clear();
+		cleartoendl();
+	}
 	return( new AString( buf ));
 }

@@ -46,6 +46,41 @@ class Game;
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <string>
+
+#include "atljson.h"
+
+class ShowSkill;
+class ItemShow;
+class ObjectShow;
+
+// The JSON report's record of one line of "Events during turn:" or "Errors
+// during turn:". The text report keeps its AString lists exactly as before;
+// these are kept alongside them, in the same order, by Faction::Event/Error.
+//
+// Gaps against master's FactionEvent/FactionError, which this branch cannot
+// fill honestly:
+//  - no "category": stable's call sites carry none, and inventing one per
+//    message would be guesswork;
+//  - no "region": stable never passes one.
+// The "unit" is known exactly when the line came through Unit::Event or
+// Unit::Error (which compose "Name (123): message"); the JSON then carries the
+// bare message and the unit, as master does. unit_number 0 means "no unit"
+// (unit numbers start at 1). Name and number are taken when the line is
+// written, not at report time, so a unit renamed or gone later still matches
+// the text.
+struct FactionEvent {
+	std::string message;
+	std::string unit_name;
+	int unit_number;
+};
+struct FactionError {
+	std::string message;
+	std::string unit_name;
+	int unit_number;
+};
+void to_json(json &j, const FactionEvent &e);
+void to_json(json &j, const FactionError &e);
 
 enum {
 	A_HOSTILE,
@@ -143,9 +178,40 @@ public:
 	void CheckExist(ARegionList *);
 	void Error(const AString &);
 	void Event(const AString &);
-	
+	// From Unit::Error/Unit::Event: `s` is the line the text report prints
+	// ("Name (123): message"), `message` the bare message and `u` its unit,
+	// for the JSON report.
+	void Error(const AString &s, Unit *u, const AString &message);
+	void Event(const AString &s, Unit *u, const AString &message);
+
 	AString FactionTypeStr();
 	void WriteReport( Areport *f, Game *pGame, int ** citems);
+
+	// JSON report (report.<n>.json), ported from master 4e04648.
+	//
+	// Order matters: Game::WriteReport calls build_json_report BEFORE
+	// WriteReport, because WriteReport empties the errors/events/battles
+	// lists, and add_json_show_reports AFTER it, because the skill/item/
+	// object reports only exist once WriteReport has produced them -- see
+	// RecordSkillShow. clear_json_report_state ends the cycle.
+	bool gets_gm_report(Game *game);
+	void build_json_report(json &j, Game *game, int **citems);
+	void build_gm_json_report(json &j, Game *game);
+	void add_json_show_reports(json &j);
+	void clear_json_report_state();
+	// Called by WriteReport for every skill/item/object report it prints.
+	// The text report is the only safe place to collect them: ShowSkill::
+	// Report(this) has side effects (DiscoverItem records the item on the
+	// faction, persisted in game.out, and queues more item/object/skill
+	// reports while the list is being walked), so the JSON report must not
+	// call it a second time. Capturing what was printed keeps the text
+	// report and game.out byte-identical and the JSON equal to the text.
+	void RecordSkillShow(ShowSkill *s, const AString &description);
+	void RecordItemShow(ItemShow *s);
+	void RecordObjectShow(ObjectShow *s);
+	std::vector<FactionEvent> json_events;
+	std::vector<FactionError> json_errors;
+	json json_shows;
 	// LLS - write order template
 	void WriteTemplate(Areport *f, Game *pGame);
 	void WriteFacInfo(Aoutfile *);
@@ -230,6 +296,7 @@ public:
 	int startturn;
 
 	void WriteFactionStats(Areport *f, Game *pGame, int ** citems);
+	json compute_faction_statistics(Game *game, int **citems);
 };
 
 Faction * GetFaction(AList *,int);

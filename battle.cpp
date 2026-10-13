@@ -754,6 +754,22 @@ void Battle::Report(Areport * f,Faction * fac) {
 	}
 }
 
+void Battle::build_json_report(json& j, Faction *fac) {
+	// The same lines Report() prints, as master's report array.
+	if (assassination == ASS_SUCC && fac != attacker) {
+		j["type"] = "assassination";
+		j["report"] = json::array();
+		j["report"].push_back(asstext->Str());
+		j["report"].push_back(""); // Report() prints an empty line after it
+		return;
+	}
+	j["type"] = "battle";
+	j["report"] = json::array();
+	forlist(&text) {
+		j["report"].push_back(((AString *) elem)->Str());
+	}
+}
+
 void Battle::AddLine(const AString & s) {
 	AString * temp = new AString(s);
 	text.Add(temp);
