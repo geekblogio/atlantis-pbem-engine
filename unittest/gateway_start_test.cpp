@@ -99,9 +99,12 @@ ut::suite<"Gateway start"> gateway_start_suite = []
 		stand(a, guard, 120);
 		stand(b, guard, 121);
 
-		// Both towns take a faction each; the third goes to a guarded town that holds one.
+		// Both towns take a faction each; the third goes to a guarded town that holds one, so
+		// the empty hex is never a start place.
 		std::vector<ARegion *> all = { a, b, c };
-		expect(eq(game->gateway_start_capacity(all, a), 2));
+		std::vector<ARegion *> places = game->gateway_start_places(all, a);
+		expect(fatal(eq(places.size(), 2u)));
+		expect(places[0] == a && places[1] == b);
 	};
 
 	"With no guarded town every town and every empty hex takes a faction of its own"_test = [=]
@@ -113,6 +116,8 @@ ut::suite<"Gateway start"> gateway_start_suite = []
 
 		// The town, then the empty hex; the occupied one is never a start of its own.
 		std::vector<ARegion *> all = { a, b, c };
-		expect(eq(game->gateway_start_capacity(all, a), 2));
+		std::vector<ARegion *> places = game->gateway_start_places(all, a);
+		expect(fatal(eq(places.size(), 2u)));
+		expect(places[0] == a && places[1] == b);
 	};
 };

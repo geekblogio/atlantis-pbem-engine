@@ -256,14 +256,19 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 						if (!nominal) continue;
 						std::vector<ARegion *> destinations;
 						gateway_destinations(nominal, destinations);
+						std::vector<ARegion *> places = gateway_start_places(destinations, nominal);
 						json gateway = {
 							{ "number", o->num },
 							{ "name", std::string(o->name->Str()) },
 							{ "terrain", TerrainDefs[nominal->type].name },
 							{ "nominal", { { "x", nominal->xloc }, { "y", nominal->yloc }, { "z", nominal->zloc } } },
-							{ "capacity", gateway_start_capacity(destinations, nominal) },
+							{ "capacity", (int) places.size() },
+							{ "starts", json::array() },
 							{ "candidates", json::array() },
 						};
+						for (auto reg : places) {
+							gateway["starts"].push_back({ { "x", reg->xloc }, { "y", reg->yloc }, { "z", reg->zloc } });
+						}
 						for (auto reg : destinations) {
 							int guards, others;
 							gateway_occupancy(reg, guards, others);
