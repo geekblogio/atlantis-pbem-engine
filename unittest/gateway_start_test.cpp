@@ -29,10 +29,10 @@ namespace {
     }
 }
 
-// The arrival cascade of MOVE IN, and the count `map starts` derives from it (Game::gateway_landing,
-// Game::gateway_start_capacity). The expected numbers are worked out from the cascade's rule, not
-// read back from the function: towns first, empty ones before guarded ones; a guarded town that
-// already holds a faction before any empty hex; an empty hex before anything at all.
+// The arrival cascade of MOVE IN, and the start places `map starts` derives from it
+// (Game::gateway_landing, Game::gateway_start_places). The expected hexes are worked out from the
+// cascade's rule, not read back from the function: towns first, empty ones before guarded ones; a
+// guarded town that already holds a faction before any empty hex; an empty hex before anything.
 ut::suite<"Gateway start"> gateway_start_suite = []
 {
   using namespace ut;
@@ -99,8 +99,10 @@ ut::suite<"Gateway start"> gateway_start_suite = []
     a->town = new TownInfo();
     b->town = new TownInfo();
 
-    // Two towns, one empty hex: three arrivals land alone, the fourth shares.
-    expect(helper.gateway_start_capacity({ a, b, c }, a) == 3_i);
+    // Two towns, one empty hex: three arrivals land alone, the fourth shares. Towns first.
+    auto places = helper.gateway_start_places({ a, b, c }, a);
+    expect(fatal(places.size() == 3_ul));
+    expect(places[0] == a && places[1] == b && places[2] == c);
   };
 
   "One guarded town stops the count at the towns"_test = []
@@ -115,8 +117,10 @@ ut::suite<"Gateway start"> gateway_start_suite = []
     helper.create_unit(guard, b);
 
     // Both towns take a faction each; the third arrival goes to the guarded town, which by then
-    // holds one, before the empty hex is ever tried.
-    expect(helper.gateway_start_capacity({ a, b, c }, a) == 2_i);
+    // holds one, before the empty hex is ever tried — so the empty hex is no start place.
+    auto places = helper.gateway_start_places({ a, b, c }, a);
+    expect(fatal(places.size() == 2_ul));
+    expect(places[0] == a && places[1] == b);
   };
 
   "A town somebody already stands in is not a start of its own"_test = []
@@ -133,7 +137,9 @@ ut::suite<"Gateway start"> gateway_start_suite = []
 
     // The occupied town is skipped at every level that hands out a hex of one's own; the empty
     // town and the empty hex remain.
-    expect(helper.gateway_start_capacity({ a, b, c }, a) == 2_i);
+    auto places = helper.gateway_start_places({ a, b, c }, a);
+    expect(fatal(places.size() == 2_ul));
+    expect(places[0] == a && places[1] == c);
   };
 
   "With no destination the arrival stays where the gateway points"_test = []
@@ -144,8 +150,10 @@ ut::suite<"Gateway start"> gateway_start_suite = []
     auto [a, b, c] = hexes(helper);
     expect(fatal(a != nullptr && c != nullptr));
 
-    expect(helper.gateway_start_capacity({}, c) == 1_i);
+    auto places = helper.gateway_start_places({}, c);
+    expect(fatal(places.size() == 1_ul));
+    expect(places[0] == c);
     helper.create_unit(player, c);
-    expect(helper.gateway_start_capacity({}, c) == 0_i);
+    expect(helper.gateway_start_places({}, c).empty());
   };
 };

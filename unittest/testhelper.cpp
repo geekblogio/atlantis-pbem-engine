@@ -105,8 +105,9 @@ int UnitTestHelper::gateway_landing(const std::vector<ARegion *>& destinations, 
     return game.gateway_landing(destinations, landing, claimed);
 }
 
-int UnitTestHelper::gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) {
-    return game.gateway_start_capacity(destinations, nominal);
+std::vector<ARegion *> UnitTestHelper::gateway_start_places(const std::vector<ARegion *>& destinations,
+    ARegion *nominal) {
+    return game.gateway_start_places(destinations, nominal);
 }
 
 std::string UnitTestHelper::log_output() {

@@ -10,6 +10,13 @@
         "z": 1
       },
       "number": 1,
+      "starts": [
+        {
+          "x": 1,
+          "y": 19,
+          "z": 1
+        }
+      ],
       "terrain": "plain"
     },
     {
@@ -22,6 +29,13 @@
         "z": 1
       },
       "number": 2,
+      "starts": [
+        {
+          "x": 0,
+          "y": 2,
+          "z": 1
+        }
+      ],
       "terrain": "forest"
     },
     {
@@ -34,6 +48,13 @@
         "z": 1
       },
       "number": 3,
+      "starts": [
+        {
+          "x": 0,
+          "y": 12,
+          "z": 1
+        }
+      ],
       "terrain": "mountain"
     },
     {
@@ -46,6 +67,7 @@
         "z": 1
       },
       "number": 4,
+      "starts": [],
       "terrain": "jungle"
     },
     {
@@ -58,6 +80,7 @@
         "z": 1
       },
       "number": 5,
+      "starts": [],
       "terrain": "tundra"
     }
   ]

@@ -1803,24 +1803,29 @@ int Game::gateway_landing(const std::vector<ARegion *>& destinations, std::vecto
     return 5;
 }
 
-int Game::gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) const
+std::vector<ARegion *> Game::gateway_start_places(const std::vector<ARegion *>& destinations,
+    ARegion *nominal) const
 {
+    std::vector<ARegion *> places;
     if (destinations.empty()) {
         // The arrival stays where the gateway points. The first faction there holds it alone
         // unless somebody already stands in it; everyone after shares.
         bool guards, others;
         gateway_occupancy(nominal, guards, others);
-        return others ? 0 : 1;
+        if (!others) places.push_back(nominal);
+        return places;
     }
 
-    // Play the arrivals forward. Any hex of the landing level would do — they are equal for the
-    // count, which is why the engine's random pick does not matter here — so the first is claimed.
+    // Play the arrivals forward. Every hex of a level that hands out a hex of one's own is claimed
+    // before the cascade moves on, whichever the random pick takes first, so the set does not
+    // depend on the pick; the first of the level is taken to make the order a fixed one.
     std::set<ARegion *> claimed;
     std::vector<ARegion *> landing;
     for (;;) {
         int match = gateway_landing(destinations, landing, claimed);
         if (match != 0 && match != 1 && match != 3) break;
         claimed.insert(landing.front());
+        places.push_back(landing.front());
     }
-    return static_cast<int>(claimed.size());
+    return places;
 }

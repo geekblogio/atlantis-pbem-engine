@@ -148,6 +148,7 @@ uses, so it describes the world as the next turn would see it
       "terrain": "plain",
       "nominal": { "x": 1, "y": 19, "z": 1 },
       "capacity": 3,
+      "starts": [ { "x": 4, "y": 6, "z": 1 } ],
       "candidates": [
         { "x": 4, "y": 6, "z": 1, "terrain": "plain", "town": "village",
           "guards": true, "others": false }
@@ -162,6 +163,9 @@ uses, so it describes the world as the next turn would see it
 - `candidates` are the hexes the arrival chooses from, after the ruleset's
   `filter_gateway_destinations`: `town` is the settlement size or `null`, `guards` whether the
   guard faction stands there, `others` whether anybody else does (a lair's monsters count).
+- `starts` are the hexes those arrivals land on alone, in the order the cascade hands them out;
+  there are always `capacity` of them. With no `candidates` it is the named hex, or nothing when
+  somebody stands there.
 - `capacity` plays the arrivals forward: empty towns first, then towns with only the guard, then a
   guarded town that already holds someone — which is a share — and only with no guarded town at
   all the empty hexes. Under `rimefall` every gateway is one slot and a taken slot hands arrivals on
