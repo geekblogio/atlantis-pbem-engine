@@ -232,6 +232,63 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
 	if (AString(typestr) == "lair") type = 2;
 	if (AString(typestr) == "gate") type = 3;
 
+	if (AString(typestr) == "starts") {
+		// Port of master's `map starts` (decision 0026 there): per Nexus gateway the hexes an
+		// arriving faction lands on and how many land alone before one shares, read from the
+		// functions MOVE IN uses. Same keys and value types as master.
+		AString fname = mapfile;
+		std::ofstream out(fname.Str(), std::ios::out | std::ios::trunc);
+		if (!out.is_open()) return(0);
+
+		json starts;
+		starts["gateways"] = json::array();
+		for (int i = 0; i < regions.numLevels; i++) {
+			ARegionArray *pArr = regions.pRegionArrays[i];
+			if (pArr->levelType != ARegionArray::LEVEL_NEXUS) continue;
+			for (int y = 0; y < pArr->y; y++) {
+				for (int x = 0; x < pArr->x; x++) {
+					ARegion *nexus = pArr->GetRegion(x, y);
+					if (!nexus) continue;
+					forlist(&nexus->objects) {
+						Object *o = (Object *) elem;
+						if (o->type != O_GATEWAY || o->inner == -1) continue;
+						ARegion *nominal = regions.GetRegion(o->inner);
+						if (!nominal) continue;
+						std::vector<ARegion *> destinations;
+						gateway_destinations(nominal, destinations);
+						json gateway = {
+							{ "number", o->num },
+							{ "name", std::string(o->name->Str()) },
+							{ "terrain", TerrainDefs[nominal->type].name },
+							{ "nominal", { { "x", nominal->xloc }, { "y", nominal->yloc }, { "z", nominal->zloc } } },
+							{ "capacity", gateway_start_capacity(destinations, nominal) },
+							{ "candidates", json::array() },
+						};
+						for (auto reg : destinations) {
+							int guards, others;
+							gateway_occupancy(reg, guards, others);
+							json candidate = {
+								{ "x", reg->xloc }, { "y", reg->yloc }, { "z", reg->zloc },
+								{ "terrain", TerrainDefs[reg->type].name },
+								{ "town", nullptr },
+								{ "guards", guards != 0 },
+								{ "others", others != 0 },
+							};
+							if (reg->town) {
+								json data = reg->basic_region_data(&regions);
+								candidate["town"] = data["settlement"]["size"];
+							}
+							gateway["candidates"].push_back(candidate);
+						}
+						starts["gateways"].push_back(gateway);
+					}
+				}
+			}
+		}
+		out << starts.dump(2);
+		return(1);
+	}
+
 	if (AString(typestr) == "hex") {
 		// Port of master's `map hex` (Game::view_map, type 5): the whole world
 		// as JSON, one bucket of hexes per level, the nexus left out. It is

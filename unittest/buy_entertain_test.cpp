@@ -8,6 +8,7 @@
 #include "faction.h"
 #include "market.h"
 #include "orders.h"
+#include "game_test_access.h"
 
 #include <string>
 
@@ -16,13 +17,7 @@
 // in inside the suite body where the collision does not apply.
 namespace ut = boost::ut;
 
-// The order handlers under test are private to Game. game.h befriends this struct as a test
-// seam; it exists only here.
-struct GameTestAccess {
-	static void tax(Game *g, Unit *u) { g->ProcessTaxOrder(u, 0); }
-	static void entertain(Game *g, Unit *u) { g->ProcessEntertainOrder(u, 0); }
-	static void doBuy(Game *g, ARegion *r, Market *m) { g->DoBuy(r, m); }
-};
+// The order handlers under test are private to Game; the seam game.h befriends is shared.
 
 namespace {
 	// Restores a Globals field however the test exits (a fatal() abort included), so a

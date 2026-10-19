@@ -1746,113 +1746,16 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
 			// Gateways should only exist in the nexus, and move the
 			// user to a semi-random instance of the target terrain
 			// type, so select where they will actually move to.
-			ARegionArray *level = regions.GetRegionArray(newreg->zloc);
-			// match levels to try for, in order:
-			// 0 - completely empty towns
-			// 1 - towns with only guardsmen
-			// 2 - towns with guardsmen and other players
-			// 3 - completely empty hexes
-			// 4 - anywhere that matches terrain (out of options)
-			int match = 0;
-			int candidates = 0;
-			while (!candidates && match < 5) {
-				for (int x = 0; x < level->x; x++)
-					for (int y = 0; y < level->y; y++) {
-						ARegion *scanReg = level->GetRegion(x, y);
-						if (!scanReg)
-							continue;
-						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
-							continue;
-						if (match < 3 && !scanReg->town)
-							continue;
-						if (match == 4) {
-							candidates++;
-							continue;
-						}
-						int guards = 0;
-						int others = 0;
-						forlist(&scanReg->objects) {
-							Object *o = (Object *) elem;
-							forlist(&o->units) {
-								Unit *u = (Unit *) elem;
-								if (u->faction->num == guardfaction)
-									guards = 1;
-								else
-									others = 1;
-							}
-						}
-						switch (match) {
-							case 0:
-								if (guards || others)
-									continue;
-								break;
-							case 1:
-								if (!guards || others)
-									continue;
-								break;
-							case 2:
-								if (!guards)
-									continue;
-								break;
-							case 3:
-								if (others)
-									continue;
-								break;
-						}
-						candidates++;
-					}
-				if (!candidates)
-					match++;
-			}
-			if (candidates) {
-				candidates = getrandom(candidates);
-				for (int x = 0; x < level->x; x++)
-					for (int y = 0; y < level->y; y++) {
-						ARegion *scanReg = level->GetRegion(x, y);
-						if (!scanReg)
-							continue;
-						if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[newreg->type].similar_type)
-							continue;
-						if (match < 3 && !scanReg->town)
-							continue;
-						if (match == 4) {
-							candidates++;
-							continue;
-						}
-						int guards = 0;
-						int others = 0;
-						forlist(&scanReg->objects) {
-							Object *o = (Object *) elem;
-							forlist(&o->units) {
-								Unit *u = (Unit *) elem;
-								if (u->faction->num == guardfaction)
-									guards = 1;
-								else
-									others = 1;
-							}
-						}
-						switch (match) {
-							case 0:
-								if (guards || others)
-									continue;
-								break;
-							case 1:
-								if (!guards || others)
-									continue;
-								break;
-							case 2:
-								if (!guards)
-									continue;
-								break;
-							case 3:
-								if (others)
-									continue;
-								break;
-						}
-						if (!candidates--) {
-							newreg = scanReg;
-						}
-					}
+			std::vector<ARegion *> destinations, landing;
+			gateway_destinations(newreg, destinations);
+			int match = gateway_landing(destinations, landing, std::set<ARegion *>());
+			if (!landing.empty()) {
+				int pick = getrandom((int) landing.size());
+				// At level 4 the old code drew and then chose nothing: its second scan counted
+				// level-4 hexes up rather than down, so the unit stayed on the gateway's own hex.
+				// Kept as it was, draw included — the turns this tree replays depend on it.
+				if (match != 4)
+					newreg = landing[pick];
 			}
 		}
 	} else if (x->dir == MOVE_PAUSE) {
@@ -2038,4 +1941,91 @@ done_moving:
 	delete o;
 	unit->monthorders = 0;
 	return 0;
+}
+
+void Game::gateway_destinations(ARegion *nominal, std::vector<ARegion *> &destinations)
+{
+	destinations.clear();
+	ARegionArray *level = regions.GetRegionArray(nominal->zloc);
+	for (int x = 0; x < level->x; x++)
+		for (int y = 0; y < level->y; y++) {
+			ARegion *scanReg = level->GetRegion(x, y);
+			if (!scanReg)
+				continue;
+			if (TerrainDefs[scanReg->type].similar_type != TerrainDefs[nominal->type].similar_type)
+				continue;
+			destinations.push_back(scanReg);
+		}
+}
+
+void Game::gateway_occupancy(ARegion *region, int &guards, int &others)
+{
+	guards = 0;
+	others = 0;
+	forlist(&region->objects) {
+		Object *o = (Object *) elem;
+		forlist(&o->units) {
+			Unit *u = (Unit *) elem;
+			if (u->faction->num == guardfaction)
+				guards = 1;
+			else
+				others = 1;
+		}
+	}
+}
+
+int Game::gateway_landing(std::vector<ARegion *> &destinations, std::vector<ARegion *> &landing,
+	const std::set<ARegion *> &claimed)
+{
+	// match levels to try for, in order:
+	// 0 - completely empty towns
+	// 1 - towns with only guardsmen
+	// 2 - towns with guardsmen and other players
+	// 3 - hexes with nobody but guardsmen
+	// 4 - anywhere that matches terrain (out of options)
+	landing.clear();
+	for (int match = 0; match < 5; match++) {
+		for (auto scanReg : destinations) {
+			if (match < 3 && !scanReg->town)
+				continue;
+			if (match < 4) {
+				int guards, others;
+				gateway_occupancy(scanReg, guards, others);
+				if (claimed.count(scanReg))
+					others = 1;
+				if (match == 0 && (guards || others))
+					continue;
+				if (match == 1 && (!guards || others))
+					continue;
+				if (match == 2 && !guards)
+					continue;
+				if (match == 3 && others)
+					continue;
+			}
+			landing.push_back(scanReg);
+		}
+		if (!landing.empty())
+			return match;
+	}
+	return 5;
+}
+
+int Game::gateway_start_capacity(std::vector<ARegion *> &destinations, ARegion *nominal)
+{
+	if (destinations.empty()) {
+		int guards, others;
+		gateway_occupancy(nominal, guards, others);
+		return others ? 0 : 1;
+	}
+
+	// Play the arrivals forward; any hex of the landing level is as good as another for the count.
+	std::set<ARegion *> claimed;
+	std::vector<ARegion *> landing;
+	for (;;) {
+		int match = gateway_landing(destinations, landing, claimed);
+		if (match != 0 && match != 1 && match != 3)
+			break;
+		claimed.insert(landing.front());
+	}
+	return (int) claimed.size();
 }
