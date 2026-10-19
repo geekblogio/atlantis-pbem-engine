@@ -43,6 +43,10 @@ phase files exist for it alone.
   world history at all. That is precisely why they are environment variables rather than CLI
   flags — see [ADR 0005](../decisions/0005-environment-variables-for-fork-hooks.md). The fifth,
   `ATLANTIS_PHASE_DUMPS`, is the Python port's; neither of these two projects sets it.
+- **`map hex` and `map starts`.** The orchestrator reads both after world generation: the
+  world as a map before any report exists, and per gateway where a faction would start and how
+  many can before two share a hex ([0026](../decisions/0026-the-start-export.md)). A renamed key
+  in either is a silent failure there.
 - **`neworigins8`** for the live game. Consumers that want NewOrigins 8 build that target
   rather than patching `neworigins` — this replaced a local patch and is a deliberate,
   downstream-visible change.

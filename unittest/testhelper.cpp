@@ -96,6 +96,19 @@ int UnitTestHelper::connected_distance(ARegion *reg1, ARegion *reg2, int penalty
     return game.regions.get_connected_distance(reg1, reg2, penalty, max);
 }
 
+void UnitTestHelper::set_guard_faction(Faction *faction) {
+    game.guardfaction = faction->num;
+}
+
+int UnitTestHelper::gateway_landing(const std::vector<ARegion *>& destinations, std::vector<ARegion *>& landing,
+    const std::set<ARegion *>& claimed) {
+    return game.gateway_landing(destinations, landing, claimed);
+}
+
+int UnitTestHelper::gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) {
+    return game.gateway_start_capacity(destinations, nominal);
+}
+
 std::string UnitTestHelper::log_output() {
     return log_stream.str();
 }

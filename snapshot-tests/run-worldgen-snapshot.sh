@@ -98,6 +98,23 @@ if [[ $status != 0 ]]; then
   exit 1
 fi
 
+# The start export (`map starts`) reads the world just made and is recorded beside it: where a
+# faction entering through each gateway lands, and how many land alone, is a property of the
+# generated world that no turn snapshot replays. `map` reads game.in, which is not part of the
+# recording.
+cd ./worldgen-output || exit 1
+cp game.out game.in
+"../$game" map starts starts.json &> /dev/null
+map_status=$?
+rm -f game.in
+cd .. || exit 1
+
+if [[ $map_status != 0 ]]; then
+  echo "map starts failed. -- Test failed."
+  cleanup "${game}"
+  exit 1
+fi
+
 if ! diff -ur "worldgen/$game/output" ./worldgen-output &> worldgen-difference.txt ; then
   echo "output differed. -- Test failed."
   cat worldgen-difference.txt

@@ -1461,6 +1461,20 @@ Engine code, but inert when unset: no recorded turn, rulebook or world moved.
 **Fork-local.** It exists for `geekblogio/atlantis-pbem-ng`, which compares its turn with this
 engine's phase by phase; upstream has no such consumer.
 
+### `#86` — the start export (0026)
+
+`game.h`, `game.cpp`, `monthorders.cpp`, a unit test and its helper, the worldgen snapshot runners
+and their recordings, the interface documents. `map starts <file>` writes, per Nexus gateway, the
+candidates an arrival chooses from and how many arrivals land alone before one shares.
+
+The gateway branch of `Do1MoveOrder` became `gateway_destinations`, `gateway_occupancy` and
+`gateway_landing`, which the export calls too; `gateway_start_capacity` plays the cascade forward
+over a set of claimed hexes. The random pick stayed where it was, so no recorded turn moved; the
+recorded worlds gained `starts.json` and nothing else.
+
+**Fork-local.** It exists for `geekblogio/atlantis-pbem-web`'s world catalogue; upstream has no
+such consumer.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose

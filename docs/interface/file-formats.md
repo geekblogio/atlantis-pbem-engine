@@ -131,6 +131,43 @@ Three things to know before reading them:
 The format is `game.out`'s, and the same caveat applies: positional and without a schema. It is
 meant to be read by the code that reads `game.in`, or by a converter built on it.
 
+## `map starts`
+
+Written by `<game> map starts <file>` from `game.in`, by every ruleset: where a faction entering
+the world through each gateway of the Nexus would land, and how many land on a hex no other
+faction holds before the first one shares. It is read from the functions `MOVE <n> IN` itself
+uses, so it describes the world as the next turn would see it
+([0026](../decisions/0026-the-start-export.md)).
+
+```json
+{
+  "gateways": [
+    {
+      "number": 1,
+      "name": "Gateway to plain [1]",
+      "terrain": "plain",
+      "nominal": { "x": 1, "y": 19, "z": 1 },
+      "capacity": 3,
+      "candidates": [
+        { "x": 4, "y": 6, "z": 1, "terrain": "plain", "town": "village",
+          "guards": true, "others": false }
+      ]
+    }
+  ]
+}
+```
+
+- `nominal` is the hex the gateway names. With no `candidates` an arrival stays there, so
+  `capacity` is 1 — or 0 when somebody already stands in it.
+- `candidates` are the hexes the arrival chooses from, after the ruleset's
+  `filter_gateway_destinations`: `town` is the settlement size or `null`, `guards` whether the
+  guard faction stands there, `others` whether anybody else does (a lair's monsters count).
+- `capacity` plays the arrivals forward: empty towns first, then towns with only the guard, then a
+  guarded town that already holds someone — which is a share — and only with no guarded town at
+  all the empty hexes. Under `rimefall` every gateway is one slot and a taken slot hands arrivals on
+  to another, so each gateway reports 1 and nobody ever shares.
+- A ruleset without gateways (start cities) writes `{"gateways": []}`.
+
 ## `players.in`
 
 A plain-text file the orchestrator generates. This is the normative description — the engine

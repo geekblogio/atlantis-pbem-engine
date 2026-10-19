@@ -36,7 +36,7 @@ them; the ruleset determines the game rules, not the interface.
 | `<game> new` | *(interactive, see below)* | `game.out`, `players.out`, and for `havilah` also `names.out` |
 | `<game> run` | `game.in`, `players.in`, `orders.<n>` | `game.out`, `players.out`, `report.<n>`, `report.<n>.json`, `template.<n>`, `times.<random>`, and `rimefall.json` for that ruleset |
 | `<game> edit` | `game.in` | `game.out` *(interactive)* |
-| `<game> map <geo\|wmon\|lair\|gate\|hex> <mapfile>` | `game.in` | `<mapfile>` |
+| `<game> map <geo\|wmon\|lair\|gate\|hex\|starts> <mapfile>` | `game.in` | `<mapfile>`; `starts` is JSON, see [file-formats.md](file-formats.md#map-starts) |
 | `<game> mapunits` | `game.in` | stdout |
 | `<game> check <orderfile> <checkfile>` | `<orderfile>` | `<checkfile>` |
 | `<game> genrules <introfile> <cssfile> <rules-outputfile>` | `<introfile>` | `<rules-outputfile>` |

@@ -1565,51 +1565,8 @@ Location *Game::DoAMoveOrder(Unit *unit, ARegion *region, Object *obj)
             // Gateways should only exist in the nexus, and move the
             // user to a semi-random instance of the target terrain
             // type, so select where they will actually move to.
-            ARegionArray *level = regions.GetRegionArray(newreg->zloc);
-            std::vector<ARegion *> start_locations = level->get_starting_region_candidates(newreg->type);
-
-            // Let the ruleset narrow the set before the cascade picks from it. Only the terrain
-            // of the gateway's destination survives the lookup above, so a ruleset that keys its
-            // gateways on anything else — latitude, for instance — has no other way to be heard.
-            // Every ruleset but rimefall leaves the list alone. See docs/decisions/0012.
-            filter_gateway_destinations(unit, obj, newreg, start_locations);
-
-            // match levels to try for, in order:
-            // 0 - completely empty towns
-            // 1 - towns with only guardsmen
-            // 2 - towns with guardsmen and other players
-            // 3 - completely empty hexes
-            // 4 - anywhere that matches terrain (out of options)
-            int match = 0;
-            std::vector<ARegion *> candidates = {};
-            while (candidates.empty() && match < 5) {
-                for (const auto scanReg : start_locations) {
-                    // ignore any region that isn't a town before match level 3
-                    if (match < 3 && !scanReg->town) continue;
-                    int guards = 0;
-                    int others = 0;
-                    for (const auto o : scanReg->objects) {
-                        for (const auto u : o->units) {
-                            if (u->faction->num == guardfaction)
-                                guards = 1;
-                            else
-                                others = 1;
-                        }
-                    }
-                    // match level 0 - ignore anything that isn't completely empty
-                    if (match == 0 && (guards || others)) continue;
-                    // match level 1 - ignore anything that has other players
-                    if (match == 1 && (!guards || others)) continue;
-                    // match level 2 - ignore anything that doesn't have guards
-                    if (match == 2 && !guards) continue;
-                    // match level 3 - ignore anything that has guards or others
-                    if (match == 3 && (guards || others)) continue;
-                    // match level 4 or we were legal by the above rules
-                    candidates.push_back(scanReg);
-                }
-                // increment match level.  If we found anything above, we'll break at the top of the while
-                match++;
-            }
+            std::vector<ARegion *> candidates;
+            gateway_landing(gateway_destinations(unit, obj, newreg), candidates);
             if (!candidates.empty()) {
                 int index = rng::get_random(candidates.size()); // Corrected namespace
                 newreg = candidates[index];
@@ -1784,4 +1741,86 @@ done_moving:
     delete o;
     unit->monthorders = nullptr;
     return 0;
+}
+
+std::vector<ARegion *> Game::gateway_destinations(Unit *unit, Object *gateway, ARegion *nominal)
+{
+    ARegionArray *level = regions.GetRegionArray(nominal->zloc);
+    std::vector<ARegion *> destinations = level->get_starting_region_candidates(nominal->type);
+
+    // Let the ruleset narrow the set before the cascade picks from it. Only the terrain
+    // of the gateway's destination survives the lookup above, so a ruleset that keys its
+    // gateways on anything else — latitude, for instance — has no other way to be heard.
+    // Every ruleset but rimefall leaves the list alone. See docs/decisions/0012.
+    filter_gateway_destinations(unit, gateway, nominal, destinations);
+    return destinations;
+}
+
+void Game::gateway_occupancy(ARegion *region, bool& guards, bool& others) const
+{
+    guards = false;
+    others = false;
+    for (const auto o : region->objects) {
+        for (const auto u : o->units) {
+            if (u->faction->num == guardfaction)
+                guards = true;
+            else
+                others = true;
+        }
+    }
+}
+
+int Game::gateway_landing(const std::vector<ARegion *>& destinations, std::vector<ARegion *>& landing,
+    const std::set<ARegion *>& claimed) const
+{
+    // match levels to try for, in order:
+    // 0 - completely empty towns
+    // 1 - towns with only guardsmen
+    // 2 - towns with guardsmen and other players
+    // 3 - completely empty hexes
+    // 4 - anywhere that matches terrain (out of options)
+    landing.clear();
+    for (int match = 0; match < 5; match++) {
+        for (const auto scanReg : destinations) {
+            // ignore any region that isn't a town before match level 3
+            if (match < 3 && !scanReg->town) continue;
+            bool guards, others;
+            gateway_occupancy(scanReg, guards, others);
+            if (claimed.count(scanReg)) others = true;
+            // match level 0 - ignore anything that isn't completely empty
+            if (match == 0 && (guards || others)) continue;
+            // match level 1 - ignore anything that has other players
+            if (match == 1 && (!guards || others)) continue;
+            // match level 2 - ignore anything that doesn't have guards
+            if (match == 2 && !guards) continue;
+            // match level 3 - ignore anything that has guards or others
+            if (match == 3 && (guards || others)) continue;
+            // match level 4 or we were legal by the above rules
+            landing.push_back(scanReg);
+        }
+        if (!landing.empty()) return match;
+    }
+    return 5;
+}
+
+int Game::gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) const
+{
+    if (destinations.empty()) {
+        // The arrival stays where the gateway points. The first faction there holds it alone
+        // unless somebody already stands in it; everyone after shares.
+        bool guards, others;
+        gateway_occupancy(nominal, guards, others);
+        return others ? 0 : 1;
+    }
+
+    // Play the arrivals forward. Any hex of the landing level would do — they are equal for the
+    // count, which is why the engine's random pick does not matter here — so the first is claimed.
+    std::set<ARegion *> claimed;
+    std::vector<ARegion *> landing;
+    for (;;) {
+        int match = gateway_landing(destinations, landing, claimed);
+        if (match != 0 && match != 1 && match != 3) break;
+        claimed.insert(landing.front());
+    }
+    return static_cast<int>(claimed.size());
 }
