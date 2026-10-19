@@ -35,6 +35,9 @@ class Game;
 #include "object.h"
 #include "events.h"
 
+#include <set>
+#include <vector>
+
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
 // The schema of report.<n>.json, kept identical to master 4e04648's (which
 // defines the same constant), so one reader handles both engines.
@@ -86,6 +89,26 @@ public:
 	void WriteNewFac(Faction *pFac);
 
 	int ViewMap(const AString &, const AString &);
+
+	// The gateway arrival of MOVE IN, split so `map starts` can read it (master's decision 0026,
+	// ported). Public, unlike the rest of the turn: the export and the unit tests read them, and
+	// none of them changes the world.
+	//
+	// The hexes an arrival through a gateway naming `nominal` chooses from: every hex of a similar
+	// terrain on its level, in the scan order MOVE IN has always used (x outer, y inner). Stable
+	// has no candidate test and no ruleset filter.
+	void gateway_destinations(ARegion *nominal, std::vector<ARegion *> &destinations);
+	// Whether the guard faction (`guards`) or anybody else (`others`) stands in a region.
+	void gateway_occupancy(ARegion *region, int &guards, int &others);
+	// The arrival cascade: fills `landing` with the hexes of the first level that has any and
+	// returns it — 0 empty towns, 1 towns with only the guard, 2 guarded towns, 3 hexes nobody but
+	// the guard holds, 4 anything; 5 when there is nothing. Regions in `claimed` count as held by
+	// somebody else. Note level 4 never moves a unit: MOVE IN draws and stays on `nominal`.
+	int gateway_landing(std::vector<ARegion *> &destinations, std::vector<ARegion *> &landing,
+		const std::set<ARegion *> &claimed);
+	// How many factions arriving one after another land on a hex no other faction holds, before
+	// the first one shares: levels 0, 1 and 3 take a hex of their own, 2 and 4 share.
+	int gateway_start_capacity(std::vector<ARegion *> &destinations, ARegion *nominal);
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);
