@@ -577,12 +577,13 @@ private:
     int gateway_landing(const std::vector<ARegion *>& destinations, std::vector<ARegion *>& landing,
         const std::set<ARegion *>& claimed = {}) const;
 
-    // How many factions arriving through a gateway with these `destinations`, one after another
-    // into the world as it is, each land on a hex no other faction holds — the arrival after them
-    // is the first to share. An arrival at level 0, 1 or 3 takes a hex of its own; level 2 or 4
-    // shares. With no destination at all the arrival stays on `nominal`, which one faction holds
-    // alone unless somebody already stands there.
-    int gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) const;
+    // The hexes factions arriving through a gateway with these `destinations`, one after another
+    // into the world as it is, land on without sharing — the arrival after the last of them is the
+    // first to share, so their number is the gateway's start capacity. An arrival at level 0, 1 or
+    // 3 takes a hex of its own; level 2 or 4 shares. With no destination at all the arrival stays
+    // on `nominal`, which one faction holds alone unless somebody already stands there.
+    std::vector<ARegion *> gateway_start_places(const std::vector<ARegion *>& destinations,
+        ARegion *nominal) const;
 
     void EndGame(Faction *pVictor);
 

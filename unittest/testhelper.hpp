@@ -78,11 +78,11 @@ public:
     void collect_transported_goods();
     // connected distance
     int connected_distance(ARegion *reg1, ARegion *reg2, int penalty, int max);
-    // The gateway arrival (Game::gateway_landing, Game::gateway_start_capacity), private to Game.
+    // The gateway arrival (Game::gateway_landing, Game::gateway_start_places), private to Game.
     void set_guard_faction(Faction *faction);
     int gateway_landing(const std::vector<ARegion *>& destinations, std::vector<ARegion *>& landing,
         const std::set<ARegion *>& claimed = {});
-    int gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal);
+    std::vector<ARegion *> gateway_start_places(const std::vector<ARegion *>& destinations, ARegion *nominal);
     // Run the maintenance phase
     void maintain_units();
     // Run sacrifice orders

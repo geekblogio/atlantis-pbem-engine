@@ -31,6 +31,11 @@ and the number of arrivals that land alone** ([../interface/file-formats.md](../
   runs the same cascade with a set of claimed hexes standing in for factions that have arrived,
   and counts until an arrival lands at a level that shares (2 or 4). Any hex of a level is as good
   as another for the count, so the random pick does not matter to it.
+- **It names the start places, not only their number.** `gateway_start_places` returns the hexes
+  the arrivals claim, the export writes them as `starts`, and `capacity` is their count — so a map
+  can mark where factions start rather than every hex they might have been sent to (a terrain
+  whose one guarded town stops the cascade has a single start among twenty candidates). Added
+  after the first version shipped, at the catalogue's first use.
 - **Rimefall needs nothing of its own.** Its filter hands back the slot a gateway names; the
   claimed overlay is not a unit, so the second arrival finds the same slot taken and the cascade
   shares — capacity 1 per gateway, which is what one slot per gateway means. That substitutes

@@ -238,7 +238,7 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
 
     if (type == 6) {
         // Where a faction entering the world lands: per gateway in the Nexus, the hexes the arrival
-        // would choose from and how many factions land alone before the first one shares a hex.
+        // would choose from, and the ones factions land on alone before the first one shares a hex.
         // Read from the same functions MOVE IN uses (Game::gateway_destinations,
         // Game::gateway_landing), so it describes this world as the next turn would see it.
         json starts;
@@ -255,14 +255,19 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
                         ARegion *nominal = regions.GetRegion(o->inner);
                         if (!nominal) continue;
                         std::vector<ARegion *> destinations = gateway_destinations(nullptr, o, nominal);
+                        std::vector<ARegion *> places = gateway_start_places(destinations, nominal);
                         json gateway = {
                             { "number", o->num },
                             { "name", o->name },
                             { "terrain", TerrainDefs[nominal->type].name },
                             { "nominal", { { "x", nominal->xloc }, { "y", nominal->yloc }, { "z", nominal->zloc } } },
-                            { "capacity", gateway_start_capacity(destinations, nominal) },
+                            { "capacity", static_cast<int>(places.size()) },
+                            { "starts", json::array() },
                             { "candidates", json::array() },
                         };
+                        for (const auto reg : places) {
+                            gateway["starts"].push_back({ { "x", reg->xloc }, { "y", reg->yloc }, { "z", reg->zloc } });
+                        }
                         for (const auto reg : destinations) {
                             bool guards, others;
                             gateway_occupancy(reg, guards, others);

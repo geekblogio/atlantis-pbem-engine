@@ -1475,6 +1475,16 @@ recorded worlds gained `starts.json` and nothing else.
 **Fork-local.** It exists for `geekblogio/atlantis-pbem-web`'s world catalogue; upstream has no
 such consumer.
 
+### `#89` — the start export names its start places (0026)
+
+`game.h`, `game.cpp`, `monthorders.cpp`, the unit test and its helper, the worldgen recordings,
+the interface documents. `gateway_start_capacity` became `gateway_start_places`, which returns the
+hexes the forward play claims; `map starts` writes them as `starts` beside `capacity`, their count.
+The catalogue's map marked every candidate, twenty rings for one start where a guarded town stops
+the cascade. No turn moved; the recorded `starts.json` gained the key.
+
+**Fork-local**, like `#86`.
+
 ### Maintenance of this register
 
 `#28`, `#29` — corrections to this file itself. `#28` added the SHAs of commits that prose
