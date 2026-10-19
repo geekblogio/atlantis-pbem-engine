@@ -106,9 +106,10 @@ public:
 	// somebody else. Note level 4 never moves a unit: MOVE IN draws and stays on `nominal`.
 	int gateway_landing(std::vector<ARegion *> &destinations, std::vector<ARegion *> &landing,
 		const std::set<ARegion *> &claimed);
-	// How many factions arriving one after another land on a hex no other faction holds, before
-	// the first one shares: levels 0, 1 and 3 take a hex of their own, 2 and 4 share.
-	int gateway_start_capacity(std::vector<ARegion *> &destinations, ARegion *nominal);
+	// The hexes factions arriving one after another land on without another faction there,
+	// before the first one shares: levels 0, 1 and 3 take a hex of their own, 2 and 4 share.
+	// Their number is the gateway's start capacity.
+	std::vector<ARegion *> gateway_start_places(std::vector<ARegion *> &destinations, ARegion *nominal);
 	// LLS
 	void UnitFactionMap();
 	int GenRules(const AString &, const AString &, const AString &);

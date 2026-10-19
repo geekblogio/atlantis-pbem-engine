@@ -2010,15 +2010,20 @@ int Game::gateway_landing(std::vector<ARegion *> &destinations, std::vector<AReg
 	return 5;
 }
 
-int Game::gateway_start_capacity(std::vector<ARegion *> &destinations, ARegion *nominal)
+std::vector<ARegion *> Game::gateway_start_places(std::vector<ARegion *> &destinations, ARegion *nominal)
 {
+	std::vector<ARegion *> places;
 	if (destinations.empty()) {
 		int guards, others;
 		gateway_occupancy(nominal, guards, others);
-		return others ? 0 : 1;
+		if (!others)
+			places.push_back(nominal);
+		return places;
 	}
 
-	// Play the arrivals forward; any hex of the landing level is as good as another for the count.
+	// Play the arrivals forward. Every hex of a level that hands out a hex of one's own is
+	// claimed before the cascade moves on, so the set does not depend on the random pick; the
+	// first of the level is taken to make the order a fixed one.
 	std::set<ARegion *> claimed;
 	std::vector<ARegion *> landing;
 	for (;;) {
@@ -2026,6 +2031,7 @@ int Game::gateway_start_capacity(std::vector<ARegion *> &destinations, ARegion *
 		if (match != 0 && match != 1 && match != 3)
 			break;
 		claimed.insert(landing.front());
+		places.push_back(landing.front());
 	}
-	return (int) claimed.size();
+	return places;
 }
