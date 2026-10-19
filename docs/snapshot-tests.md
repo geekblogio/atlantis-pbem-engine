@@ -14,7 +14,7 @@ byte of every output file** against what was recorded.
 | --- | --- |
 | `run-game-snapshots.sh [game]` | replays `turns/` (`standard`) or `<game>_turns/`; turn data exists for `standard`, `neworigins` (14 turns each) and `rimefall` (7) |
 | `run-rules-snapshot.sh [game]` | regenerates the HTML rulebook and diffs it against `rules/<game>.html`, for every ruleset |
-| `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`; recorded for every ruleset except `neworigins8` |
+| `run-worldgen-snapshot.sh <game>` | regenerates a world from a fixed seed and diffs it against `worldgen/<game>/output`, including the `map starts` export of that world (`starts.json`, [0026](decisions/0026-the-start-export.md)); recorded for every ruleset except `neworigins8` |
 | `run-phase-dump-snapshot.sh` | replays the `standard` turns with `ATLANTIS_PHASE_DUMPS` set: all 32 phase files must appear, and everything else must match the recording, stdout apart from the line announcing the variable ([0025](decisions/0025-the-world-after-every-phase.md)). The phase files themselves are not recorded. |
 | `run-snapshots.sh` | all four, for everything |
 

@@ -200,6 +200,7 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
     if (typestr == "gate") type = 3;
     if (typestr == "cities") type = 4;
     if (typestr == "hex") type = 5;
+    if (typestr == "starts") type = 6;
 
     std::ofstream f(mapfile, std::ios::out|std::ios::ate);
     if (!f.is_open()) return(0);
@@ -232,6 +233,55 @@ int Game::view_map(const std::string& typestr,const std::string& mapfile)
 
             f << "(" << reg->xloc << "," << reg->yloc << "): " << reg->town->name << "\n";
         }
+        return(1);
+    }
+
+    if (type == 6) {
+        // Where a faction entering the world lands: per gateway in the Nexus, the hexes the arrival
+        // would choose from and how many factions land alone before the first one shares a hex.
+        // Read from the same functions MOVE IN uses (Game::gateway_destinations,
+        // Game::gateway_landing), so it describes this world as the next turn would see it.
+        json starts;
+        starts["gateways"] = json::array();
+        for (auto i = 0; i < regions.numLevels; i++) {
+            ARegionArray *pArr = regions.pRegionArrays[i];
+            if (pArr->levelType != ARegionArray::LEVEL_NEXUS) continue;
+            for (int y = 0; y < pArr->y; y++) {
+                for (int x = 0; x < pArr->x; x++) {
+                    ARegion *nexus = pArr->GetRegion(x, y);
+                    if (!nexus) continue;
+                    for (const auto o : nexus->objects) {
+                        if (o->type != O_GATEWAY || o->inner == -1) continue;
+                        ARegion *nominal = regions.GetRegion(o->inner);
+                        if (!nominal) continue;
+                        std::vector<ARegion *> destinations = gateway_destinations(nullptr, o, nominal);
+                        json gateway = {
+                            { "number", o->num },
+                            { "name", o->name },
+                            { "terrain", TerrainDefs[nominal->type].name },
+                            { "nominal", { { "x", nominal->xloc }, { "y", nominal->yloc }, { "z", nominal->zloc } } },
+                            { "capacity", gateway_start_capacity(destinations, nominal) },
+                            { "candidates", json::array() },
+                        };
+                        for (const auto reg : destinations) {
+                            bool guards, others;
+                            gateway_occupancy(reg, guards, others);
+                            json candidate = {
+                                { "x", reg->xloc }, { "y", reg->yloc }, { "z", reg->zloc },
+                                { "terrain", TerrainDefs[reg->type].name },
+                                { "town", nullptr },
+                                { "guards", guards },
+                                { "others", others },
+                            };
+                            if (reg->town) candidate["town"] = reg->basic_region_data()["settlement"]["size"];
+                            gateway["candidates"].push_back(candidate);
+                        }
+                        starts["gateways"].push_back(gateway);
+                    }
+                }
+            }
+        }
+        f << starts.dump(2);
         return(1);
     }
 

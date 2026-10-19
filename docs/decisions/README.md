@@ -42,3 +42,4 @@ is what prompted writing this down.
 | [0023](0023-a-rimefall-start-carries-a-settlement.md) | A `rimefall` start carries a settlement |
 | [0024](0024-the-start-count-scales-with-the-land.md) | The start count scales with the land |
 | [0025](0025-the-world-after-every-phase.md) | The world after every phase, for the Python port |
+| [0026](0026-the-start-export.md) | The start export: where a gateway lands, from the arrival's own code |

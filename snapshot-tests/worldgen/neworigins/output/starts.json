@@ -1,0 +1,869 @@
+{
+  "gateways": [
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 17,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 17,
+          "y": 17,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 18,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 19,
+          "y": 3,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 19,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": true,
+          "others": false,
+          "terrain": "plain",
+          "town": "village",
+          "x": 19,
+          "y": 17,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 20,
+          "y": 4,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "plain",
+          "town": null,
+          "x": 20,
+          "y": 6,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "plain",
+          "town": null,
+          "x": 21,
+          "y": 5,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 21,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "plain",
+          "town": null,
+          "x": 22,
+          "y": 6,
+          "z": 1
+        }
+      ],
+      "capacity": 1,
+      "name": "Gateway to plain [1]",
+      "nominal": {
+        "x": 17,
+        "y": 17,
+        "z": 1
+      },
+      "number": 1,
+      "terrain": "plain"
+    },
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 0,
+          "y": 6,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 0,
+          "y": 8,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 0,
+          "y": 20,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 1,
+          "y": 5,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 1,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 1,
+          "y": 19,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 1,
+          "y": 21,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 2,
+          "y": 6,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 2,
+          "y": 18,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 3,
+          "y": 17,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 17,
+          "y": 19,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 18,
+          "y": 6,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 18,
+          "y": 18,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 19,
+          "y": 5,
+          "z": 1
+        },
+        {
+          "guards": true,
+          "others": false,
+          "terrain": "forest",
+          "town": "town",
+          "x": 19,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 19,
+          "y": 19,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 20,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 20,
+          "y": 18,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 21,
+          "y": 13,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 21,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": true,
+          "others": false,
+          "terrain": "forest",
+          "town": "town",
+          "x": 21,
+          "y": 17,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "forest",
+          "town": null,
+          "x": 21,
+          "y": 19,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 22,
+          "y": 12,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 22,
+          "y": 14,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 22,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 22,
+          "y": 18,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 23,
+          "y": 13,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "forest",
+          "town": null,
+          "x": 23,
+          "y": 19,
+          "z": 1
+        }
+      ],
+      "capacity": 2,
+      "name": "Gateway to forest [2]",
+      "nominal": {
+        "x": 2,
+        "y": 6,
+        "z": 1
+      },
+      "number": 2,
+      "terrain": "forest"
+    },
+    {
+      "candidates": [
+        {
+          "guards": true,
+          "others": false,
+          "terrain": "mountain",
+          "town": "village",
+          "x": 3,
+          "y": 19,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "mountain",
+          "town": null,
+          "x": 23,
+          "y": 17,
+          "z": 1
+        }
+      ],
+      "capacity": 1,
+      "name": "Gateway to mountain [3]",
+      "nominal": {
+        "x": 3,
+        "y": 19,
+        "z": 1
+      },
+      "number": 3,
+      "terrain": "mountain"
+    },
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 2,
+          "y": 20,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 3,
+          "y": 21,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 17,
+          "y": 5,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "swamp",
+          "town": null,
+          "x": 17,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 20,
+          "y": 10,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 20,
+          "y": 12,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "swamp",
+          "town": null,
+          "x": 20,
+          "y": 14,
+          "z": 1
+        }
+      ],
+      "capacity": 6,
+      "name": "Gateway to swamp [4]",
+      "nominal": {
+        "x": 17,
+        "y": 5,
+        "z": 1
+      },
+      "number": 4,
+      "terrain": "swamp"
+    },
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "jungle",
+          "town": null,
+          "x": 0,
+          "y": 10,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 0,
+          "y": 12,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 1,
+          "y": 9,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 1,
+          "y": 11,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "jungle",
+          "town": null,
+          "x": 1,
+          "y": 13,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 2,
+          "y": 10,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 2,
+          "y": 12,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 19,
+          "y": 9,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "jungle",
+          "town": null,
+          "x": 22,
+          "y": 10,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "jungle",
+          "town": null,
+          "x": 23,
+          "y": 11,
+          "z": 1
+        }
+      ],
+      "capacity": 7,
+      "name": "Gateway to jungle [5]",
+      "nominal": {
+        "x": 0,
+        "y": 12,
+        "z": 1
+      },
+      "number": 5,
+      "terrain": "jungle"
+    },
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 0,
+          "y": 14,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 0,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "desert",
+          "town": null,
+          "x": 0,
+          "y": 18,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 1,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 1,
+          "y": 17,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 2,
+          "y": 8,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 2,
+          "y": 14,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 2,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "desert",
+          "town": null,
+          "x": 3,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 3,
+          "y": 11,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 3,
+          "y": 13,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 3,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 4,
+          "y": 12,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "desert",
+          "town": null,
+          "x": 4,
+          "y": 14,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "desert",
+          "town": null,
+          "x": 4,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 5,
+          "y": 11,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "desert",
+          "town": null,
+          "x": 15,
+          "y": 15,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 16,
+          "y": 16,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 20,
+          "y": 8,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 21,
+          "y": 9,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 21,
+          "y": 11,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 22,
+          "y": 8,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 23,
+          "y": 7,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "desert",
+          "town": null,
+          "x": 23,
+          "y": 15,
+          "z": 1
+        }
+      ],
+      "capacity": 19,
+      "name": "Gateway to desert [6]",
+      "nominal": {
+        "x": 4,
+        "y": 12,
+        "z": 1
+      },
+      "number": 6,
+      "terrain": "desert"
+    },
+    {
+      "candidates": [
+        {
+          "guards": false,
+          "others": true,
+          "terrain": "tundra",
+          "town": null,
+          "x": 18,
+          "y": 4,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "tundra",
+          "town": null,
+          "x": 22,
+          "y": 20,
+          "z": 1
+        },
+        {
+          "guards": true,
+          "others": false,
+          "terrain": "tundra",
+          "town": "town",
+          "x": 22,
+          "y": 22,
+          "z": 1
+        },
+        {
+          "guards": false,
+          "others": false,
+          "terrain": "tundra",
+          "town": null,
+          "x": 23,
+          "y": 21,
+          "z": 1
+        }
+      ],
+      "capacity": 1,
+      "name": "Gateway to tundra [7]",
+      "nominal": {
+        "x": 22,
+        "y": 22,
+        "z": 1
+      },
+      "number": 7,
+      "terrain": "tundra"
+    }
+  ]
+}

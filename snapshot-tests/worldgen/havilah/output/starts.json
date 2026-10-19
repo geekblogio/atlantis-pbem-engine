@@ -1,0 +1,64 @@
+{
+  "gateways": [
+    {
+      "candidates": [],
+      "capacity": 1,
+      "name": "Gateway to plain [1]",
+      "nominal": {
+        "x": 1,
+        "y": 19,
+        "z": 1
+      },
+      "number": 1,
+      "terrain": "plain"
+    },
+    {
+      "candidates": [],
+      "capacity": 1,
+      "name": "Gateway to forest [2]",
+      "nominal": {
+        "x": 0,
+        "y": 2,
+        "z": 1
+      },
+      "number": 2,
+      "terrain": "forest"
+    },
+    {
+      "candidates": [],
+      "capacity": 1,
+      "name": "Gateway to mountain [3]",
+      "nominal": {
+        "x": 0,
+        "y": 12,
+        "z": 1
+      },
+      "number": 3,
+      "terrain": "mountain"
+    },
+    {
+      "candidates": [],
+      "capacity": 0,
+      "name": "Gateway to jungle [4]",
+      "nominal": {
+        "x": 15,
+        "y": 13,
+        "z": 1
+      },
+      "number": 4,
+      "terrain": "jungle"
+    },
+    {
+      "candidates": [],
+      "capacity": 0,
+      "name": "Gateway to tundra [5]",
+      "nominal": {
+        "x": 2,
+        "y": 6,
+        "z": 1
+      },
+      "number": 5,
+      "terrain": "tundra"
+    }
+  ]
+}

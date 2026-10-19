@@ -28,6 +28,7 @@ bool read_input_line(parser::string_parser& parser);
 using json = nlohmann::json;
 
 #include <map>
+#include <set>
 #include <string>
 
 #define CURRENT_ATL_VER MAKE_ATL_VER(5, 2, 5)
@@ -557,6 +558,31 @@ private:
     //
     void filter_gateway_destinations(Unit *unit, Object *gateway, ARegion *nominal,
         std::vector<ARegion *>& candidates);
+
+    // Where a unit stepping through `gateway` may land: the candidates for the terrain of
+    // `nominal`, after the ruleset's filter above. `unit` may be null — nothing is then said to
+    // anyone, which is what `map starts` needs. MOVE IN and the export both call this, so the
+    // export cannot describe a world the arrival does not live in.
+    std::vector<ARegion *> gateway_destinations(Unit *unit, Object *gateway, ARegion *nominal);
+
+    // Whether a region holds the guard (`guards`) or any unit that is not the guard (`others`) —
+    // what the arrival cascade below reads of a candidate.
+    void gateway_occupancy(ARegion *region, bool& guards, bool& others) const;
+
+    // The arrival cascade. Fills `landing` with the candidates of the first level that has any
+    // and returns that level: 0 empty towns, 1 towns with only the guard, 2 towns with the guard
+    // and somebody else, 3 empty hexes, 4 anything; 5 when `destinations` is empty. Regions in
+    // `claimed` count as holding somebody else, which is how the capacity below plays arrivals
+    // forward without moving a unit.
+    int gateway_landing(const std::vector<ARegion *>& destinations, std::vector<ARegion *>& landing,
+        const std::set<ARegion *>& claimed = {}) const;
+
+    // How many factions arriving through a gateway with these `destinations`, one after another
+    // into the world as it is, each land on a hex no other faction holds — the arrival after them
+    // is the first to share. An arrival at level 0, 1 or 3 takes a hex of its own; level 2 or 4
+    // shares. With no destination at all the arrival stays on `nominal`, which one faction holds
+    // alone unless somebody already stands there.
+    int gateway_start_capacity(const std::vector<ARegion *>& destinations, ARegion *nominal) const;
 
     void EndGame(Faction *pVictor);
 
